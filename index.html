@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+
+<link href='http://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,300' rel='stylesheet' type='text/css'>
+
+<link href="style.css" rel="stylesheet" type="text/css">
+<title>Geography of the Post</title>
+
+</head>
+
+<body>
+
+<script src="lib/d3.js"></script>
+<script src="lib/crossfilter.js"></script>
+<!-- <script src="lib/queue.js"></script> -->
+<!-- <script src="lib/topojson.js"></script> -->
+<script src="http://d3js.org/queue.v1.min.js"></script>
+<script src="http://d3js.org/topojson.v0.min.js"></script>
+<script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
+
+<div id="info">
+    <h1>The Geography of the Nineteenth-Century Post</h1>
+	<div id="about">
+		<ul>
+		    <li>Cameron Blevins</li>
+		    <li><span class="sc">Stanford University</span></li>
+		</ul>
+	</div>
+</div>
+
+<script>
+
+//********************************************
+// Global variables
+//********************************************
+
+var width = 960,
+    height = 750,
+    barchart_margin = {top: 20, right: 20, bottom: 30, left: 40},
+    barchart_width = 960 - barchart_margin.left - barchart_margin.right,
+    barchart_height = 200 - barchart_margin.top - barchart_margin.bottom;
+
+// Scales
+var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
+var y = d3.scale.linear().range([barchart_height, 0]);
+
+var parse_date = d3.time.format("%Y").parse;
+
+// Get our data ready
+//********************************************
+queue()
+    .defer(d3.json, "us.json")
+    .defer(d3.csv, "blevins.csv")
+    .await(ready);
+
+//********************************************
+// Map
+//********************************************
+
+   // azimuth projection
+var projection = d3.geo.azimuthalEqualArea()
+    .translate([680, 380])
+    .rotate([118.9, 0])
+    .center([0, 44.03])
+    .scale(1200 * 7);
+
+    // satellite projection
+    // use this one instead?
+var projection2 = d3.geo.satellite()
+    .distance(1.1)
+    .scale(5500)
+    .rotate([118.00, -34.50, 32.12])
+    .center([-2, 5])
+    .tilt(25)
+    .clipAngle(Math.acos(1 / 1.1) * 180 / Math.PI - 1e-6)
+    .precision(.1);
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var graticule = d3.geo.graticule()
+    .extent([[-98 - 45, 38 - 45], [-98 + 45, 38 + 45]])
+    .step([22.5 / 4, 22.5 / 4]);
+
+path = d3.geo.path()
+    .projection(projection)
+    .pointRadius(1.5);
+
+// Printing the map
+
+svg.append("path")
+    .datum(graticule.outline)
+    .attr("class", "background")
+    .attr("d", path);
+
+function ready(error, us, post) {
+  exposedpost = post;
+
+  svg.append("path")
+      .datum(topojson.object(us, us.objects.land))
+      .attr("class", "land")
+      .attr("d", path);
+
+  svg.append("path")
+      .datum(topojson.mesh(us, us.objects.counties, function(a, b) { return a.id !== b.id; }))
+      .attr("class", "boundary")
+      .attr("d", path);
+
+  // Printing all points
+  postoffices = svg.selectAll("g.points-est")
+      .data(post)
+    .enter().append("g")
+     .attr("class","post-label")
+     .attr("transform", function(d) {return "translate(" + projection([d["Longitude"], d["Latitude"]]) + ")"; })
+     .on("mouseover", showLabel)
+     .on("mouseout", function() {d3.selectAll("text.postlabel").remove(); });
+  // TODO(jheppler): For future use -- a function to take the salaries of the post offices and resize
+  // the points based on their amount.
+  // .attr("r", function(d) {
+  //   return Math.sqrt(parseInt(d["salaries"]) * 0.00004);
+  // })
+
+  postoffices
+    .append("circle")
+      .attr("r", 3)
+      .attr("class","points-est");
+
+// // Color function - determining the color of points based on the extent 
+// // of the brush
+// var arrSize = 4;
+    var brush_start_date = "1862-6-15"
+    var bush_end_date = "1865-6-15"
+// function colorByEst(sentObj, arbitraryDateMin, arbitraryDateMax) {
+//     var estArr = [sentObj.Est, sentObj.Re2, sentObj.Re3, sentObj.Re4];
+//     var disArr = [sentObj.Dis1, sentObj.Dis2, sentObj.Dis3, sentObj.Dis4];
+
+//     var estArrTemp[];
+//     var disArrTemp[];
+
+//     var preBrushEst[];
+//     var preBrushDis[];
+
+//     var inBrushEst[];
+//     var inBrushDis[];
+
+//     var countE = 0;
+//     var countD = 0;
+
+//     //create the less than brush end arrays
+//     for(int i = 0; i < arrSize, i++) {
+//       if (estArr[i] <= arbitraryDateMax) {
+//         estArrTemp[countE] = estArr[i];
+//         countE ++;
+//       }
+//       if (disArr[i] <= arbitraryDateMax) {
+//         disArrTemp[countD] = estArr[i];
+//         countD ++;
+//       }
+//     }
+
+//     //create the pre-brush arrays
+//     countE = 0;
+//     countD = 0;
+//     for(int i = 0; i < arrSize, i++) {
+//       if (estArr[i] <= arbitraryDateMin) {
+//         preBrushEst[countE] = estArr[i];
+//         countE ++;
+//       }
+//       if (disArr[i] <= arbitraryDateMin) {
+//         preBrushDis[countD] = estArr[i];
+//         countD ++;
+//       }
+//     }
+
+//     //create the inside brush arrays
+//     countE = 0;
+//     countD = 0;
+//     for(int i = 0; i < arrSize, i++) {
+//       if (estArr[i] > arbitraryDateMin && estArr[i] < arbitraryDateMax) {
+//         inBrushEst[countE] = estArr[i];
+//         countE ++;
+//       }
+//       if (disArr[i] > arbitraryDateMin && estArr[i] < arbitraryDateMax) {
+//         inBrushDis[countD] = estArr[i];
+//         countD ++;
+//       }
+//     }
+
+//     // TODO(jheppler): Convert bools to JavaScript-recognized boolean 
+//     // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+//     bool isAliveStart;
+//     bool isAliveEnd;
+//     bool isChangedDuringBrush;
+
+//     //dead at the start of the brush (possibly never alive before brush start)
+//     if (preBrushEst[preBrushEst.size - 1] < preBrushDis[preBrushDis.size - 1] || preBrushEst.size == 0) {
+//       isAliveStart = false;
+//     }
+//     //alive at the start of the brush (possibly never died before brush start)
+//     else if (preBrushEst[preBrushEst.size - 1] > preBrushDis[preBrushDis.size - 1] || (preBrushDis.size == 0 && preBrushEst.size != 0)) {
+//       isAliveStart = true;
+//     }
+
+//     //dead at the end of the brush (possibly never alive before brush end)
+//     if(estArrTemp[estArrTemp.size - 1] < disArrTemp[disArrTemp.size - 1] estArrTemp.size == 0) {
+//       isAliveEnd = false;
+//     }
+//     //alive at the end of the brush (possibly never died before brush end)
+//     else if(estArrTemp[estArrTemp.size - 1] > disArrTemp[disArrTemp.size - 1] || (disArrTemp.size == 0 && estArrTemp.size != 0)) {
+//       isAliveEnd = true;
+//     }
+//     //state changes during the brush
+//     if (inBrushEst.size != 0 || inBrushDis.size != 0) {
+//       isChangedDuringBrush = true;
+//     }
+//     else if (inBrushEst.size == 0 && inBrushDis.size == 0) {
+//       isChangedDuringBrush = false;
+//     }
+
+//     //alive the whole time, and does not change state during the brush
+//     if(isAliveStart && !isChangedDuringBrush && isAliveEnd) {
+//       return "red";
+//     }
+//     //established before brush, and dead at the end of the brush
+//     if(isAliveStart && isChangedDuringBrush && !isAliveEnd) {
+//       return "purple";
+//     }
+//     //established before brush, and alive at end  - but changed state
+//     if(isAliveStart && isChangedDuringBrush && isAliveEnd) {
+//       return "yellow";
+//     }
+//     //established within brush and alive at the end
+//     if (!isAliveStart && isChangedDuringBrush && isAliveEnd) {
+//       return "green";
+//     }
+//     //established within brush and dead at the end  - but changed state
+//     if (!isAliveStart && isChangedDuringBrush && !isAliveEnd) {
+//       return "blue";
+//     }
+//     //not alive during brush
+//     if(!isAliveStart && !isChangedDuringBrush) {
+//       return NULL;
+//     }
+
+//     if (sentObj.Est < arbitraryDateMin != "") {
+//       return "red";
+//     }
+//     if (sentObj.Est > arbitraryDateMin) {
+//       return "blue";
+//     }
+//     if (sentObj.Dis1 < arbitraryDateMin && sentObj.Dis1) {
+//       return "yellow";
+//     }
+//   }
+
+  // temporary code; testing the coloring of points
+  test_date = "1885-08-15";
+  d3.selectAll("circle.points-est").style("fill", function(d) { return d.Dis1 < test_date && d.Dis1 != "" ? "rgb(255, 255, 191)" : d.Est > test_date ? "rgb(215, 25, 28)" : "rgb(44, 123, 182)" })
+
+
+  // *******************************************
+  // Printing the entire CSV file as a table
+  // *******************************************
+
+  // TODO(jheppler): Modify this so it auto-updates as a brush event is created.
+
+  var columns = ["Name", "Est", "Dis1", "R1", "Dis2", "Re2", "Dis3", "Re3", "Dis4", "Re4", "Latitude", "Longitude"];
+  // var year_columns = ["year", "frequency"];
+
+    // Print the table by placing a `div` with `id` of `container` below
+    var table = d3.select("#container").append("table"),
+        thead = table.append("thead"),
+        tbody = table.append("tbody");
+
+    thead.append("tr")
+    .selectAll("th")
+      .data(columns)
+    .enter()
+      .append("th")
+      .text(function(column) { return column; });
+
+    var rows = tbody.selectAll("tr")
+      .data(post)
+    .enter()
+      .append("tr");
+
+    var cells = rows.selectAll("td")
+      .data(function(row) {
+          return columns.map(function(column) {
+              return {column: column, value: row[column]};
+          });
+      })
+    .enter()
+      .append("td")
+      .text(function(d) { return d.value; });
+
+// *********************************************
+// Callbacks
+// *********************************************
+
+  // On hover, show point labels
+  function showLabel(d,i) {
+    d3.select(this).append("text").attr("class", "postlabel").text(d["Name"]);
+    this.parentNode.appendChild(this);
+  }
+
+}
+
+
+//********************************************
+// Graphing the year counts as a bar chart
+//********************************************
+
+// Is it possible to pass the brush extent to the map above when it's not
+// in the same `csv` file?
+
+// Prepare the canvas
+var barchart = d3.select("body").append("svg")
+    .attr("width", barchart_width + barchart_margin.left + barchart_margin.right)
+    .attr("height", barchart_height + barchart_margin.top + barchart_margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + barchart_margin.left + "," + barchart_margin.top + ")");
+
+// d3.csv("blevins.csv"), function(error, post) {
+d3.csv("years_count.csv", function(error, post) {
+
+  brush = d3.svg.brush()
+    .x(x)
+    .on("brush", brushed)
+    .on("brushstart", brushed)
+    .on("brushend", brushed);
+
+  // Loop through the date formats, nest the years together, and total
+  // the number of post offices per year into an array `year: total`
+
+
+
+  // Coercion since CSV is untyped
+  post.forEach(function(d) {
+    d["frequency"] = +d["frequency"];
+    d["year"] = d3.time.format("%Y").parse(d["year"]).getFullYear();
+  });
+
+  x.domain(post.map(function(d) { return d["year"]; }));
+  y.domain([0, d3.max(post, function(d) { return d["frequency"]; })]);
+  time_scale = d3.time.scale().domain([0, function(d) { return d["year"]; }]).range([0, width]);
+
+  // Axis variables for the bar chart
+  x_axis = d3.svg.axis().scale(x).orient("bottom");
+  y_axis = d3.svg.axis().scale(y).orient("left");
+
+  // x axis
+  barchart.append("g")
+      .attr("class", "x axis")
+      .call(x_axis)
+      .attr("transform", "translate(0," + barchart_height + ")");
+
+  // y axis
+  barchart.append("g")
+      .attr("class", "y axis")
+      .call(y_axis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Openings");
+
+  // Draw the bars
+  barchart.selectAll(".bar")
+      .data(post)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.year); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return y(d.frequency); })
+      .attr("height", function(d) { return barchart_height - y(d.frequency); });
+
+  // TODO(jheppler): Ask Elijah why I have to assume dates are in order for this chart to look right
+
+  // Draw the brush
+  barchart.append("g")
+      .attr("class", "brush")
+      .call(brush)
+    .selectAll("rect")
+      .attr("y", -6)
+      .attr("height", barchart_height + 7)
+      .append("title")
+      .text("Drag left or right to brush along this axis.");;
+
+  // ****************************************
+  // Callbacks
+  // ****************************************
+
+  function brushed() {
+    var b = brush.empty() ? x.domain() : brush.extent();
+    console.log(b);
+  }
+
+});
+
+</script>
+
+<p>The visualizations above (built with <a href="http://d3js.org">D3</a>) plot the opening, closing, and in some cases the re-opening and re-closing, of nearly 1,500 post offices in Oregon between 1847 and 1902. Click and drag on the bar chart to filter the post offices. The colored points indicate whether a post office was opened, existed, or closed during that time period. The table below provides details on demand.</p>
+
+<p>The <span style="color: red;">Red</span> points blah blah blah, the <span style="color: blue;">Blue</span> points blah blah blah.... Hover over points on the map to view more information about that post office.</p>
+
+<p>Some questions to consider: What happens <a href="">year-by-year</a>? Do post offices react to national events like the <a href="">Civil War</a>? Are there unique groupings of post offices based on <a href="">historical events in Oregon?</a> Are there patterns to <a href="">closed</a> or <a href="">opened</a> post offices?</p>
+
+<!-- TODO: For the future: be able to click on a time-framed event and create the brush event for a given period of time. -->
+<div id="nav">
+    <ul>
+        <li><a href="#">Single Year</a></li>
+        <li><a href="#">Civil War</a></li>
+        <li><a href="#">Western Expansion</a></li>
+        <li><a href="#">Gilded Age</a></li>
+    </ul>
+</div>
+
+<div id="selections">
+  <h4>Offices</h4>
+  <form>
+    <input type="checkbox" name="maps" value="All">All<br>
+    <input type="checkbox" name="maps" value="Established">Established<br>
+    <input type="checkbox" name="maps" value="Reestablished">Reestablished
+  </form>
+</div>
+
+<!-- <div id="years_container"></div>-->
+<div id="container"></div>
+
+<footer>
+  <span style="float:right;">
+    Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache License 2.0</a>.
+  </span>
+  Visualized by <a href="http://www.jasonheppler.org">Jason Heppler</a> and Tara Balakrishnan. Special thanks to Elijah Meeks.
+</footer>
