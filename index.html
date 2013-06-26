@@ -13,9 +13,6 @@
 <body>
 
 <script src="lib/d3.js"></script>
-<script src="lib/crossfilter.js"></script>
-<!-- <script src="lib/queue.js"></script> -->
-<!-- <script src="lib/topojson.js"></script> -->
 <script src="http://d3js.org/queue.v1.min.js"></script>
 <script src="http://d3js.org/topojson.v0.min.js"></script>
 <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
@@ -45,6 +42,7 @@ var width = 960,
 // Scales
 var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
 var y = d3.scale.linear().range([barchart_height, 0]);
+public_x = d3.scale.ordinal();
 
 var parse_date = d3.time.format("%Y").parse;
 
@@ -113,7 +111,7 @@ function ready(error, us, post) {
   postoffices = svg.selectAll("g.points-est")
       .data(post)
     .enter().append("g")
-     .attr("class","post-label")
+     .attr("class","points-est")
      .attr("transform", function(d) {return "translate(" + projection([d["Longitude"], d["Latitude"]]) + ")"; })
      .on("mouseover", showLabel)
      .on("mouseout", function() {d3.selectAll("text.postlabel").remove(); });
@@ -268,7 +266,6 @@ function ready(error, us, post) {
   // TODO(jheppler): Modify this so it auto-updates as a brush event is created.
 
   var columns = ["Name", "Est", "Dis1", "R1", "Dis2", "Re2", "Dis3", "Re3", "Dis4", "Re4", "Latitude", "Longitude"];
-  // var year_columns = ["year", "frequency"];
 
     // Print the table by placing a `div` with `id` of `container` below
     var table = d3.select("#container").append("table"),
@@ -333,10 +330,6 @@ d3.csv("years_count.csv", function(error, post) {
     .on("brushstart", brushed)
     .on("brushend", brushed);
 
-  // Loop through the date formats, nest the years together, and total
-  // the number of post offices per year into an array `year: total`
-
-
 
   // Coercion since CSV is untyped
   post.forEach(function(d) {
@@ -346,7 +339,7 @@ d3.csv("years_count.csv", function(error, post) {
 
   x.domain(post.map(function(d) { return d["year"]; }));
   y.domain([0, d3.max(post, function(d) { return d["frequency"]; })]);
-  time_scale = d3.time.scale().domain([0, function(d) { return d["year"]; }]).range([0, width]);
+//   time_scale = d3.time.scale().domain([0, function(d) { return d["year"]; }]).range([0, width]);
 
   // Axis variables for the bar chart
   x_axis = d3.svg.axis().scale(x).orient("bottom");
@@ -377,9 +370,8 @@ d3.csv("years_count.csv", function(error, post) {
       .attr("x", function(d) { return x(d.year); })
       .attr("width", x.rangeBand())
       .attr("y", function(d) { return y(d.frequency); })
+      .attr("id", function(d) { return "year-" + d.year; })
       .attr("height", function(d) { return barchart_height - y(d.frequency); });
-
-  // TODO(jheppler): Ask Elijah why I have to assume dates are in order for this chart to look right
 
   // Draw the brush
   barchart.append("g")
@@ -389,16 +381,23 @@ d3.csv("years_count.csv", function(error, post) {
       .attr("y", -6)
       .attr("height", barchart_height + 7)
       .append("title")
-      .text("Drag left or right to brush along this axis.");;
+      .text("Drag left or right to brush along this axis.");
 
   // ****************************************
   // Callbacks
   // ****************************************
 
   function brushed() {
-    var b = brush.empty() ? x.domain() : brush.extent();
-    console.log(b);
+    b = brush.empty() ? [0,9999] : brush.extent();
+//     console.log(x.domain());
+    newscale = d3.scale.linear();
+    newscale.domain(x.range()).range(x.domain());
+    var year_begin = newscale(b[0]);
+    var year_end = newscale(b[1]);
+    d3.selectAll("g.points-est").style("display", function(d, i) { return parseInt(d.Est.split("-")[0]) >= year_begin && parseInt(d.Est.split("-")[0]) <= year_end ? "block" : "none" });
+    d3.selectAll("rect.bar").style("opacity", function(d, i) { return d.year >= year_begin && d.year <= year_end ? "1" : ".5" });
   }
+
 
 });
 
