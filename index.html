@@ -12,7 +12,7 @@
 
 <body>
 
-<script src="lib/d3.js"></script>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="http://d3js.org/queue.v1.min.js"></script>
 <script src="http://d3js.org/topojson.v0.min.js"></script>
 <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
@@ -47,7 +47,6 @@ public_x = d3.scale.ordinal();
 var parse_date = d3.time.format("%Y").parse;
 
 // Get our data ready
-//********************************************
 queue()
     .defer(d3.json, "us.json")
     .defer(d3.csv, "blevins.csv")
@@ -103,7 +102,7 @@ function ready(error, us, post) {
       .attr("d", path);
 
   svg.append("path")
-      .datum(topojson.mesh(us, us.objects.counties, function(a, b) { return a.id !== b.id; }))
+      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a.id !== b.id; }))
       .attr("class", "boundary")
       .attr("d", path);
 
@@ -129,8 +128,6 @@ function ready(error, us, post) {
 // // Color function - determining the color of points based on the extent 
 // // of the brush
 // var arrSize = 4;
-    var brush_start_date = "1862-6-15"
-    var bush_end_date = "1865-6-15"
 // function colorByEst(sentObj, arbitraryDateMin, arbitraryDateMax) {
 //     var estArr = [sentObj.Est, sentObj.Re2, sentObj.Re3, sentObj.Re4];
 //     var disArr = [sentObj.Dis1, sentObj.Dis2, sentObj.Dis3, sentObj.Dis4];
@@ -306,13 +303,9 @@ function ready(error, us, post) {
 
 }
 
-
 //********************************************
 // Graphing the year counts as a bar chart
 //********************************************
-
-// Is it possible to pass the brush extent to the map above when it's not
-// in the same `csv` file?
 
 // Prepare the canvas
 var barchart = d3.select("body").append("svg")
@@ -321,7 +314,6 @@ var barchart = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + barchart_margin.left + "," + barchart_margin.top + ")");
 
-// d3.csv("blevins.csv"), function(error, post) {
 d3.csv("years_count.csv", function(error, post) {
 
   brush = d3.svg.brush()
@@ -329,7 +321,6 @@ d3.csv("years_count.csv", function(error, post) {
     .on("brush", brushed)
     .on("brushstart", brushed)
     .on("brushend", brushed);
-
 
   // Coercion since CSV is untyped
   post.forEach(function(d) {
@@ -339,7 +330,6 @@ d3.csv("years_count.csv", function(error, post) {
 
   x.domain(post.map(function(d) { return d["year"]; }));
   y.domain([0, d3.max(post, function(d) { return d["frequency"]; })]);
-//   time_scale = d3.time.scale().domain([0, function(d) { return d["year"]; }]).range([0, width]);
 
   // Axis variables for the bar chart
   x_axis = d3.svg.axis().scale(x).orient("bottom");
@@ -386,7 +376,7 @@ d3.csv("years_count.csv", function(error, post) {
   // ****************************************
   // Callbacks
   // ****************************************
-
+  
   function brushed() {
     b = brush.empty() ? [0,9999] : brush.extent();
 //     console.log(x.domain());
@@ -397,7 +387,6 @@ d3.csv("years_count.csv", function(error, post) {
     d3.selectAll("g.points-est").style("display", function(d, i) { return parseInt(d.Est.split("-")[0]) >= year_begin && parseInt(d.Est.split("-")[0]) <= year_end ? "block" : "none" });
     d3.selectAll("rect.bar").style("opacity", function(d, i) { return d.year >= year_begin && d.year <= year_end ? "1" : ".5" });
   }
-
 
 });
 
@@ -412,7 +401,7 @@ d3.csv("years_count.csv", function(error, post) {
 <!-- TODO: For the future: be able to click on a time-framed event and create the brush event for a given period of time. -->
 <div id="nav">
     <ul>
-        <li><a href="#">Single Year</a></li>
+        <li><a href="javascript:filter([null, null, null, [new Date(1864, 0, 12), new Date(1865, 0, 13)]])">Single Year</a></li>
         <li><a href="#">Civil War</a></li>
         <li><a href="#">Western Expansion</a></li>
         <li><a href="#">Gilded Age</a></li>
@@ -424,7 +413,7 @@ d3.csv("years_count.csv", function(error, post) {
   <form>
     <input type="checkbox" name="maps" value="All">All<br>
     <input type="checkbox" name="maps" value="Established">Established<br>
-    <input type="checkbox" name="maps" value="Reestablished">Reestablished
+    <input type="checkbox" name="maps" value="Discontinued">Discontinued
   </form>
 </div>
 
