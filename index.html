@@ -23,6 +23,7 @@
 		<ul>
 		    <li>Cameron Blevins</li>
 		    <li><span class="sc">Stanford University</span></li>
+            <li>Revision: <a href="https://github.com/stanford-history/geographypost/blob/b4412d9b7f6e58a87d3fdaeea86b3b8e45329563/index.html">b4412d9b7f</a> on 6/28/2013</li>
 		</ul>
 	</div>
 </div>
@@ -60,8 +61,8 @@ queue()
 var projection = d3.geo.azimuthalEqualArea()
     .translate([680, 380])
     .rotate([118.9, 0])
-    .center([0, 44.03])
-    .scale(1200 * 7);
+    .center([0, 42.5])
+    .scale(1200 * 5);
 
     // satellite projection
     // use this one instead?
@@ -72,11 +73,11 @@ var projection2 = d3.geo.satellite()
     .center([-2, 5])
     .tilt(25)
     .clipAngle(Math.acos(1 / 1.1) * 180 / Math.PI - 1e-6)
-    .precision(.1);
+    .precision(.1); 
 
 var svg = d3.select("body").append("svg")
     .attr("width", width)
-    .attr("height", height);
+    .attr("height", "460");               // change this back to `height`
 
 var graticule = d3.geo.graticule()
     .extent([[-98 - 45, 38 - 45], [-98 + 45, 38 + 45]])
@@ -113,7 +114,7 @@ function ready(error, us, post) {
      .attr("class","points-est")
      .attr("transform", function(d) {return "translate(" + projection([d["Longitude"], d["Latitude"]]) + ")"; })
      .on("mouseover", showLabel)
-     .on("mouseout", function() {d3.selectAll("text.postlabel").remove(); });
+     .on("mouseout", function() {d3.selectAll("text.map-tooltip").remove(); });
   // TODO(jheppler): For future use -- a function to take the salaries of the post offices and resize
   // the points based on their amount.
   // .attr("r", function(d) {
@@ -251,6 +252,7 @@ function ready(error, us, post) {
 //     }
 //   }
 
+
   // temporary code; testing the coloring of points
   test_date = "1885-08-15";
   d3.selectAll("circle.points-est").style("fill", function(d) { return d.Dis1 < test_date && d.Dis1 != "" ? "rgb(255, 255, 191)" : d.Est > test_date ? "rgb(215, 25, 28)" : "rgb(44, 123, 182)" })
@@ -297,7 +299,7 @@ function ready(error, us, post) {
 
   // On hover, show point labels
   function showLabel(d,i) {
-    d3.select(this).append("text").attr("class", "postlabel").text(d["Name"]);
+    d3.select(this).append("text").attr("class", "map-tooltip").text(d["Name"]);
     this.parentNode.appendChild(this);
   }
 
@@ -332,7 +334,7 @@ d3.csv("years_count.csv", function(error, post) {
   y.domain([0, d3.max(post, function(d) { return d["frequency"]; })]);
 
   // Axis variables for the bar chart
-  x_axis = d3.svg.axis().scale(x).orient("bottom");
+  x_axis = d3.svg.axis().scale(x).tickValues([1850,1855,1860,1865,1870,,1875,1880,1885,1890,1895,1900]).orient("bottom");
   y_axis = d3.svg.axis().scale(y).orient("left");
 
   // x axis
@@ -350,7 +352,7 @@ d3.csv("years_count.csv", function(error, post) {
       .attr("y", 6)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("Openings");
+      .text("No. of established");
 
   // Draw the bars
   barchart.selectAll(".bar")
@@ -379,7 +381,7 @@ d3.csv("years_count.csv", function(error, post) {
   
   function brushed() {
     b = brush.empty() ? [0,9999] : brush.extent();
-//     console.log(x.domain());
+    // console.log(x.domain());
     newscale = d3.scale.linear();
     newscale.domain(x.range()).range(x.domain());
     var year_begin = newscale(b[0]);
@@ -394,30 +396,29 @@ d3.csv("years_count.csv", function(error, post) {
 
 <p>The visualizations above (built with <a href="http://d3js.org">D3</a>) plot the opening, closing, and in some cases the re-opening and re-closing, of nearly 1,500 post offices in Oregon between 1847 and 1902. Click and drag on the bar chart to filter the post offices. The colored points indicate whether a post office was opened, existed, or closed during that time period. The table below provides details on demand.</p>
 
-<p>The <span style="color: red;">Red</span> points blah blah blah, the <span style="color: blue;">Blue</span> points blah blah blah.... Hover over points on the map to view more information about that post office.</p>
+<!-- <p>The <span style="color: red;">Red</span> points blah blah blah, the <span style="color: blue;">Blue</span> points blah blah blah.... Hover over points on the map to view more information about that post office.</p>
 
-<p>Some questions to consider: What happens <a href="">year-by-year</a>? Do post offices react to national events like the <a href="">Civil War</a>? Are there unique groupings of post offices based on <a href="">historical events in Oregon?</a> Are there patterns to <a href="">closed</a> or <a href="">opened</a> post offices?</p>
+<p>Some questions to consider: What happens <a href="">year-by-year</a>? Do post offices react to national events like the <a href="">Civil War</a>? Are there unique groupings of post offices based on <a href="">historical events in Oregon?</a> Are there patterns to <a href="">closed</a> or <a href="">opened</a> post offices?</p> -->
 
-<!-- TODO: For the future: be able to click on a time-framed event and create the brush event for a given period of time. -->
-<div id="nav">
+<!-- TODO(jheppler): For the future: be able to click on a time-framed event and create the brush event for a given period of time. -->
+<!-- <div id="nav">
     <ul>
-        <li><a href="javascript:filter([null, null, null, [new Date(1864, 0, 12), new Date(1865, 0, 13)]])">Single Year</a></li>
+        <li><a href="#">Single Year</a></li>
         <li><a href="#">Civil War</a></li>
         <li><a href="#">Western Expansion</a></li>
         <li><a href="#">Gilded Age</a></li>
     </ul>
-</div>
+</div> -->
 
-<div id="selections">
+<!-- <div id="selections">
   <h4>Offices</h4>
   <form>
     <input type="checkbox" name="maps" value="All">All<br>
     <input type="checkbox" name="maps" value="Established">Established<br>
     <input type="checkbox" name="maps" value="Discontinued">Discontinued
   </form>
-</div>
+</div> -->
 
-<!-- <div id="years_container"></div>-->
 <div id="container"></div>
 
 <footer>
