@@ -9,6 +9,7 @@ Visualization team:
 
 - Jason A. Heppler, Academic Technology Specialist, History, Stanford University
 - Tara Balakrishnan, Undergraduate Research Assistant, Stanford University
+- Jocelyn Hickox, Undergraduate Research Assistant, Stanford University
 - Elijah Meeks, Digital Humanities Specialist, Stanford University
 
 About
