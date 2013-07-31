@@ -16,16 +16,17 @@
 <script src="http://d3js.org/queue.v1.min.js"></script>
 <script src="http://d3js.org/topojson.v0.min.js"></script>
 <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
+<script src="http://d3js.org/d3.geo.tile.v0.min.js"></script>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
 
 <div id="info">
     <h1>The Geography of the Nineteenth-Century Post</h1>
-	<div id="about">
-		<ul>
-		    <li>Cameron Blevins</li>
-		    <li><span class="sc">Stanford University</span></li>
-            <li>Revision: <a href="https://github.com/stanford-history/geographypost/blob/b4412d9b7f6e58a87d3fdaeea86b3b8e45329563/index.html">b4412d9b7f</a> on 6/28/2013</li>
-		</ul>
-	</div>
+  <div id="about">
+    <ul>
+        <li>Cameron Blevins</li>
+        <li><span class="sc">Stanford University</span></li>
+    </ul>
+  </div>
 </div>
 
 <script>
@@ -41,17 +42,20 @@ var width = 960,
     barchart_height = 200 - barchart_margin.top - barchart_margin.bottom;
 
 // Scales
-var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
+var x = d3.scale.ordinal().rangeRoundBands([0, barchart_width], .1); // trying the barchart_width. Change back to 'width' if it messes up stuff
 var y = d3.scale.linear().range([barchart_height, 0]);
-public_x = d3.scale.ordinal();
-
-var parse_date = d3.time.format("%Y").parse;
 
 // Get our data ready
 queue()
-    .defer(d3.json, "us.json")
-    .defer(d3.csv, "blevins.csv")
+    .defer(d3.json, "/data/us.json")
+    .defer(d3.csv, "/data/blevins.csv")
     .await(ready);
+
+// Colors
+var aliveThroughout = "#2CB5AC", //Teal
+  diesDuring = "#B52C35", //Red
+  bornDuring = "#FFFF99", //Yellow
+  aliveDuring = "#0A0"; //Green
 
 //********************************************
 // Map
@@ -83,35 +87,40 @@ var graticule = d3.geo.graticule()
     .extent([[-98 - 45, 38 - 45], [-98 + 45, 38 + 45]])
     .step([22.5 / 4, 22.5 / 4]);
 
-path = d3.geo.path()
-    .projection(projection)
-    .pointRadius(1.5);
+this.path = d3.geo.path()
+    .projection(projection);
 
 // Printing the map
 
 svg.append("path")
     .datum(graticule.outline)
     .attr("class", "background")
-    .attr("d", path);
+    .attr("d", this.path);
 
 function ready(error, us, post) {
-  exposedpost = post;
+  this.defs = this.svg.append("defs");
 
   svg.append("path")
       .datum(topojson.object(us, us.objects.land))
       .attr("class", "land")
-      .attr("d", path);
+      .attr("d", this.path);
 
-  svg.append("path")
+  this.land = this.svg.append("path")
       .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a.id !== b.id; }))
       .attr("class", "boundary")
-      .attr("d", path);
+      .attr("d", this.path);
+
+  this.svg.append("clipPath")
+    .attr("id", "clip")
+    .append("use")
+    .attr("xlink:href", "#land");
 
   // Printing all points
-  postoffices = svg.selectAll("g.points-est")
+  this.postoffices = svg.selectAll("g.points-est")
       .data(post)
     .enter().append("g")
      .attr("class","points-est")
+     .style("fill", "red")
      .attr("transform", function(d) {return "translate(" + projection([d["Longitude"], d["Latitude"]]) + ")"; })
      .on("mouseover", showLabel)
      .on("mouseout", function() {d3.selectAll("text.map-tooltip").remove(); });
@@ -121,150 +130,18 @@ function ready(error, us, post) {
   //   return Math.sqrt(parseInt(d["salaries"]) * 0.00004);
   // })
 
-  postoffices
+  this.postoffices
     .append("circle")
       .attr("r", 3)
-      .attr("class","points-est");
-
-// // Color function - determining the color of points based on the extent 
-// // of the brush
-// var arrSize = 4;
-// function colorByEst(sentObj, arbitraryDateMin, arbitraryDateMax) {
-//     var estArr = [sentObj.Est, sentObj.Re2, sentObj.Re3, sentObj.Re4];
-//     var disArr = [sentObj.Dis1, sentObj.Dis2, sentObj.Dis3, sentObj.Dis4];
-
-//     var estArrTemp[];
-//     var disArrTemp[];
-
-//     var preBrushEst[];
-//     var preBrushDis[];
-
-//     var inBrushEst[];
-//     var inBrushDis[];
-
-//     var countE = 0;
-//     var countD = 0;
-
-//     //create the less than brush end arrays
-//     for(int i = 0; i < arrSize, i++) {
-//       if (estArr[i] <= arbitraryDateMax) {
-//         estArrTemp[countE] = estArr[i];
-//         countE ++;
-//       }
-//       if (disArr[i] <= arbitraryDateMax) {
-//         disArrTemp[countD] = estArr[i];
-//         countD ++;
-//       }
-//     }
-
-//     //create the pre-brush arrays
-//     countE = 0;
-//     countD = 0;
-//     for(int i = 0; i < arrSize, i++) {
-//       if (estArr[i] <= arbitraryDateMin) {
-//         preBrushEst[countE] = estArr[i];
-//         countE ++;
-//       }
-//       if (disArr[i] <= arbitraryDateMin) {
-//         preBrushDis[countD] = estArr[i];
-//         countD ++;
-//       }
-//     }
-
-//     //create the inside brush arrays
-//     countE = 0;
-//     countD = 0;
-//     for(int i = 0; i < arrSize, i++) {
-//       if (estArr[i] > arbitraryDateMin && estArr[i] < arbitraryDateMax) {
-//         inBrushEst[countE] = estArr[i];
-//         countE ++;
-//       }
-//       if (disArr[i] > arbitraryDateMin && estArr[i] < arbitraryDateMax) {
-//         inBrushDis[countD] = estArr[i];
-//         countD ++;
-//       }
-//     }
-
-//     // TODO(jheppler): Convert bools to JavaScript-recognized boolean 
-//     // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean
-//     bool isAliveStart;
-//     bool isAliveEnd;
-//     bool isChangedDuringBrush;
-
-//     //dead at the start of the brush (possibly never alive before brush start)
-//     if (preBrushEst[preBrushEst.size - 1] < preBrushDis[preBrushDis.size - 1] || preBrushEst.size == 0) {
-//       isAliveStart = false;
-//     }
-//     //alive at the start of the brush (possibly never died before brush start)
-//     else if (preBrushEst[preBrushEst.size - 1] > preBrushDis[preBrushDis.size - 1] || (preBrushDis.size == 0 && preBrushEst.size != 0)) {
-//       isAliveStart = true;
-//     }
-
-//     //dead at the end of the brush (possibly never alive before brush end)
-//     if(estArrTemp[estArrTemp.size - 1] < disArrTemp[disArrTemp.size - 1] estArrTemp.size == 0) {
-//       isAliveEnd = false;
-//     }
-//     //alive at the end of the brush (possibly never died before brush end)
-//     else if(estArrTemp[estArrTemp.size - 1] > disArrTemp[disArrTemp.size - 1] || (disArrTemp.size == 0 && estArrTemp.size != 0)) {
-//       isAliveEnd = true;
-//     }
-//     //state changes during the brush
-//     if (inBrushEst.size != 0 || inBrushDis.size != 0) {
-//       isChangedDuringBrush = true;
-//     }
-//     else if (inBrushEst.size == 0 && inBrushDis.size == 0) {
-//       isChangedDuringBrush = false;
-//     }
-
-//     //alive the whole time, and does not change state during the brush
-//     if(isAliveStart && !isChangedDuringBrush && isAliveEnd) {
-//       return "red";
-//     }
-//     //established before brush, and dead at the end of the brush
-//     if(isAliveStart && isChangedDuringBrush && !isAliveEnd) {
-//       return "purple";
-//     }
-//     //established before brush, and alive at end  - but changed state
-//     if(isAliveStart && isChangedDuringBrush && isAliveEnd) {
-//       return "yellow";
-//     }
-//     //established within brush and alive at the end
-//     if (!isAliveStart && isChangedDuringBrush && isAliveEnd) {
-//       return "green";
-//     }
-//     //established within brush and dead at the end  - but changed state
-//     if (!isAliveStart && isChangedDuringBrush && !isAliveEnd) {
-//       return "blue";
-//     }
-//     //not alive during brush
-//     if(!isAliveStart && !isChangedDuringBrush) {
-//       return NULL;
-//     }
-
-//     if (sentObj.Est < arbitraryDateMin != "") {
-//       return "red";
-//     }
-//     if (sentObj.Est > arbitraryDateMin) {
-//       return "blue";
-//     }
-//     if (sentObj.Dis1 < arbitraryDateMin && sentObj.Dis1) {
-//       return "yellow";
-//     }
-//   }
-
-
-  // temporary code; testing the coloring of points
-  test_date = "1885-08-15";
-  d3.selectAll("circle.points-est").style("fill", function(d) { return d.Dis1 < test_date && d.Dis1 != "" ? "rgb(255, 255, 191)" : d.Est > test_date ? "rgb(215, 25, 28)" : "rgb(44, 123, 182)" })
-
+      .attr("class","points-est")
+      .style("fill", aliveDuring);
 
   // *******************************************
   // Printing the entire CSV file as a table
   // *******************************************
 
   // TODO(jheppler): Modify this so it auto-updates as a brush event is created.
-
-  var columns = ["Name", "Est", "Dis1", "R1", "Dis2", "Re2", "Dis3", "Re3", "Dis4", "Re4", "Latitude", "Longitude"];
+  var columns = ["Name", "Est", "Dis1", "Re1", "Dis2", "Re2", "Dis3", "Re3", "Dis4", "Re4", "Latitude", "Longitude"];
 
     // Print the table by placing a `div` with `id` of `container` below
     var table = d3.select("#container").append("table"),
@@ -316,7 +193,7 @@ var barchart = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + barchart_margin.left + "," + barchart_margin.top + ")");
 
-d3.csv("years_count.csv", function(error, post) {
+d3.csv("/data/years_count.csv", function(error, post) {
 
   brush = d3.svg.brush()
     .x(x)
@@ -334,7 +211,7 @@ d3.csv("years_count.csv", function(error, post) {
   y.domain([0, d3.max(post, function(d) { return d["frequency"]; })]);
 
   // Axis variables for the bar chart
-  x_axis = d3.svg.axis().scale(x).tickValues([1850,1855,1860,1865,1870,,1875,1880,1885,1890,1895,1900]).orient("bottom");
+  x_axis = d3.svg.axis().scale(x).tickValues([1850,1855,1860,1865,1870,1875,1880,1885,1890,1895,1900]).orient("bottom");
   y_axis = d3.svg.axis().scale(y).orient("left");
 
   // x axis
@@ -386,38 +263,204 @@ d3.csv("years_count.csv", function(error, post) {
     newscale.domain(x.range()).range(x.domain());
     var year_begin = newscale(b[0]);
     var year_end = newscale(b[1]);
-    d3.selectAll("g.points-est").style("display", function(d, i) { return parseInt(d.Est.split("-")[0]) >= year_begin && parseInt(d.Est.split("-")[0]) <= year_end ? "block" : "none" });
-    d3.selectAll("rect.bar").style("opacity", function(d, i) { return d.year >= year_begin && d.year <= year_end ? "1" : ".5" });
+    
+
+    var arrSize = 4;
+
+    //Returns whether or not the post office was alive at a given date
+    function isAliveStart(estArr, lifeSpanArr, brushDate) {
+      for (var i = 0; i < arrSize; i++) {
+        if (estArr[i] < brushDate && brushDate <= (estArr[i] + lifeSpanArr[i])) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function isAliveEnd(estArr, lifeSpanArr, brushDate) {
+      for (var j = 0; j < arrSize; j++) {
+        if (estArr[j] <= brushDate && brushDate <= (estArr[j] + lifeSpanArr[j])) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+
+
+    //If the post office was established during the brush, it existed during the brush.
+    //Only post offices that were dead at the start and end of the brush are passed to this function.
+    function isDuring(est, brushMin, brushMax) {
+      for (var k = 0; k < arrSize; k++) {
+        if (brushMin <= est[k] && est[k] <= brushMax) {
+          return true;
+        }
+      }   
+      return false;
+    }
+
+
+
+    //To make math work, set a disestablish date of greater than the maximum date in the span of years if a post office is never disestablished.
+    var defaultDis = 1905;  // TODO(jheppler): Convert this to d3.max function to automatically
+                            // find the max year date + 1
+
+
+    d3.selectAll("g.points-est").style("display", function(d, i) { 
+ 
+    
+      // Convert dates into integers
+      // If a post office is not disestablished, set its disestablish date to default, greater than any possible year in the brush. (Sorry this is so sloppy.)
+      var dEst = parseInt(d.Est.split("-")[0]);
+      var dRe1 = parseInt(d.Re1.split("-")[0]);
+      var dRe2 = parseInt(d.Re2.split("-")[0]);
+      var dRe3 = parseInt(d.Re3.split("-")[0]);
+
+      var dDis1 = parseInt(d.Dis1.split("-")[0]);
+      if (d.Dis1 == "") {
+        dDis1 = defaultDis;
+      }
+
+      var dDis2 = parseInt(d.Dis2.split("-")[0]);
+      if(d.Dis2 == "") {
+        dDis2 = defaultDis;
+      }
+
+      var dDis3 = parseInt(d.Dis3.split("-")[0]);
+      if (d.dis3 == "") {
+        dDis3 = defaultDis;
+      }
+
+      var dDis4 = parseInt(d.Dis4.split("-")[0]);
+      if (d.Dis4 == "") {
+        dDis4 = defaultDis;
+      }
+
+
+       // Arrays of established dates and subsequent life spans of a single post office. 
+      // Note: assumes there are exactly 4 establish dates in the data
+      var estArr = [dEst, dRe1, dRe2, dRe3];
+      var lifespanArr = [dDis1 - dEst, dDis2 - dRe1, dDis3 - dRe2, dDis4 - dRe3];
+
+
+      // Bools are true if post office was alive at the time of brushMin and brushMax
+      var startAlive = false;
+      var endAlive = false;
+         
+
+      // Determine whether or not a post is alive at the start and end of brush
+      startAlive = isAliveStart(estArr, lifespanArr, year_begin);
+      endAlive = isAliveEnd(estArr, lifespanArr, year_end);
+
+
+      if (startAlive && endAlive) { 
+        return "block"; 
+      } else if (startAlive && !endAlive) { 
+        return "block"; 
+      } else if (!startAlive && endAlive) { 
+        return "block"; 
+      } else if (isDuring(estArr, year_begin, year_end)) { 
+        return "block"; 
+      }
+      return "none";
+    });
+
+
+
+    //Colors the points to reflect their category within the brush
+    d3.selectAll("circle.points-est").style("fill", function(d, i) { 
+  
+  
+      // Convert dates into integers
+      // If a post office is not disestablished, set its disestablish date to default, greater than any possible year in the brush. (Sorry this is so sloppy.)
+      var dEst = parseInt(d.Est.split("-")[0]);
+      var dRe1 = parseInt(d.Re1.split("-")[0]);
+      var dRe2 = parseInt(d.Re2.split("-")[0]);
+      var dRe3 = parseInt(d.Re3.split("-")[0]);
+
+      var dDis1 = parseInt(d.Dis1.split("-")[0]);
+      if (d.Dis1 == "") {
+        dDis1 = defaultDis;
+      }
+
+      var dDis2 = parseInt(d.Dis2.split("-")[0]);
+      if(d.Dis2 == "") {
+        dDis2 = defaultDis;
+      }
+
+      var dDis3 = parseInt(d.Dis3.split("-")[0]);
+      if (d.dis3 == "") {
+        dDis3 = defaultDis;
+      }
+
+      var dDis4 = parseInt(d.Dis4.split("-")[0]);
+      if (d.Dis4 == "") {
+        dDis4 = defaultDis;
+      }
+
+
+       // Arrays of established dates and subsequent life spans of a single post office. 
+      // Note: assumes there are exactly 4 establish dates in the data
+      var estArr = [dEst, dRe1, dRe2, dRe3];
+      var lifespanArr = [dDis1 - dEst, dDis2 - dRe1, dDis3 - dRe2, dDis4 - dRe3];
+
+
+      // Bools are true if post office was alive at the time of brushMin and brushMax
+      var startAlive = false;
+      var endAlive = false;
+         
+
+      // Determine whether or not a post is alive at the start and end of brush
+      startAlive = isAliveStart(estArr, lifespanArr, year_begin);
+      endAlive = isAliveEnd(estArr, lifespanArr, year_end);
+
+
+      if (startAlive && endAlive) { //Alive throughout (or at least at start and end)
+        return aliveThroughout; //Teal
+      } else if (startAlive && !endAlive) { //Dies during brush
+        return diesDuring; //Red
+      } else if (!startAlive && endAlive) { //Established during brush
+        return bornDuring; //Yellow
+      } else if (isDuring(estArr, year_begin, year_end)) { //Est. and dies during brush.
+        return aliveDuring; //Green
+      } else {
+        return "black";
+      }
+
+    });
+
+
+ d3.selectAll("rect.bar").style("opacity", function(d, i) { return d.year >= year_begin && d.year <= year_end ? "1" : ".5" });
+  
+
   }
 
 });
 
 </script>
 
-<p>The visualizations above (built with <a href="http://d3js.org">D3</a>) plot the opening, closing, and in some cases the re-opening and re-closing, of nearly 1,500 post offices in Oregon between 1847 and 1902. Click and drag on the bar chart to filter the post offices. The colored points indicate whether a post office was opened, existed, or closed during that time period. The table below provides details on demand.</p>
-
-<!-- <p>The <span style="color: red;">Red</span> points blah blah blah, the <span style="color: blue;">Blue</span> points blah blah blah.... Hover over points on the map to view more information about that post office.</p>
-
-<p>Some questions to consider: What happens <a href="">year-by-year</a>? Do post offices react to national events like the <a href="">Civil War</a>? Are there unique groupings of post offices based on <a href="">historical events in Oregon?</a> Are there patterns to <a href="">closed</a> or <a href="">opened</a> post offices?</p> -->
-
 <!-- TODO(jheppler): For the future: be able to click on a time-framed event and create the brush event for a given period of time. -->
-<!-- <div id="nav">
+<div id="nav">
     <ul>
         <li><a href="#">Single Year</a></li>
         <li><a href="#">Civil War</a></li>
         <li><a href="#">Western Expansion</a></li>
         <li><a href="#">Gilded Age</a></li>
     </ul>
-</div> -->
+</div>
 
-<!-- <div id="selections">
+<p>The visualizations above (built with <a href="http://d3js.org">D3</a>) plot the opening, closing, and in some cases the re-opening and re-closing, of nearly 1,500 post offices in Oregon between 1847 and 1902. Click and drag on the bar chart to filter the post offices. The colored points indicate whether a post office was opened, existed, or closed during that time period. The table below provides details on demand.</p>
+
+<p>The <span id="legend" style="color: #2CB5AC;">Teal</span> points reference Post Offices that are alive throughout a brush extent, the <span id="legend" style="color: #B52C35;">Red</span> points indicate Post Offices that are closed within the extent of a brush, the <span id="legend" style="color: #FFFF99;">Yellow</span> color indicates Post Offices that are established sometime during the brush extent, and the <span id="legend" style="color: #0A0;">Green</span> points indicate a Post Office that is established during the brush. Hover over points on the map to view more information about individual post offices.</p>
+
+<div id="selections">
   <h4>Offices</h4>
   <form>
     <input type="checkbox" name="maps" value="All">All<br>
     <input type="checkbox" name="maps" value="Established">Established<br>
     <input type="checkbox" name="maps" value="Discontinued">Discontinued
   </form>
-</div> -->
+</div>
 
 <div id="container"></div>
 
@@ -425,5 +468,9 @@ d3.csv("years_count.csv", function(error, post) {
   <span style="float:right;">
     Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache License 2.0</a>.
   </span>
+<<<<<<< Updated upstream
   Visualized by <a href="http://www.jasonheppler.org">Jason Heppler</a>, Jocelyn Hickcox, Tara Balakrishnan. Special thanks to Elijah Meeks.
+=======
+  Visualized by <a href="http://www.jasonheppler.org">Jason Heppler</a>, Tara Balakrishnan, and Jocelyn Hickcox. Special thanks to Elijah Meeks.
+>>>>>>> Stashed changes
 </footer>
