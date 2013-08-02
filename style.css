@@ -74,8 +74,10 @@ footer {
 }
 
 .overlay {
+  fill: none;
   opacity: 0;
-  box-shadow: 5px 5px 10px #888888;;
+  box-shadow: 5px 5px 10px #888888;
+  pointer-events: fill;
 }
 
 .toggles {
@@ -119,6 +121,7 @@ footer {
       fill: none;
       stroke: #a5967e;
 }
+
 .points-est {
     fill: green;
     fill-opacity: .7;
