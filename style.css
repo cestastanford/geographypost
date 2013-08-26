@@ -7,6 +7,7 @@ body {
   width: 1060px;
   min-height: 1000px;
   pointer-events: none;
+  /*z-index: -20;*/
 }
 
 td, th {
@@ -127,6 +128,11 @@ footer {
 .svg {
   position: absolute;
   top: 280px;
+  pointer-events: all;
+}
+
+.features {
+  pointer-events: all;
 }
 
 #mapWindow {
@@ -157,9 +163,12 @@ footer {
 }
 
 #selections {
-  /*display: inline-block;
-  padding: 15px;
-  background: #ececec;*/
+  display: inline-block;
+  pointer-events: all;
+}
+
+#mapSelections {
+  pointer-events: all;
 }
 
 .overlay {
@@ -188,11 +197,13 @@ footer {
   stroke: darkgrey;
   stroke-width: 2px;
   box-shadow: 5px 5px 10px #888888;
+  pointer-events: visible;
 }
 
 .background {
       fill: #a4bac7;
       box-shadow: 5px 5px 10px #888888;
+      pointer-events: all;
 }
 
 .foreground {
@@ -205,18 +216,20 @@ footer {
       fill: #E3DAC9; /*#E9D6B3;*/
       stroke: #766951;
       fill-opacity: .7;
+      pointer-events: visible;
 }
 
 .boundary {
       fill: none;
       stroke: #a5967e;
+      pointer-events: visible;
 }
 
 .points-est {
     fill: green;
     fill-opacity: .7;
-    stroke: #888;
-    stroke-width: .7px;
+   /* stroke: #888;
+    stroke-width: .7px;*/
     pointer-events: visible;
     z-index: 20;
 }
@@ -245,6 +258,27 @@ footer {
   z-index: 13;
   width: 85px;
 }
+
+.mapText {
+  font-size: 10px;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+.percentLabel {
+  fill: lightgrey;
+  font-size: 11px;
+}
+
+#onMap {
+  fill: #838B83;
+  fill-opacity: .8;
+}
+
+#notOnMap {
+  fill: #8B7D7B;
+  fill-opacity: .8;
+}
+
 
 /* Graph Styles */
 
