@@ -9,7 +9,6 @@
 
 <link href="style.css" rel="stylesheet" type="text/css">
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
 
 <title>Geography of the Post</title>
 
@@ -24,7 +23,6 @@
 <script src="http://d3js.org/topojson.v0.min.js"></script>
 <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
 <script src="http://d3js.org/d3.geo.tile.v0.min.js"></script>
-<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
 
 <div id="info">
     <h1>The Geography of the Nineteenth-Century Post</h1>
@@ -116,7 +114,7 @@ queue()
 
 var aliveThroughout = "#2166AC"; //Teal
 var diesDuring = "#B2182B"; //Pink
-var bornDuring = "#66AB21"; //Green
+var bornDuring = "#52891A"; //Green
 var aliveDuring = "#D88531"; //Orange
 var autoColor = "#356581"; //Grey
 
@@ -129,26 +127,37 @@ var shownOpacity = .8;
 var fadeOpacity = .2;
 
 
+  var mapped_y = 425;
+  var barWidth = 25;
+  var num_mapped = 50;
+  var totalShown = 100;
+  var mappedHeight = 57; // TODO: set init value automatically
+  var unmappedHeight = 43;
+
+
 
 //********************************************
 // Map
 //********************************************
 
+var tile = d3.geo.tile()
+    .size([width, height]);
+
    // azimuth projection
 var projection = d3.geo.azimuthalEqualArea()
     .translate([680, 380])
     .rotate([118.9, 0])
-    .center([0, 42.5])
-    .scale(1200 * 5);
+    .center([11, 34.5])
+    .scale(770 * 2);
 
     // satellite projection
     // use this one instead?
 var projection2 = d3.geo.satellite()
     .distance(1.1)
-    .scale(7000)
+    .scale(5000)
     .rotate([125.00, -37.50, 32.12])
     .center([-1, 5])
-    .tilt(30)
+    .tilt(0)
     .clipAngle(Math.acos(1 / 1.1) * 180 / Math.PI - 1e-6)
     .precision(.1); 
 
@@ -170,10 +179,7 @@ this.path = d3.geo.path()
 
 // Printing the map
 
-  svg.append("path")
-    .datum(graticule.outline)
-    .attr("class", "background")
-    .attr("d", this.path);
+  
 
 
 function ready(error, us, post) {
@@ -187,6 +193,11 @@ function ready(error, us, post) {
     .on("zoom", zoomed);
 
    var features = svg.append("g"); 
+
+   features.append("path")
+    .datum(graticule.outline)
+    .attr("class", "background")
+    .attr("d", this.path);
 
   features.append("path")
       .datum(topojson.object(us, us.objects.land))
@@ -203,27 +214,16 @@ function ready(error, us, post) {
     .append("use")
     .attr("xlink:href", "#land");
 
-  svg.call(zoom);
+  features.call(zoom);  
 
   function zoomed() {
     features.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
     features.select(".boundary").style("stroke-width", 1.5 / d3.event.scale + "px");
-   // svg.selectAll("circle.points-est").attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-    svg.selectAll("circle.points-est").attr("r", function() { return 3 / d3.event.scale + "px"});
-    svg.selectAll("circle.points-est").style("stroke-width", .7 / d3.event.scale + "px");
-    d3.select(".map-tooltip").style("width", 85 / d3.event.scale + "px");
+    svg.selectAll("circle.points-est").attr("r", function() { return 2.5 / d3.event.scale + "px"});
+    //svg.selectAll("circle.points-est").style("stroke-width", .7 / d3.event.scale + "px");
+    labelSize = 16 / d3.event.scale;
+    d3.select(".map-tooltip").style("font-size", 16 / d3.event.scale + "px");
   }
-
-// For reference
-
-//      .attr("transform", function(d) {return "translate(" + projection([d["Longitude"], d["Latitude"]]) + ")"; })
-
-/*function reproject(newProjection) {
-  path.projection(newProjection)
-d3.selectAll("path.land").transition().duration(500).attr("d",path);
-d3.selectAll("g.points-est").transition().duration(500).attr("transform", function(d) {return "translate(" + newProjection([d["Longitude"], d["Latitude"]]) + ")"; });
-d3.selectAll("path.boundary").transition().duration(500).attr("d",path);
-}*/
 
 
   // Make the legend
@@ -231,6 +231,17 @@ d3.selectAll("path.boundary").transition().duration(500).attr("d",path);
   var legend_x = 45;
   var legend_y = 55;
   var legend_margin = 20;
+
+
+
+  var brushYears = svg.append("g")
+  brushYears.append("text")
+    .attr("id", "brushYears")
+    .classed("mapText", true)
+    .text("Post offices between " + brushStart + " and " + brushEnd)
+    .attr("x", width - 200)
+    .attr("y", 15);
+
 
 
    if (document.getElementById("regular").checked == true) { var legend = svg.append("g")
@@ -310,6 +321,54 @@ d3.selectAll("path.boundary").transition().duration(500).attr("d",path);
 }
 
 
+
+ // Chart showing the percentage of mapped to unmapped data points within the given brush
+var mapped = svg.append("g");
+
+    mapped.append("rect")
+      .attr("id", "onMap")
+      .attr("x", legend_x + 10)
+      .attr("y", mapped_y - mappedHeight)
+      .attr("width", barWidth)
+      .attr("height", mappedHeight);
+
+    mapped.append("text")
+      .text("Mapped")
+      .attr("class", "mapText")
+      .attr("y", mapped_y + 15)
+      .attr("x", legend_x - 5);
+
+    mapped.append("text")
+      .text(mappedHeight + "%")
+      .attr("class", "percentLabel")
+      .attr("id", "mappedPercent")
+      .attr("y", mapped_y - 2)
+      .attr("x", legend_x + 11);
+
+    mapped.append("rect")
+      .attr("id", "notOnMap")
+      .attr("x", legend_x + 55)
+      .attr("y", mapped_y - unmappedHeight)
+      .attr("width", barWidth)
+      .attr("height", unmappedHeight);
+
+    mapped.append("text")
+      .text(unmappedHeight + "%")
+      .attr("class", "percentLabel")
+      .attr("id", "unmappedPercent")
+      .attr("y", mapped_y - 2)
+      .attr("x", legend_x + 56);
+
+    mapped.append("text")
+      .text("Unmapped")
+      .attr("class", "mapText")
+      .attr("y", mapped_y + 15)
+      .attr("x", legend_x + 45);
+
+
+
+
+
   // Printing all points
   this.postoffices = features.selectAll("g.points-est")
       .data(post)
@@ -318,11 +377,10 @@ d3.selectAll("path.boundary").transition().duration(500).attr("d",path);
      .style("fill", "red")
      .attr("transform", function(d) {return "translate(" + projection([d["Longitude"], d["Latitude"]]) + ")"; })
      .on("mouseover", showLabel)
-     .on("mouseout", function() {d3.selectAll("text.map-tooltip").remove(); });
-     /*.on("mouseover", function(d) { d3.select(this).transition().duration(500).style("r", 5).style("stroke-opacity", .5);
      .on("mouseout", function() {
-      d3.select(this).transition().duration(500).style("r", 3).style("stroke-opacity", 1);
-        });;*/
+        d3.selectAll("text.map-tooltip").remove(); 
+        d3.selectAll("rect.bar").transition().duration(600).style("fill", function () { return; }); //TODO: fix lack of transition
+      });
   // TODO(jheppler): For future use -- a function to take the salaries of the post offices and resize
   // the points based on their amount.
   // .attr("r", function(d) {
@@ -336,18 +394,11 @@ d3.selectAll("path.boundary").transition().duration(500).attr("d",path);
 
   postoffices
     .append("circle")
-      .attr("r", 3)
+      .attr("r", 2.5)
       .attr("class","points-est")
       .style("fill", autoColor);
 
-      /*.on("mouseover", function() {
-        d3.select(this)
-        .transition()
-        .duration(1000)
-        .attr("r", 5);
-      });*/
-
-  
+   
 
 
   // *******************************************
@@ -357,7 +408,7 @@ d3.selectAll("path.boundary").transition().duration(500).attr("d",path);
   // TODO(jheppler): Modify this so it auto-updates as a brush event is created.
 
 
-  var columns = ["Name", "Est", "Dis1", "Re1", "Dis2", "Re2", "Dis3", "Re3", "Dis4", "Re4", "Latitude", "Longitude"];
+  /*var columns = ["Name", "Est", "Dis1", "Re1", "Dis2", "Re2", "Dis3", "Re3", "Dis4", "Re4", "Latitude", "Longitude"];
 
     // Print the table by placing a `div` with `id` of `container` below
     var table = d3.select("#container").append("table"),
@@ -384,18 +435,27 @@ d3.selectAll("path.boundary").transition().duration(500).attr("d",path);
       })
     .enter()
       .append("td")
-      .text(function(d) { return d.value; });
+      .text(function(d) { return d.value; });*/
 
 // *********************************************
 // Callbacks
 // *********************************************
 
+  var labelSize = 16;
+
   // On hover, show point labels
   function showLabel(d,i) {
     //d3.select(this).tipsy();
-    d3.select(this).append("text").attr("class", "map-tooltip").text(d["Name"]);
+    d3.select(this).append("text").attr("class", "map-tooltip").text(d["Name"]).style("font-size", labelSize);
     d3.select(this).transition().duration(600).style("stroke-opacity", .5);
     this.parentNode.appendChild(this);
+    var startDate = d["Est"];
+    var endDate = d["Dis1"];
+    if (d["Dis1"] == "") {
+      endDate = 1905;
+    }
+    d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d) { if (d.x >= startDate && d.x <= endDate) { return "goldenrod"; } });
+
   }
  
 
@@ -415,73 +475,13 @@ var barchart = d3.select("body").append("svg")
     .attr("transform", "translate(" + barchart_margin.left + "," + barchart_margin.top + ")");
     
 
+
 d3.csv("/data/years_count2.csv", function(error, post) {
 
   brush = d3.svg.brush()
     .x(x)
     .on("brush", brushed)
-    .on("brushstart", brushed)
     .on("brushend", brushed);
-
- 
-   
-  /* var freqlist = new Array();
-     // new Array(), 
-     // new Array());
-
-for (var i = 1847; i < 1903; i++) {
-  freqlist[i - 1847] = 0;
-}
- 
-
-   post.forEach(function(d) {
-
-
-        var dEst = parseInt(d.Est.split("-")[0]);
-        
-        freqlist[dEst - 1847]++;
-        var dRe1 = parseInt(d.Re1.split("-")[0]);
-        freqlist[dRe1 - 1847]++;
-        var dRe2 = parseInt(d.Re2.split("-")[0]);
-        freqlist[dRe2 - 1847]++
-        var dRe3 = parseInt(d.Re3.split("-")[0]);
-        freqlist[dRe3 - 1847]++;
-
-        
-       
-
-        /*var estArr = [dEst, dRe1, dRe2, dRe3];
-
-        for (var j = 0; j < arrSize; j++) {
-          if (estArr[j] == NaN) {
-            break;
-          }
-          freqlist[estArr[j], 0]++;
-          console.log(freqlist[estArr[j], 0]);
-        }*/
-
-
-     /* var dDis1 = parseInt(d.Dis1.split("-")[0]);
-      
-      var dDis2 = parseInt(d.Dis2.split("-")[0]);
-      var dDis3 = parseInt(d.Dis3.split("-")[0]);
-      var dDis4 = parseInt(d.Dis4.split("-")[0]);
-      
-      
-      var disArray = [dDis1, dDis2, dDis3, dDis4]
-      for (var j = 0; j < arrSize; j++) {
-          if (disArray[j] == NaN) {
-            break;
-          }
-          freqlist[disArray[j], 1]++;
-          console.log(freqlist[disArray[j], 1]);
-        }
-
-        console.log(freqlist);*/
-
-   //   });
-
- //console.log(freqlist);
 
 
   // Coercion since CSV is untyped
@@ -499,9 +499,6 @@ for (var i = 1847; i < 1903; i++) {
     });
   }));
 
-
-  //x.domain(post.map(function(d) { return d["year"]; }));
-  //y.domain([0, d3.max(post, function(d) { return d["frequency"] + d["frequency_discontinued"]; })]);
 
   x.domain(freqs[0].map(function(d) { return d.x; }));
   y.domain([0, d3.max(freqs[freqs.length - 1], function(d) { return d.y0 + d.y; })]);
@@ -529,22 +526,6 @@ for (var i = 1847; i < 1903; i++) {
       .text("No. of established");
 
 
- /*for (var i = 1847; i < 1903; i++) {
-    var num = freqlist[i];
-  // Draw the bars
- // barchart.selectAll(".bar")
-     // .data(freqlist)
-      
-      //.enter()
-      barchart.append("rect")
-        .attr("class", "bar")
-        .attr("x", x(i))
-        .attr("width", x.rangeBand())
-        .attr("y", y(num))
-        .attr("id", function() { return "year-" + i; })
-        .attr("height", function() { return barchart_height - y(num); });
-  }*/
-
   var z = d3.scale.ordinal().range(["steelblue", "indianred"]);
 
 
@@ -570,7 +551,7 @@ for (var i = 1847; i < 1903; i++) {
 
 
   // Draw the brush
-  barchart.append("g")
+  var gbrush = barchart.append("g")
       .attr("class", "brush")
       .call(brush)
     .selectAll("rect")
@@ -594,10 +575,15 @@ for (var i = 1847; i < 1903; i++) {
     var year_begin = newscale(b[0]);
     var year_end = newscale(b[1]);
 
-    brushStart = year_begin;
-    brushEnd = year_end;
+    brushStart = Math.ceil(year_begin);
+    brushEnd = Math.floor(year_end);
 
+   /* var extent1 = brush.extent();
 
+    extent1[0] = brushStart;
+    extent1[1] = brushEnd;
+
+    d3.select(this).call(brush.extent(extent1));*/
 
     //To make math work, set a disestablish date of greater than the maximum date in the span of years if a post office is never disestablished.
     var defaultDis = 1905;  // TODO(jheppler): Convert this to d3.max function to automatically
@@ -616,13 +602,24 @@ for (var i = 1847; i < 1903; i++) {
 
       colorPoints();
       styleOpacity();
+
+
+      // Update percent mapped vs percent unmapped bars
+      mappedHeight = (num_mapped / totalShown) * 100;
+      unmappedHeight = ((totalShown - num_mapped) / totalShown) * 100;
+      d3.select("#onMap").attr("height", mappedHeight)
+          .attr("y", function() { return mapped_y - mappedHeight});
+      d3.select("#notOnMap").attr("height", unmappedHeight)
+          .attr("y", function() {return mapped_y - unmappedHeight});
+      d3.select("svg").append("brushYears");
+      d3.select("#mappedPercent").text(Math.round(mappedHeight) + "%");
+      d3.select("#unmappedPercent").text(Math.round(unmappedHeight) + "%");
+
+      // Update start and end years in upper right-hand corner of the map
+      d3.select("#brushYears").text("Post offices between " + brushStart + " and " + brushEnd);
      
- 
-
-  d3.selectAll("rect.bar").style("opacity", function(d, i) { return d.x >= year_begin && d.x <= year_end ? "1" : ".4" });
-
-  //d3.selectAll("rect.bar").style("fill", function(d, i) { return d.year >= year_begin && d.year <= year_end ? "steelblue" : "#69c" });
- 
+      // Fade all years in the histogram not within the brush
+      d3.selectAll("rect.bar").style("opacity", function(d, i) { return d.x >= year_begin && d.x <= year_end ? "1" : ".4" });
 
 
   }
@@ -679,7 +676,9 @@ for (var i = 1847; i < 1903; i++) {
 
     //Colors the points to reflect their category within the brush
     d3.selectAll("circle.points-est").style("fill", function(d, i) { 
-  
+
+     
+
       // Convert dates into integers
       // If a post office is not disestablished, set its disestablish date to default, greater than any possible year in the brush. (Sorry this is so sloppy.)
 
@@ -742,27 +741,7 @@ for (var i = 1847; i < 1903; i++) {
           return "black";
         }
       } else if (document.getElementById("snapshot").checked == true) {
-        
-          /*var brushSpan = brushEnd - brushStart;
-          var percentAlive = 0;
-
-          for (var i = 0; i < arrSize; i++) {
-            // If the post office was alive at the start of the brush, add appropriate number of years
-            if (estArr[i] < brushStart && brushStart <= (estArr[i] + lifespanArr[i])) {
-              percentAlive += (estArr[i] + lifespanArr[i] - brushStart);
-            }
-            // Otherwise, if the post office was established any number of times during the brush, add appropriate years
-            if (brushStart <= estArr[i] && estArr[i] <= brushEnd) {
-              if (brushEnd >= (estArr[i] + lifespanArr[i])) {
-                percentAlive += lifespanArr[i];
-              } else {
-                percentAlive += (brushEnd - estArr[i]);
-              }
-            }
-          }
-          percentAlive = percentAlive / brushSpan;*/
           return "red";
-
       }
 
     });
@@ -837,16 +816,6 @@ for (var i = 1847; i < 1903; i++) {
             }
           }
           var nm = d["Name"];
-         // console.log(nm);
-          //console.log(estArr);
-          //console.log(lifespanArr);
-          //console.log(percentAlive);
-          //console.log(percentAlive / brushSpan)
-         if (percentAlive / brushSpan > 1) {
-          console.log("Uh oh! " + nm);
-          console.log(estArr + " " + lifespanArr);
-          console.log(percentAlive);
-         }
           return percentAlive / brushSpan;
         }
 
@@ -859,7 +828,6 @@ for (var i = 1847; i < 1903; i++) {
 
   function showEst() {
   
-       //d3.selectAll("g.points-est").style("display", function(d) { 
         d3.selectAll("g.points-est").transition().duration(500).style("opacity", function(d) {
 
     
@@ -890,8 +858,6 @@ for (var i = 1847; i < 1903; i++) {
 
 function showDis() {
 
-
-  //d3.selectAll("g.points-est").style("display", function(d) { 
     d3.selectAll("g.points-est").transition().duration(500).style("opacity", function(d) {
 
     var dDis1 = parseInt(d.Dis1.split("-")[0]);
@@ -935,12 +901,17 @@ function showDis() {
 
 function showAll() {
 
-  d3.selectAll("g.points-est").style("display", function(d) { 
+  totalShown = 0;
+  num_mapped = 0;
 
-    var score = parseInt(d.GeocodeScore);
-      if (score > 0) {
+  d3.selectAll("g.points-est").style("display", function(d) { 
+  
 
         var dEst = parseInt(d.Est.split("-")[0]);
+        if (dEst > brushEnd) {
+          d3.select(this).classed("shown", false);
+          return "none";
+        }
         var dRe1 = parseInt(d.Re1.split("-")[0]);
         var dRe2 = parseInt(d.Re2.split("-")[0]);
         var dRe3 = parseInt(d.Re3.split("-")[0]);
@@ -982,25 +953,41 @@ function showAll() {
         // Buggy: only goes into effect when the brush is changed; not automatic. 
           if (startAlive && endAlive) {  
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
-           // d.classed("shown", true);
-              return "block";
+            //d3.select(this).classed("shown", true);
+            if (d.Latitude != 0 && d.Latitude != "") {
+              num_mapped++;
+            }
+            totalShown++;
+            return "block";
           } else if (startAlive && !endAlive) { 
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
-          //  d.classed("shown", true);
+            //d3.select(this).classed("shown", true);
+               if (d.Latitude != 0 && d.Latitude != "") {
+              num_mapped++;
+            }
+            totalShown++;
             return "block"; 
           } else if (!startAlive && endAlive) { 
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
-          //  d.classed("shown", true);
+           // d3.select(this).classed("shown", true);
+              if (d.Latitude != 0 && d.Latitude != "") {
+              num_mapped++;
+            }
+            totalShown++;
             return "block"; 
           } else if (isDuring(estArr, brushStart, brushEnd)) { 
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
-           // d.classed("shown", true);
+            //d3.select(this).classed("shown", true);
+               if (d.Latitude != 0 && d.Latitude != "") {
+              num_mapped++;
+            }
+            totalShown++;
             return "block"; 
           }
-         // d.classed("shown", false);
+          //d3.select(this).classed("shown", false);
         return "none";
 
-      }
+      
     });
 
 };
@@ -1043,11 +1030,7 @@ function showRegular() {
    document.getElementById("tab1").style.background="#F5F1DE"
   showAll();
   document.getElementById("selections").style.visibility = "visible";
-   if (document.getElementById("estab").checked == true) {
-        showEst();
-      } else if (document.getElementById("discont").checked == true) {
-        showDis();
-      }
+  document.getElementById("all").checked = true;
   colorPoints();
   styleOpacity();
   //d3.selectAll("g.points-est").transition().duration(500).style("opacity", shownOpacity);
@@ -1086,9 +1069,12 @@ function showEvent() {
 
 </script>
 
+<br></br>
 
 
 <div id="mapWindow"></div>
+
+<br></br>
 
 <div id="histogram"></div>
 
