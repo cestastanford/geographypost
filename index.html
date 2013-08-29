@@ -10,12 +10,11 @@
 <link href="style.css" rel="stylesheet" type="text/css">
 
 
-<title>Geography of the Post</title>
+<title id="title">Geography of the Post</title>
 
 </head>
 
 <body>
-
 
 
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
@@ -23,6 +22,10 @@
 <script src="http://d3js.org/topojson.v0.min.js"></script>
 <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
 <script src="http://d3js.org/d3.geo.tile.v0.min.js"></script>
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<!--<script src="http://square.github.io/crossfilter/crossfilter.v1.min.js"></script>-->
 
 <div id="info">
     <h1>The Geography of the Nineteenth-Century Post</h1>
@@ -46,17 +49,10 @@
 </div>
 
 
-<!--<div id="datamode">
-  <ul class="nav">
-    <li id="snapshot"><a href="javascript:showSnapshot()" class="current">Snapshot View</a></li>
-    <li id="event"><a href="javascript:showEvent()">Event View</a></li>
-    <li id="regular"><a href="javascript:showRegular()">Regular View</a></li>
-  </ul>
-</div>-->
-
 <div id="placeholder">
   <p id="gibberish">jhghjjh</p>
 </div>
+
 
 <div id="datamode">
   <form display: "inline">
@@ -65,7 +61,8 @@
             class="datamode" 
             name="data" 
             value="snapshot"
-            onclick="showSnapshot()"/>Snapshot View
+            onclick="showSnapshot()"
+            checked="checked"/>Snapshot View
     <input type="radio" 
             id="event" 
             class="datamode" 
@@ -77,8 +74,7 @@
             class="datamode" 
             name="data" 
             value="regular"
-            onclick="showRegular()"
-            checked="checked"/>Regular View
+            onclick="showRegular()"/>Regular View
  </form>
 </div>
 
@@ -88,7 +84,7 @@
 // Global variables
 //********************************************
 
-var width = 960,
+var width = 960, //$(document).width(),
     height = 750,
     barchart_margin = {top: 20, right: 20, bottom: 30, left: 40},
     barchart_width = 960 - barchart_margin.left - barchart_margin.right,
@@ -116,7 +112,7 @@ var aliveThroughout = "#2166AC"; //Teal
 var diesDuring = "#B2182B"; //Pink
 var bornDuring = "#52891A"; //Green
 var aliveDuring = "#D88531"; //Orange
-var autoColor = "#356581"; //Grey
+var autoColor = "red"; //"#356581"; //Grey
 
 //Brush Dates
 var brushStart = 1846
@@ -127,7 +123,7 @@ var shownOpacity = .8;
 var fadeOpacity = .2;
 
 
-  var mapped_y = 425;
+  
   var barWidth = 25;
   var num_mapped = 50;
   var totalShown = 100;
@@ -183,13 +179,62 @@ this.path = d3.geo.path()
 
 
 function ready(error, us, post) {
+
+
   this.defs = this.svg.append("defs");
+
+
+  // A little coercion, since the CSV is untyped.
+  post.forEach(function (d, i) {
+    d.index = i;
+    d.name = d["Name"];
+    d.est = parseInt(d.Est.split("-")[0]);
+    d.re1 = parseInt(d.Re1.split("-")[0]);
+    d.re2 = parseInt(d.Re2.split("-")[0]);
+    d.re3 = parseInt(d.Re3.split("-")[0]);
+    d.dis1 = parseInt(d.Dis1.split("-")[0]);
+    d.dis1 = parseInt(d.Dis1.split("-")[0]);
+    if (d.Dis1 == "") {
+      d.dis1 = defaultDis;
+    }
+    d.dis2 = parseInt(d.Dis2.split("-")[0]);
+    if(d.Dis2 == "") {
+      d.dis2 = defaultDis;
+    }
+
+    d.dis3 = parseInt(d.Dis3.split("-")[0]);
+    if (d.dis3 == "") {
+      d.dis3 = defaultDis;
+    }
+   d.dis4 = parseInt(d.Dis4.split("-")[0]);
+    if (d.Dis4 == "") {
+      d.dis4 = defaultDis;
+    }
+    d.lat = d["Latitude"];
+    d.long = d["Longitude"];
+  });
+
+  // Create the crossfilter for the relevant dimensions and groups.
+ // var posts = crossfilter(post);
+      /*all =  posts.groupAll(),
+      name = posts.dimension(function(d) { return d.name; }),
+      est = posts.dimension(function(d) { return d.est; }),
+      re1 = posts.dimension(function(d) { return d.re1; }),
+      re2 = posts.dimension(function(d) { return d.re2; }),
+      re3 = posts.dimension(function(d) { return d.re3; }),
+      dis1 = posts.dimension(function(d) { return d.dis1; }),
+      dis2 = posts.dimension(function(d) { return d.dis2; }),
+      dis3 = posts.dimension(function(d) { return d.dis3; }),
+      dis4 = posts.dimension(function(d) {return d.dis4; }),
+      lat = posts.dimension(function(d) { return d.lat; }),
+      long = posts.dimension(function(d) { return d.long; });*/
+
 
 
   var zoom = d3.behavior.zoom()
     .translate([0, 0])
     .scale(1)
-    .scaleExtent([.1, 8])
+    .scaleExtent([.05, 8])
     .on("zoom", zoomed);
 
    var features = svg.append("g"); 
@@ -226,147 +271,188 @@ function ready(error, us, post) {
   }
 
 
+
+  // Make side bar
+
+
+
   // Make the legend
 
-  var legend_x = 45;
-  var legend_y = 55;
-  var legend_margin = 20;
+  var legend_x = 25, //15;
+      legend_y = 45, //40;
+      legend_width = 175,
+      legend_height = 400,
+      legend_margin = 20
+      key_y = 40,
+      key_x = 16;
+      mapped_y = legend_y + legend_height - 100; //405;;
 
 
+ // Construct the side bar on the map
 
-  var brushYears = svg.append("g")
-  brushYears.append("text")
-    .attr("id", "brushYears")
-    .classed("mapText", true)
-    .text("Post offices between " + brushStart + " and " + brushEnd)
-    .attr("x", width - 200)
-    .attr("y", 15);
+ var legend = svg.append("g")
+    .attr("class", "legend");
 
-
-
-   if (document.getElementById("regular").checked == true) { var legend = svg.append("g")
-    .attr("class", "legend")
-    .attr("x", 60)
-    .attr("y", 25)
-    .attr("height", 100)
-    .attr("width", 100);
 
   legend.append("rect")
-    .attr("class", "legendBox")
+    .attr("id", "legendBox")
     .attr("x", legend_x)
     .attr("y", legend_y - 15)
-    .attr("width", 180)
-    .attr("height", 100)
+    .attr("width", legend_width)
+    .attr("height", legend_height)
     .style();
 
-    // Established during brush
-  legend.append("rect")
-    .attr("x", function() {return legend_x + 10})
-    .attr("y", function() {return legend_y})
-    .attr("width", 10)
-    .attr("height", 10)
-    .style("fill", bornDuring);
 
-  legend.append("text")
-    .attr("x", function() {return legend_x + 23})
-    .attr("y", function() {return legend_y + 11})
-    .text("Established")
-    .style("text-anchor", "right");
+    // Numbers showing the start and end brush dates.
+  var brushYears = legend.append("g")
+  brushYears.append("text")
+    .attr("id", "brushYears")
+    .classed("yearText", true)
+    .text(brushStart + " - " + brushEnd)
+    .attr("x", legend_x + 35)
+    .attr("y", legend_y + 12);
+
+  //legend.append("line")
+
+
+  var key = legend.append("g")
+
+    // Established during brush
+  key.append("circle")
+    .attr("id", "keyCircle1")
+    .attr("cx", function() {return legend_x + key_x})
+    .attr("cy", function() {return legend_y + key_y + 5})
+    .attr("r", 5)
+    .style("fill", "red");
+
+  key.append("text")
+    .attr("class", "legendText")
+    .attr("id", "keyLabel1")
+    .attr("x", function() {return legend_x + key_x + 10})
+    .attr("y", function() {return legend_y + 10 + key_y})
+    .text("Longer Lifespan");
 
 
     // Closed during brush
-  legend.append("rect")
-    .attr("x", function() {return legend_x + 10})
-    .attr("y", function() {return legend_y + legend_margin})
-    .attr("width", 10)
-    .attr("height", 10)
-    .style("fill", diesDuring);
+  key.append("circle")
+    .attr("id", "keyCircle2")
+    .attr("cx", function() {return legend_x + key_x})
+    .attr("cy", function() {return legend_y + legend_margin + key_y + 5})
+    .attr("r", 5)
+    .style("fill", "red")
+    .style("opacity", .75);
 
-  legend.append("text")
-    .attr("x", function() {return legend_x + 23})
-    .attr("y", function() {return legend_y + legend_margin + 11})
-    .text("Closed")
-    .style("text-anchor", "right");  
+  key.append("text")
+    .attr("class", "legendText")
+    .attr("id", "keyLabel2")
+    .attr("x", function() {return legend_x + key_x + 10})
+    .attr("y", function() {return legend_y + legend_margin + 10 + key_y})
+    .style("display", "none")
+    .text("Closed");  
 
 
     // Alive throughout brush
-  legend.append("rect")
-    .attr("x", function() {return legend_x + 10})
-       .attr("y", function() {return legend_y + 2 * legend_margin})
-    .attr("width", 10)
-    .attr("height", 10)
-    .style("fill", aliveThroughout);
+  key.append("circle")
+    .attr("id", "keyCircle3")
+    .attr("cx", function() {return legend_x + key_x})
+    .attr("cy", function() {return legend_y + 2 * legend_margin + key_y + 5})
+    .attr("r", 5)
+    .style("fill", "red")
+    .style("opacity", .5);
 
-  legend.append("text")
-    .attr("x", function() {return legend_x + 23})
-    .attr("y", function() {return legend_y + 2 * legend_margin + 11})
-    .text("Active throughout")
-    .style("text-anchor", "right");  
+  key.append("text")
+    .attr("class", "legendText")
+    .attr("id", "keyLabel3")
+    .attr("x", function() {return legend_x + key_x + 10})
+    .attr("y", function() {return legend_y + 2 * legend_margin + 10 + key_y})
+    .style("display", "none")
+    .text("Active throughout");  
 
 
     // Lives and dies during brush
-  legend.append("rect")
-    .attr("x", function() {return legend_x + 10})
-    .attr("y", function() {return legend_y + 3 * legend_margin})
-    .attr("width", 10)
-    .attr("height", 10)
-    .style("fill", aliveDuring);
+  key.append("circle")
+    .attr("id", "keyCircle4")
+    .attr("cx", function() {return legend_x + key_x})
+    .attr("cy", function() {return legend_y + 3 * legend_margin + key_y + 5})
+    .attr("r", 5)
+    .style("fill", "red")
+    .style("opacity", .25);
 
-  legend.append("text")
-    .attr("x", function() {return legend_x + 23})
-    .attr("y", function() {return legend_y + 3 * legend_margin + 11})
-    .text("Estab. and Closed")
-    .style("text-anchor", "right");  
+  key.append("text")
+    .attr("class", "legendText")
+    .attr("id", "keyLabel4")
+    .attr("x", function() {return legend_x + key_x + 10})
+    .attr("y", function() {return legend_y + 3 * legend_margin + 10 + key_y})
+    .text("Shorter Lifespan");  
 
-}
 
 
 
  // Chart showing the percentage of mapped to unmapped data points within the given brush
-var mapped = svg.append("g");
+  var mapped = legend.append("g");
 
+    // Mapped bar
     mapped.append("rect")
       .attr("id", "onMap")
-      .attr("x", legend_x + 10)
+      .attr("x", legend_x + 40)
       .attr("y", mapped_y - mappedHeight)
       .attr("width", barWidth)
       .attr("height", mappedHeight);
 
+      // "Mapped" label
     mapped.append("text")
       .text("Mapped")
       .attr("class", "mapText")
       .attr("y", mapped_y + 15)
-      .attr("x", legend_x - 5);
+      .attr("x", legend_x + 25);
 
+      // Mapped percentage label
     mapped.append("text")
       .text(mappedHeight + "%")
       .attr("class", "percentLabel")
       .attr("id", "mappedPercent")
-      .attr("y", mapped_y - 2)
-      .attr("x", legend_x + 11);
+      .attr("y", mapped_y - mappedHeight - 3)
+      .attr("x", legend_x + 41);
 
+      // Unmapped bar
     mapped.append("rect")
       .attr("id", "notOnMap")
-      .attr("x", legend_x + 55)
+      .attr("x", legend_x + 95)
       .attr("y", mapped_y - unmappedHeight)
       .attr("width", barWidth)
       .attr("height", unmappedHeight);
 
+      // Unmapped percentage label
     mapped.append("text")
       .text(unmappedHeight + "%")
       .attr("class", "percentLabel")
       .attr("id", "unmappedPercent")
-      .attr("y", mapped_y - 2)
-      .attr("x", legend_x + 56);
+      .attr("y", mapped_y - unmappedHeight - 3)
+      .attr("x", legend_x + 96);
 
+      // "Unmapped" label
     mapped.append("text")
       .text("Unmapped")
       .attr("class", "mapText")
       .attr("y", mapped_y + 15)
-      .attr("x", legend_x + 45);
+      .attr("x", legend_x + 80);
 
 
+   /* var button = legend.append("g")
 
+    button.append("rect")
+      .attr("class", "resetMap")
+      .attr("x", legend_x + 55)
+      .attr("y", legend_y + legend_height - 60)
+      .attr("width", 65)
+      .attr("height", 25)
+      .on("click", reproject(projection));
+
+    button.append("text")
+      .text("Reset Map")
+      .attr("x", legend_x + 55)
+      .attr("y", legend_y + legend_height - 60)
+      .attr("text-anchor", "center");*/
 
 
   // Printing all points
@@ -375,7 +461,7 @@ var mapped = svg.append("g");
     .enter().append("g")
      .attr("class","points-est")
      .style("fill", "red")
-     .attr("transform", function(d) {return "translate(" + projection([d["Longitude"], d["Latitude"]]) + ")"; })
+     .attr("transform", function(d) {return "translate(" + projection([d.long, d.lat]) + ")"; })
      .on("mouseover", showLabel)
      .on("mouseout", function() {
         d3.selectAll("text.map-tooltip").remove(); 
@@ -398,6 +484,8 @@ var mapped = svg.append("g");
       .attr("class","points-est")
       .style("fill", autoColor);
 
+
+  styleOpacity();
    
 
 
@@ -445,15 +533,13 @@ var mapped = svg.append("g");
 
   // On hover, show point labels
   function showLabel(d,i) {
-    //d3.select(this).tipsy();
+    
     d3.select(this).append("text").attr("class", "map-tooltip").text(d["Name"]).style("font-size", labelSize);
     d3.select(this).transition().duration(600).style("stroke-opacity", .5);
     this.parentNode.appendChild(this);
-    var startDate = d["Est"];
-    var endDate = d["Dis1"];
-    if (d["Dis1"] == "") {
-      endDate = 1905;
-    }
+    var startDate = d.est;
+    var endDate = d.dis1;
+ 
     d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d) { if (d.x >= startDate && d.x <= endDate) { return "goldenrod"; } });
 
   }
@@ -469,8 +555,10 @@ var mapped = svg.append("g");
 
 // Prepare the canvas
 var barchart = d3.select("body").append("svg")
+    .attr("class", "barchart")
     .attr("width", barchart_width + barchart_margin.left + barchart_margin.right)
     .attr("height", barchart_height + barchart_margin.top + barchart_margin.bottom)
+    .attr("y", height - barchart_height)
   .append("g")
     .attr("transform", "translate(" + barchart_margin.left + "," + barchart_margin.top + ")");
     
@@ -478,9 +566,11 @@ var barchart = d3.select("body").append("svg")
 
 d3.csv("/data/years_count2.csv", function(error, post) {
 
-  brush = d3.svg.brush()
+  //var years = crossfilter(post);
+
+  var brush = d3.svg.brush()
     .x(x)
-    .on("brush", brushed)
+   // .on("brush", brushed)
     .on("brushend", brushed);
 
 
@@ -551,6 +641,7 @@ d3.csv("/data/years_count2.csv", function(error, post) {
 
 
   // Draw the brush
+
   var gbrush = barchart.append("g")
       .attr("class", "brush")
       .call(brush)
@@ -561,15 +652,17 @@ d3.csv("/data/years_count2.csv", function(error, post) {
       .text("Drag left or right to brush along this axis.");
 
 
-
-
   // ****************************************
   // Callbacks
   // ****************************************
   
   function brushed() {
 
-    b = brush.empty() ? [0,1000] : brush.extent();
+    //if (document.getElementById("event").checked == true) {
+      //b = brush.empty ? [1947, 1950] : 1;
+   // } else {
+      b = brush.empty() ? [0,1000] : brush.extent();
+    //} 
     newscale = d3.scale.linear();
     newscale.domain(x.range()).range(x.domain());
     var year_begin = newscale(b[0]);
@@ -578,12 +671,16 @@ d3.csv("/data/years_count2.csv", function(error, post) {
     brushStart = Math.ceil(year_begin);
     brushEnd = Math.floor(year_end);
 
-   /* var extent1 = brush.extent();
+   
+
+  if (document.getElementById("event").checked == true) {
+     var extent1 = brush.extent();
+     brushEnd = brushStart + 1;
 
     extent1[0] = brushStart;
     extent1[1] = brushEnd;
-
-    d3.select(this).call(brush.extent(extent1));*/
+    d3.select(this).call(brush);
+  }
 
     //To make math work, set a disestablish date of greater than the maximum date in the span of years if a post office is never disestablished.
     var defaultDis = 1905;  // TODO(jheppler): Convert this to d3.max function to automatically
@@ -614,9 +711,11 @@ d3.csv("/data/years_count2.csv", function(error, post) {
       d3.select("svg").append("brushYears");
       d3.select("#mappedPercent").text(Math.round(mappedHeight) + "%");
       d3.select("#unmappedPercent").text(Math.round(unmappedHeight) + "%");
+      d3.select("#mappedPercent").attr("y", mapped_y - mappedHeight - 3);
+      d3.select("#unmappedPercent").attr("y", mapped_y - unmappedHeight - 3);
 
       // Update start and end years in upper right-hand corner of the map
-      d3.select("#brushYears").text("Post offices between " + brushStart + " and " + brushEnd);
+      d3.select("#brushYears").text(brushStart + " - " + brushEnd);
      
       // Fade all years in the histogram not within the brush
       d3.selectAll("rect.bar").style("opacity", function(d, i) { return d.x >= year_begin && d.x <= year_end ? "1" : ".4" });
@@ -646,7 +745,7 @@ d3.csv("/data/years_count2.csv", function(error, post) {
 
     function isAliveEnd(estArr, lifeSpanArr, brushDate) {
       for (var j = 0; j < arrSize; j++) {
-        if (estArr[j] <= brushDate && brushDate <= (estArr[j] + lifeSpanArr[j])) {
+        if (estArr[j] <= brushDate && brushDate < (estArr[j] + lifeSpanArr[j])) {
           return true;
         }
       }
@@ -677,46 +776,11 @@ d3.csv("/data/years_count2.csv", function(error, post) {
     //Colors the points to reflect their category within the brush
     d3.selectAll("circle.points-est").style("fill", function(d, i) { 
 
-     
-
-      // Convert dates into integers
-      // If a post office is not disestablished, set its disestablish date to default, greater than any possible year in the brush. (Sorry this is so sloppy.)
-
-      
-        var dEst = parseInt(d.Est.split("-")[0]);
-        var dRe1 = parseInt(d.Re1.split("-")[0]);
-        var dRe2 = parseInt(d.Re2.split("-")[0]);
-        var dRe3 = parseInt(d.Re3.split("-")[0]);
-
-        var dDis1 = parseInt(d.Dis1.split("-")[0]);
-
-
-
-        var dDis1 = parseInt(d.Dis1.split("-")[0]);
-
-        if (d.Dis1 == "") {
-          dDis1 = defaultDis;
-        }
-
-        var dDis2 = parseInt(d.Dis2.split("-")[0]);
-        if(d.Dis2 == "") {
-          dDis2 = defaultDis;
-        }
-
-        var dDis3 = parseInt(d.Dis3.split("-")[0]);
-        if (d.dis3 == "") {
-          dDis3 = defaultDis;
-        }
-
-        var dDis4 = parseInt(d.Dis4.split("-")[0]);
-        if (d.Dis4 == "") {
-          dDis4 = defaultDis;
-        }
 
          // Arrays of established dates and subsequent life spans of a single post office. 
         // Note: assumes there are exactly 4 establish dates in the data
-        var estArr = [dEst, dRe1, dRe2, dRe3];
-        var lifespanArr = [dDis1 - dEst, dDis2 - dRe1, dDis3 - dRe2, dDis4 - dRe3];
+        var estArr = [d.est, d.re1, d.re2, d.re3];
+        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
 
         // Bools are true if post office was alive at the time of brushMin and brushMax
@@ -757,33 +821,9 @@ d3.csv("/data/years_count2.csv", function(error, post) {
         return shownOpacity;
       } else if (document.getElementById("snapshot").checked == true) {
 
-      var dEst = parseInt(d.Est.split("-")[0]);
-      var dRe1 = parseInt(d.Re1.split("-")[0]);
-      var dRe2 = parseInt(d.Re2.split("-")[0]);
-      var dRe3 = parseInt(d.Re3.split("-")[0]);
-      var dDis1 = parseInt(d.Dis1.split("-")[0]);
-
-      if (d.Dis1 == "") {
-        dDis1 = defaultDis;
-      }
-
-      var dDis2 = parseInt(d.Dis2.split("-")[0]);
-      if(d.Dis2 == "") {
-        dDis2 = defaultDis;
-      }
-
-      var dDis3 = parseInt(d.Dis3.split("-")[0]);
-      if (d.dis3 == "") {
-        dDis3 = defaultDis;
-      }
-
-      var dDis4 = parseInt(d.Dis4.split("-")[0]);
-      if (d.Dis4 == "") {
-        dDis4 = defaultDis;
-      }
- 
-      var estArr = [dEst, dRe1, dRe2, dRe3];
-      var lifespanArr = [dDis1 - dEst, dDis2 - dRe1, dDis3 - dRe2, dDis4 - dRe3];
+   
+      var estArr = [d.est, d.re1, d.re2, d.re3];
+      var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
       // Bools are true if post office was alive at the time of brushMin and brushMax
       var startAlive = false;
@@ -815,7 +855,7 @@ d3.csv("/data/years_count2.csv", function(error, post) {
               }
             }
           }
-          var nm = d["Name"];
+          var nm = d.name;
           return percentAlive / brushSpan;
         }
 
@@ -830,14 +870,7 @@ d3.csv("/data/years_count2.csv", function(error, post) {
   
         d3.selectAll("g.points-est").transition().duration(500).style("opacity", function(d) {
 
-    
-        var dEst = parseInt(d.Est.split("-")[0]);
-        var dRe1 = parseInt(d.Re1.split("-")[0]);
-        var dRe2 = parseInt(d.Re2.split("-")[0]);
-        var dRe3 = parseInt(d.Re3.split("-")[0]);
-       
-
-        var estArr = [dEst, dRe1, dRe2, dRe3];
+        var estArr = [d.est, d.re1, d.re2, d.re3];
 
         for (var i = 0; i < arrSize; i++) {
          if (estArr[i] <= brushEnd && estArr[i] > brushStart) {
@@ -860,28 +893,8 @@ function showDis() {
 
     d3.selectAll("g.points-est").transition().duration(500).style("opacity", function(d) {
 
-    var dDis1 = parseInt(d.Dis1.split("-")[0]);
 
-        if (d.Dis1 == "") {
-          dDis1 = defaultDis;
-        }
-
-        var dDis2 = parseInt(d.Dis2.split("-")[0]);
-        if(d.Dis2 == "") {
-          dDis2 = defaultDis;
-        }
-
-        var dDis3 = parseInt(d.Dis3.split("-")[0]);
-        if (d.dis3 == "") {
-          dDis3 = defaultDis;
-        }
-
-        var dDis4 = parseInt(d.Dis4.split("-")[0]);
-        if (d.Dis4 == "") {
-          dDis4 = defaultDis;
-        }
-
-        var disArr = [dDis1, dDis2, dDis3, dDis4];
+        var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
 
         for (var i = 0; i < arrSize; i++) {
          if (disArr[i] <= brushEnd && disArr[i] > brushStart) {
@@ -906,38 +919,9 @@ function showAll() {
 
   d3.selectAll("g.points-est").style("display", function(d) { 
   
-
-        var dEst = parseInt(d.Est.split("-")[0]);
-        if (dEst > brushEnd) {
-          d3.select(this).classed("shown", false);
-          return "none";
-        }
-        var dRe1 = parseInt(d.Re1.split("-")[0]);
-        var dRe2 = parseInt(d.Re2.split("-")[0]);
-        var dRe3 = parseInt(d.Re3.split("-")[0]);
-        var dDis1 = parseInt(d.Dis1.split("-")[0]);
-
-        if (d.Dis1 == "") {
-          dDis1 = defaultDis;
-        }
-
-        var dDis2 = parseInt(d.Dis2.split("-")[0]);
-        if(d.Dis2 == "") {
-          dDis2 = defaultDis;
-        }
-
-        var dDis3 = parseInt(d.Dis3.split("-")[0]);
-        if (d.dis3 == "") {
-          dDis3 = defaultDis;
-        }
-
-        var dDis4 = parseInt(d.Dis4.split("-")[0]);
-        if (d.Dis4 == "") {
-          dDis4 = defaultDis;
-        }
    
-        var estArr = [dEst, dRe1, dRe2, dRe3];
-        var lifespanArr = [dDis1 - dEst, dDis2 - dRe1, dDis3 - dRe2, dDis4 - dRe3];
+        var estArr = [d.est, d.re1, d.re2, d.re3];
+        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
         // Bools are true if post office was alive at the time of brushMin and brushMax
         var startAlive = false;
@@ -1011,9 +995,10 @@ svg.append("path")
 
 
 function reproject(newProjection) {
+  console.log("reprojecting");
   path.projection(newProjection)
 d3.selectAll("path.land").transition().duration(500).attr("d",path);
-d3.selectAll("g.points-est").transition().duration(500).attr("transform", function(d) {return "translate(" + newProjection([d["Longitude"], d["Latitude"]]) + ")"; });
+d3.selectAll("g.points-est").transition().duration(500).attr("transform", function(d) {return "translate(" + newProjection([d.long, d.lat]) + ")"; });
 d3.selectAll("path.boundary").transition().duration(500).attr("d",path);
 }
 
@@ -1034,9 +1019,20 @@ function showRegular() {
   colorPoints();
   styleOpacity();
   //d3.selectAll("g.points-est").transition().duration(500).style("opacity", shownOpacity);
-  d3.selectAll("g.legend").transition().duration(1000).style("opacity", .8);
+  d3.selectAll("g.key").transition().duration(1000).style("opacity", .8);
  // d3.selectAll("g.legend").style("display", "block");
 
+ document.getElementById("keyCircle1").style.fill = bornDuring;
+ document.getElementById("keyCircle2").style.fill = diesDuring;
+ document.getElementById("keyCircle3").style.fill = aliveThroughout;
+ document.getElementById("keyCircle4").style.fill = aliveDuring;
+ document.getElementById("keyCircle2").style.opacity = 1;
+ document.getElementById("keyCircle3").style.opacity = 1;
+ document.getElementById("keyCircle4").style.opacity = 1;
+ d3.select("#keyLabel1").text("Established");
+  d3.select("#keyLabel2").style("display", "block");
+  d3.select("#keyLabel3").style("display", "block");
+  d3.select("#keyLabel4").text("Estab. and Closed");
 }
 
 function showSnapshot() {
@@ -1049,11 +1045,22 @@ function showSnapshot() {
   document.getElementById("tab1").style.background="#f7f7f7"
   showAll();
   colorPoints();
-  d3.selectAll("g.legend").transition().duration(1000).style("opacity", 0);
+  d3.selectAll("g.key").transition().duration(1000).style("opacity", 0);
   //d3.selectAll("g.legend").style("display", "none");
   styleOpacity();
   document.getElementById("selections").style.visibility = "hidden";
-
+  document.getElementById("keyCircle1").style.fill = "red"
+  document.getElementById("keyCircle1").style.opacity = 1;
+  d3.select("#keyLabel1").text("Longer Lifespan");
+  document.getElementById("keyCircle2").style.fill = "red";
+  document.getElementById("keyCircle2").style.opacity = .75;
+  d3.select("#keyLabel2").style("display", "none");
+  document.getElementById("keyCircle3").style.fill = "red";
+  document.getElementById("keyCircle3").style.opacity = .5;
+  d3.select("#keyLabel3").style("display", "none");
+  document.getElementById("keyCircle4").style.fill = "red";
+  document.getElementById("keyCircle4").style.opacity = .25;
+  d3.select("#keyLabel4").text("Shorter Lifespan");
 }
 
 function showEvent() {
@@ -1064,12 +1071,45 @@ function showEvent() {
   document.getElementById("tab2").style.background="#f7f7f7"
   document.getElementById("tab1").style.zIndex ="-4";
   document.getElementById("tab1").style.background="#F5F1DE"
+
+  //d3.select("barchart").selectAll("rect.brush.extent").transition().duration(750).style("fill-opacity", 0);
+  //d3.select("barchart").select("gbrush").brush.clear();
+
+  d3.select(".gbrush.brush.extent").attr("pointer-events", "none");
+
+}
+
+function resetMap() {
+
+
+  var newProjection = d3.geo.azimuthalEqualArea()
+    .translate([680, 380])
+    .rotate([118.9, 0])
+    .center([11, 34.5])
+    .scale(770 * 2);
+
+    document.getElementById("mapView").checked = true;
+
+
+  reproject(newProjection);
+
 }
 
 
 </script>
 
 <br></br>
+
+<div id="resetMap" display="inline">
+  <form>
+    <button
+    name="resetMap"
+    value="Reset Map"
+    onclick="resetMap()"/>Reset Map
+  </form>
+</div>
+
+
 
 
 <div id="mapWindow"></div>
@@ -1110,6 +1150,7 @@ function showEvent() {
   <form>
     <input type="radio"
     name="satellite"
+    id="mapView"
     checked="checked"
     onclick="reproject(projection)"
     value="Map View"/>Map View
