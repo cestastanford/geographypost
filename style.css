@@ -86,7 +86,7 @@ footer {
   box-shadow: 0px 5px 10px #888888;
   z-index: -3;
   border-radius: 15px;
-  background-color: #F5F1DE;
+  background-color: #f7f7f7;
   pointer-events: all;
  
 }
@@ -97,7 +97,7 @@ footer {
   left: 230px;
   top: 196px;
   box-shadow: 0px 5px 10px #888888;
-  z-index: -5;
+  z-index: -4;
   border-radius: 15px;
   background-color: #F5F1DE;
   pointer-events:all;
@@ -111,9 +111,9 @@ footer {
   left: 420px;
   top: 196px;
   box-shadow: 0px 5px 10px #888888;
-  z-index: -4;
+  z-index: -5;
   border-radius: 15px;
-  background-color: #f7f7f7;
+  background-color: #F5F1DE;
   pointer-events: all;
 
 }
@@ -162,6 +162,14 @@ footer {
   border-right: 1px solid black;
 }
 
+#resetMap {
+  pointer-events: all;
+  display: box;
+  position: absolute;
+  top: 645px;
+  left: 167px;
+}
+
 #selections {
   display: inline-block;
   pointer-events: all;
@@ -191,13 +199,14 @@ footer {
 
 /* Map Styles */
 
-.legendBox {
+#legendBox {
   fill: beige;
   opacity: .8;
   stroke: darkgrey;
   stroke-width: 2px;
   box-shadow: 5px 5px 10px #888888;
-  pointer-events: visible;
+  pointer-events: all;
+  border-radius: 10px;
 }
 
 .background {
@@ -260,14 +269,31 @@ footer {
 }
 
 .mapText {
-  font-size: 10px;
+  font-size: 12px;
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  fill: darkslategray;
+}
+
+
+.legendText {
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-size: 14px;
+  fill: darkslategray;
+  text-anchor: right;
+}
+
+
+.yearText {
+  font-size: 16px;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  fill: darkslategray;
 }
 
 .percentLabel {
-  fill: lightgrey;
+  fill: #888;
   font-size: 11px;
 }
+
 
 #onMap {
   fill: #838B83;
@@ -281,6 +307,19 @@ footer {
 
 
 /* Graph Styles */
+
+.barchart {
+  z-index: 30;
+  display: block;
+}
+
+.chartButton {
+  stroke-radius: 15px;
+  fill: gainsboro;
+  stroke: #888;
+  stroke-width: 2px;
+  box-shadow: 5px 5px 10px #888888 inset;
+}
 
 .axis path,
 .axis line {
