@@ -3,7 +3,7 @@ body {
   color: rgb(51, 51, 51);
   background-color: #f0f0f0; /*#F1F6F8;*/
   text-rendering: optimizeLegibility;
-  margin: 40px auto;
+  margin: 0;
   width: 1060px;
   min-height: 1000px;
   pointer-events: none;
@@ -65,7 +65,7 @@ footer {
   border-radius: 15px;
 }
 
-#backdrop {
+/*#backdrop {
   width: 1100px;
   height: 730px;
   position: absolute;
@@ -75,14 +75,14 @@ footer {
   z-index: -2;
   border-radius: 15px;
   background-color: #f7f7f7;
-}
+}*/
 
 #tab1 {
   width: 200px;
   height: 100px;
   position: absolute;
   left: 40px;
-  top: 196px;
+  top: 126px;
   box-shadow: 0px 5px 10px #888888;
   z-index: -3;
   border-radius: 15px;
@@ -95,7 +95,7 @@ footer {
   height: 100px;
   position: absolute;
   left: 230px;
-  top: 196px;
+  top: 126px;
   box-shadow: 0px 5px 10px #888888;
   z-index: -4;
   border-radius: 15px;
@@ -109,7 +109,7 @@ footer {
   height: 100px;
   position: absolute;
   left: 420px;
-  top: 196px;
+  top: 126px;
   box-shadow: 0px 5px 10px #888888;
   z-index: -5;
   border-radius: 15px;
@@ -133,9 +133,10 @@ footer {
 
 .features {
   pointer-events: all;
+  z-index: 25;
 }
 
-#mapWindow {
+/*#mapWindow {
   width: 960px;
   height: 461px;
   position: absolute;
@@ -146,7 +147,7 @@ footer {
 }
 
 #histogram {
-  background-color: #CCE5E5; /*should be same as stroke color of var freq*/
+  background-color: #CCE5E5; /*should be same as stroke color of var freq
   width: 960px;
   height: 200px;
   position: absolute;
@@ -154,7 +155,7 @@ footer {
   left: center;
   box-shadow: 5px 5px 10px #888888;
   z-index: -1;
-}
+}*/
 
 #years_container {
   float: left;
@@ -166,8 +167,8 @@ footer {
   pointer-events: all;
   display: box;
   position: absolute;
-  top: 645px;
-  left: 167px;
+  top: 650px;
+  left: 75px;
 }
 
 #selections {
@@ -310,7 +311,10 @@ footer {
 
 .barchart {
   z-index: 30;
-  display: block;
+  display: box;
+  visibility: visible;
+  position: relative;
+  top: -185px;
 }
 
 .chartButton {
