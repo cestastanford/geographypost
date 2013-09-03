@@ -37,7 +37,7 @@
   </div>
 </div>
 
-<div id="backdrop"></div>
+<!--<div id="backdrop"></div>-->
 <div id="tab1" onclick="javascript:showSnapshot()">
   <p class="tabLabel">Snapshot View</p>
 </div>
@@ -46,11 +46,6 @@
 </div>
 <div id="tab3" onclick="javascript:showRegular()">
   <p class="tabLabel">Regular View</p>
-</div>
-
-
-<div id="placeholder">
-  <p id="gibberish">jhghjjh</p>
 </div>
 
 
@@ -84,11 +79,11 @@
 // Global variables
 //********************************************
 
-var width = 960, //$(document).width(),
+var width = $(document).width(),
     height = 750,
     barchart_margin = {top: 20, right: 20, bottom: 30, left: 40},
-    barchart_width = 960 - barchart_margin.left - barchart_margin.right,
-    barchart_height = 200 - barchart_margin.top - barchart_margin.bottom;
+    barchart_width = $(document).width() - barchart_margin.left - barchart_margin.right,
+    barchart_height = 180 - barchart_margin.top - barchart_margin.bottom;
 
 
 
@@ -161,7 +156,7 @@ var projection2 = d3.geo.satellite()
 
 var svg = d3.select("body").append("svg")
     .attr("width", width)
-    .attr("height", "460")
+    .attr("height", "700")
     .attr("class", "mapbox")
     .style("boxShadow", "10px 10px 5px #888888");              // change this back to `height`
 
@@ -281,7 +276,7 @@ function ready(error, us, post) {
   var legend_x = 25, //15;
       legend_y = 45, //40;
       legend_width = 175,
-      legend_height = 400,
+      legend_height = 500,
       legend_margin = 20
       key_y = 40,
       key_x = 16;
@@ -438,22 +433,6 @@ function ready(error, us, post) {
       .attr("x", legend_x + 80);
 
 
-   /* var button = legend.append("g")
-
-    button.append("rect")
-      .attr("class", "resetMap")
-      .attr("x", legend_x + 55)
-      .attr("y", legend_y + legend_height - 60)
-      .attr("width", 65)
-      .attr("height", 25)
-      .on("click", reproject(projection));
-
-    button.append("text")
-      .text("Reset Map")
-      .attr("x", legend_x + 55)
-      .attr("y", legend_y + legend_height - 60)
-      .attr("text-anchor", "center");*/
-
 
   // Printing all points
   this.postoffices = features.selectAll("g.points-est")
@@ -475,7 +454,6 @@ function ready(error, us, post) {
 
 
 
-  
 
 
   postoffices
@@ -533,15 +511,14 @@ function ready(error, us, post) {
 
   // On hover, show point labels
   function showLabel(d,i) {
-    
+
     d3.select(this).append("text").attr("class", "map-tooltip").text(d["Name"]).style("font-size", labelSize);
     d3.select(this).transition().duration(600).style("stroke-opacity", .5);
     this.parentNode.appendChild(this);
     var startDate = d.est;
     var endDate = d.dis1;
- 
     d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d) { if (d.x >= startDate && d.x <= endDate) { return "goldenrod"; } });
-
+  
   }
  
 
@@ -556,9 +533,9 @@ function ready(error, us, post) {
 // Prepare the canvas
 var barchart = d3.select("body").append("svg")
     .attr("class", "barchart")
-    .attr("width", barchart_width + barchart_margin.left + barchart_margin.right)
+    .attr("width", $(document).width() ) //barchart_width + barchart_margin.left + barchart_margin.right)
     .attr("height", barchart_height + barchart_margin.top + barchart_margin.bottom)
-    .attr("y", height - barchart_height)
+    .attr("y", height - barchart_height - 100)
   .append("g")
     .attr("transform", "translate(" + barchart_margin.left + "," + barchart_margin.top + ")");
     
@@ -1112,11 +1089,11 @@ function resetMap() {
 
 
 
-<div id="mapWindow"></div>
+<!--<div id="mapWindow"></div>
 
 <br></br>
 
-<div id="histogram"></div>
+<div id="histogram"></div>-->
 
 <div id="selections">
    <h4 display="inline">Offices: </h4>
