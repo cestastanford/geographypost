@@ -4,7 +4,7 @@ body {
   background-color: #f0f0f0; /*#F1F6F8;*/
   text-rendering: optimizeLegibility;
   margin: 0;
-  width: 1060px;
+  width: 100%;
   min-height: 1000px;
   pointer-events: none;
   /*z-index: -20;*/
@@ -36,6 +36,8 @@ body > p {
 footer {
   padding: 2em 0 1em 0;
   font-size: 12px;
+  margin: 0 auto;
+  width: 90%;
 }
 
 /*svg text {
@@ -381,6 +383,7 @@ footer {
     color: #333;
     padding: 20px 0 3px;
     z-index: -10;
+    margin-left: 2em;
 }
 
 #info h1 {
@@ -410,8 +413,7 @@ footer {
     display: block;
     content: "";
     height: 0;
-    border-top: 1px solid rgba(60, 60, 60, 0.25);
-    border-bottom: 1px solid #fff;
+
   }
   #about ul {
     list-style: none;
@@ -428,6 +430,11 @@ footer {
   }
   #about ul li a {
     text-decoration: underline;
+  }
+
+  #information {
+    margin: 0 auto;
+    width: 90%;
   }
 
   span.sc {

@@ -1,6 +1,4 @@
 <!DOCTYPE html>
-
-
 <head>
 <meta charset="utf-8">
 
@@ -8,14 +6,9 @@
 <link href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,300' rel='stylesheet' type='text/css'>
 
 <link href="style.css" rel="stylesheet" type="text/css">
-
+<link href="tipsy.css" rel="stylesheet" type="text/css">
 
 <title id="title">Geography of the Post</title>
-
-</head>
-
-<body>
-
 
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="http://d3js.org/queue.v1.min.js"></script>
@@ -23,9 +16,12 @@
 <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
 <script src="http://d3js.org/d3.geo.tile.v0.min.js"></script>
 <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
 <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-<!--<script src="http://square.github.io/crossfilter/crossfilter.v1.min.js"></script>-->
+<script src="/lib/jquery.tipsy.js"></script>
+
+</head>
+
+<body>
 
 <div id="info">
     <h1>The Geography of the Nineteenth-Century Post</h1>
@@ -41,13 +37,9 @@
 <div id="tab1" onclick="javascript:showSnapshot()">
   <p class="tabLabel">Snapshot View</p>
 </div>
-<div id="tab2" onclick="javascript:showEvent()">
-  <p class="tabLabel">Event View</p>
-</div>
-<div id="tab3" onclick="javascript:showRegular()">
+<div id="tab2" onclick="javascript:showRegular()">
   <p class="tabLabel">Regular View</p>
 </div>
-
 
 <div id="datamode">
   <form display: "inline">
@@ -85,14 +77,10 @@ var width = $(document).width(),
     barchart_width = $(document).width() - barchart_margin.left - barchart_margin.right,
     barchart_height = 180 - barchart_margin.top - barchart_margin.bottom;
 
-
+currentZoom = -99;
 
 // Scales
-
 var x = d3.scale.ordinal().rangeRoundBands([0, width - 60], .1);
-
-//var x = d3.scale.ordinal().rangeRoundBands([0, barchart_width], .1); // trying the barchart_width. Change back to 'width' if it messes up stuff
-
 var y = d3.scale.linear().range([barchart_height, 0]);
 
 // Get our data ready
@@ -102,7 +90,6 @@ queue()
     .await(ready);
 
 // Colors
-
 var aliveThroughout = "#2166AC"; //Teal
 var diesDuring = "#B2182B"; //Pink
 var bornDuring = "#52891A"; //Green
@@ -113,19 +100,13 @@ var autoColor = "red"; //"#356581"; //Grey
 var brushStart = 1846
 var brushEnd = 1903
 var defaultDis = 1904;
-
 var shownOpacity = .8;
-var fadeOpacity = .2;
-
-
-  
-  var barWidth = 25;
-  var num_mapped = 50;
-  var totalShown = 100;
-  var mappedHeight = 57; // TODO: set init value automatically
-  var unmappedHeight = 43;
-
-
+var fadeOpacity = .2;  
+var barWidth = 25;
+var num_mapped = 50;
+var totalShown = 100;
+var mappedHeight = 57; // TODO: set init value automatically
+var unmappedHeight = 43;
 
 //********************************************
 // Map
@@ -134,31 +115,27 @@ var fadeOpacity = .2;
 var tile = d3.geo.tile()
     .size([width, height]);
 
-   // azimuth projection
-var projection = d3.geo.azimuthalEqualArea()
+var mercator = d3.geo.mercator()
+    .scale((1 << 12) / 2 / Math.PI)
+    .translate([width / 2, height / 2]);
+
+var center = mercator([12, 42]);
+
+var path = d3.geo.path()
+   .projection(mercator);
+
+// azimuth projection
+var projection = d3.geo.mercator()
     .translate([680, 380])
     .rotate([118.9, 0])
     .center([11, 34.5])
     .scale(770 * 2);
 
-    // satellite projection
-    // use this one instead?
-var projection2 = d3.geo.satellite()
-    .distance(1.1)
-    .scale(5000)
-    .rotate([125.00, -37.50, 32.12])
-    .center([-1, 5])
-    .tilt(0)
-    .clipAngle(Math.acos(1 / 1.1) * 180 / Math.PI - 1e-6)
-    .precision(.1); 
-
-
-
-var svg = d3.select("body").append("svg")
+ svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", "700")
     .attr("class", "mapbox")
-    .style("boxShadow", "10px 10px 5px #888888");              // change this back to `height`
+    .style("boxShadow", "10px 10px 5px #888888");
 
 var graticule = d3.geo.graticule()
     .extent([[-98 - 45, 38 - 45], [-98 + 45, 38 + 45]])
@@ -167,17 +144,11 @@ var graticule = d3.geo.graticule()
 this.path = d3.geo.path()
     .projection(projection);
 
-
 // Printing the map
-
-  
-
 
 function ready(error, us, post) {
 
-
   this.defs = this.svg.append("defs");
-
 
   // A little coercion, since the CSV is untyped.
   post.forEach(function (d, i) {
@@ -209,70 +180,51 @@ function ready(error, us, post) {
     d.long = d["Longitude"];
   });
 
-  // Create the crossfilter for the relevant dimensions and groups.
- // var posts = crossfilter(post);
-      /*all =  posts.groupAll(),
-      name = posts.dimension(function(d) { return d.name; }),
-      est = posts.dimension(function(d) { return d.est; }),
-      re1 = posts.dimension(function(d) { return d.re1; }),
-      re2 = posts.dimension(function(d) { return d.re2; }),
-      re3 = posts.dimension(function(d) { return d.re3; }),
-      dis1 = posts.dimension(function(d) { return d.dis1; }),
-      dis2 = posts.dimension(function(d) { return d.dis2; }),
-      dis3 = posts.dimension(function(d) { return d.dis3; }),
-      dis4 = posts.dimension(function(d) {return d.dis4; }),
-      lat = posts.dimension(function(d) { return d.lat; }),
-      long = posts.dimension(function(d) { return d.long; });*/
-
-
-
   var zoom = d3.behavior.zoom()
     .translate([0, 0])
     .scale(1)
     .scaleExtent([.05, 8])
     .on("zoom", zoomed);
 
+   var pathsG = svg.append("g"); 
    var features = svg.append("g"); 
 
-   features.append("path")
+   pathsG.append("path")
     .datum(graticule.outline)
     .attr("class", "background")
     .attr("d", this.path);
 
-  features.append("path")
+  pathsG.append("path")
       .datum(topojson.object(us, us.objects.land))
       .attr("class", "land")
       .attr("d", this.path);
 
-  this.land = features.append("path")
+  this.land = pathsG.append("path")
       .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a.id !== b.id; }))
       .attr("class", "boundary")
       .attr("d", this.path);
 
-  features.append("clipPath")
+  pathsG.append("clipPath")
     .attr("id", "clip")
     .append("use")
     .attr("xlink:href", "#land");
 
-  features.call(zoom);  
+  svg.call(zoom);  
 
   function zoomed() {
+    // d3.selectAll("g.points-est").style("display", "none")
     features.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-    features.select(".boundary").style("stroke-width", 1.5 / d3.event.scale + "px");
-    svg.selectAll("circle.points-est").attr("r", function() { return 2.5 / d3.event.scale + "px"});
-    //svg.selectAll("circle.points-est").style("stroke-width", .7 / d3.event.scale + "px");
+    pathsG.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    pathsG.select(".boundary").style("stroke-width", 1.5 / d3.event.scale + "px");  
+    if (currentZoom != d3.event.scale) {
+      currentZoom = d3.event.scale;
+      svg.selectAll("circle.points-est").attr("r", function() { return 2.5 / d3.event.scale + "px"});
+    }
     labelSize = 16 / d3.event.scale;
     d3.select(".map-tooltip").style("font-size", 16 / d3.event.scale + "px");
   }
 
-
-
-  // Make side bar
-
-
-
   // Make the legend
-
   var legend_x = 25, //15;
       legend_y = 45, //40;
       legend_width = 175,
@@ -282,12 +234,10 @@ function ready(error, us, post) {
       key_x = 16;
       mapped_y = legend_y + legend_height - 100; //405;;
 
-
  // Construct the side bar on the map
 
  var legend = svg.append("g")
     .attr("class", "legend");
-
 
   legend.append("rect")
     .attr("id", "legendBox")
@@ -297,7 +247,6 @@ function ready(error, us, post) {
     .attr("height", legend_height)
     .style();
 
-
     // Numbers showing the start and end brush dates.
   var brushYears = legend.append("g")
   brushYears.append("text")
@@ -306,9 +255,6 @@ function ready(error, us, post) {
     .text(brushStart + " - " + brushEnd)
     .attr("x", legend_x + 35)
     .attr("y", legend_y + 12);
-
-  //legend.append("line")
-
 
   var key = legend.append("g")
 
@@ -327,7 +273,6 @@ function ready(error, us, post) {
     .attr("y", function() {return legend_y + 10 + key_y})
     .text("Longer Lifespan");
 
-
     // Closed during brush
   key.append("circle")
     .attr("id", "keyCircle2")
@@ -344,7 +289,6 @@ function ready(error, us, post) {
     .attr("y", function() {return legend_y + legend_margin + 10 + key_y})
     .style("display", "none")
     .text("Closed");  
-
 
     // Alive throughout brush
   key.append("circle")
@@ -363,7 +307,6 @@ function ready(error, us, post) {
     .style("display", "none")
     .text("Active throughout");  
 
-
     // Lives and dies during brush
   key.append("circle")
     .attr("id", "keyCircle4")
@@ -379,9 +322,6 @@ function ready(error, us, post) {
     .attr("x", function() {return legend_x + key_x + 10})
     .attr("y", function() {return legend_y + 3 * legend_margin + 10 + key_y})
     .text("Shorter Lifespan");  
-
-
-
 
  // Chart showing the percentage of mapped to unmapped data points within the given brush
   var mapped = legend.append("g");
@@ -432,18 +372,16 @@ function ready(error, us, post) {
       .attr("y", mapped_y + 15)
       .attr("x", legend_x + 80);
 
-
-
   // Printing all points
   this.postoffices = features.selectAll("g.points-est")
       .data(post)
     .enter().append("g")
      .attr("class","points-est")
-     .style("fill", "red")
+     // .style("fill", "blue")
      .attr("transform", function(d) {return "translate(" + projection([d.long, d.lat]) + ")"; })
      .on("mouseover", showLabel)
      .on("mouseout", function() {
-        d3.selectAll("text.map-tooltip").remove(); 
+        // d3.selectAll("text.map-tooltip").remove(); 
         d3.selectAll("rect.bar").transition().duration(600).style("fill", function () { return; }); //TODO: fix lack of transition
       });
   // TODO(jheppler): For future use -- a function to take the salaries of the post offices and resize
@@ -452,56 +390,13 @@ function ready(error, us, post) {
   //   return Math.sqrt(parseInt(d["salaries"]) * 0.00004);
   // })
 
-
-
-
-
   postoffices
     .append("circle")
       .attr("r", 2.5)
       .attr("class","points-est")
       .style("fill", autoColor);
 
-
   styleOpacity();
-   
-
-
-  // *******************************************
-  // Printing the entire CSV file as a table
-  // *******************************************
-
-  // TODO(jheppler): Modify this so it auto-updates as a brush event is created.
-
-
-  /*var columns = ["Name", "Est", "Dis1", "Re1", "Dis2", "Re2", "Dis3", "Re3", "Dis4", "Re4", "Latitude", "Longitude"];
-
-    // Print the table by placing a `div` with `id` of `container` below
-    var table = d3.select("#container").append("table"),
-        thead = table.append("thead"),
-        tbody = table.append("tbody");
-
-    thead.append("tr")
-    .selectAll("th")
-      .data(columns)
-    .enter()
-      .append("th")
-      .text(function(column) { return column; });
-
-    var rows = tbody.selectAll("tr")
-      .data(post)
-    .enter()
-      .append("tr");
-
-    var cells = rows.selectAll("td")
-      .data(function(row) {
-          return columns.map(function(column) {
-              return {column: column, value: row[column]};
-          });
-      })
-    .enter()
-      .append("td")
-      .text(function(d) { return d.value; });*/
 
 // *********************************************
 // Callbacks
@@ -509,22 +404,25 @@ function ready(error, us, post) {
 
   var labelSize = 16;
 
+  $('g.points-est').tipsy({
+    gravity: 's',
+    html: true,
+    title: function() {
+      var d = this.__data__;
+      return "Name: " + d["Name"] + "<br>" + "Established: " + d["Est"] + "<br>" + "Discontinued: " + d["Dis1"];
+    }
+  });
+
   // On hover, show point labels
   function showLabel(d,i) {
-
-    d3.select(this).append("text").attr("class", "map-tooltip").text(d["Name"]).style("font-size", labelSize);
-    d3.select(this).transition().duration(600).style("stroke-opacity", .5);
+    // d3.select(this).append("text").attr("class", "map-tooltip").text(d["Name"] + "\n" + d["Est"]).style("font-size", labelSize);
+    // d3.select(this).transition().duration(600).style("stroke-opacity", .5);
     this.parentNode.appendChild(this);
     var startDate = d.est;
     var endDate = d.dis1;
     d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d) { if (d.x >= startDate && d.x <= endDate) { return "goldenrod"; } });
-  
   }
- 
-
-
 }
-
 
 //********************************************
 // Graphing the year counts as a bar chart
@@ -538,18 +436,12 @@ var barchart = d3.select("body").append("svg")
     .attr("y", height - barchart_height - 100)
   .append("g")
     .attr("transform", "translate(" + barchart_margin.left + "," + barchart_margin.top + ")");
-    
-
 
 d3.csv("/data/years_count2.csv", function(error, post) {
-
-  //var years = crossfilter(post);
-
   var brush = d3.svg.brush()
     .x(x)
    // .on("brush", brushed)
     .on("brushend", brushed);
-
 
   // Coercion since CSV is untyped
   post.forEach(function(d) {
@@ -558,18 +450,14 @@ d3.csv("/data/years_count2.csv", function(error, post) {
     d["year"] = d3.time.format("%Y").parse(d["year"]).getFullYear();
   });
 
-
-
     var freqs = d3.layout.stack()(["frequency", "frequency_discontinued"].map(function(type) {
     return post.map(function(d) {
       return {x: d["year"], y: +d[type]};
     });
   }));
 
-
   x.domain(freqs[0].map(function(d) { return d.x; }));
   y.domain([0, d3.max(freqs[freqs.length - 1], function(d) { return d.y0 + d.y; })]);
-
 
   // Axis variables for the bar chart
   x_axis = d3.svg.axis().scale(x).tickValues([1850,1855,1860,1865,1870,1875,1880,1885,1890,1895,1900]).orient("bottom");
@@ -615,10 +503,7 @@ d3.csv("/data/years_count2.csv", function(error, post) {
       .attr("width", x.rangeBand())
       .attr("id", function(d) { return "year-" + d.year; });
 
-
-
   // Draw the brush
-
   var gbrush = barchart.append("g")
       .attr("class", "brush")
       .call(brush)
@@ -627,7 +512,6 @@ d3.csv("/data/years_count2.csv", function(error, post) {
       .attr("height", barchart_height + 7)
       .append("title")
       .text("Drag left or right to brush along this axis.");
-
 
   // ****************************************
   // Callbacks
@@ -648,8 +532,6 @@ d3.csv("/data/years_count2.csv", function(error, post) {
     brushStart = Math.ceil(year_begin);
     brushEnd = Math.floor(year_end);
 
-   
-
   if (document.getElementById("event").checked == true) {
      var extent1 = brush.extent();
      brushEnd = brushStart + 1;
@@ -663,8 +545,6 @@ d3.csv("/data/years_count2.csv", function(error, post) {
     var defaultDis = 1905;  // TODO(jheppler): Convert this to d3.max function to automatically
                             // find the max year date + 1
 
-
-
       // When brushed, depending on option selected call a function to show and style points                 
 
         showAll();
@@ -676,7 +556,6 @@ d3.csv("/data/years_count2.csv", function(error, post) {
 
       colorPoints();
       styleOpacity();
-
 
       // Update percent mapped vs percent unmapped bars
       mappedHeight = (num_mapped / totalShown) * 100;
@@ -696,17 +575,11 @@ d3.csv("/data/years_count2.csv", function(error, post) {
      
       // Fade all years in the histogram not within the brush
       d3.selectAll("rect.bar").style("opacity", function(d, i) { return d.x >= year_begin && d.x <= year_end ? "1" : ".4" });
-
-
   }
 
 });
     
-
-       var arrSize = 4;
-
-
-
+    var arrSize = 4;
 
     //Returns whether or not the post office was alive at a given date
     function isAliveStart(estArr, lifeSpanArr, brushDate) {
@@ -718,8 +591,6 @@ d3.csv("/data/years_count2.csv", function(error, post) {
       return false;
     }
 
-  
-
     function isAliveEnd(estArr, lifeSpanArr, brushDate) {
       for (var j = 0; j < arrSize; j++) {
         if (estArr[j] <= brushDate && brushDate < (estArr[j] + lifeSpanArr[j])) {
@@ -728,8 +599,6 @@ d3.csv("/data/years_count2.csv", function(error, post) {
       }
       return false;
     }
-
-
 
     //If the post office was established during the brush, it existed during the brush.
     //Only post offices that were dead at the start and end of the brush are passed to this function.
@@ -742,28 +611,19 @@ d3.csv("/data/years_count2.csv", function(error, post) {
       return false;
     }
 
-
-
-
-
-
-
     function colorPoints() {
 
     //Colors the points to reflect their category within the brush
     d3.selectAll("circle.points-est").style("fill", function(d, i) { 
-
 
          // Arrays of established dates and subsequent life spans of a single post office. 
         // Note: assumes there are exactly 4 establish dates in the data
         var estArr = [d.est, d.re1, d.re2, d.re3];
         var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
-
         // Bools are true if post office was alive at the time of brushMin and brushMax
         var startAlive = false;
-        var endAlive = false;
-           
+        var endAlive = false;           
 
         // Determine whether or not a post is alive at the start and end of brush
         startAlive = isAliveStart(estArr, lifespanArr, brushStart);
@@ -788,7 +648,6 @@ d3.csv("/data/years_count2.csv", function(error, post) {
     });
 
   }
-
 
   function styleOpacity() {
 
@@ -839,10 +698,6 @@ d3.csv("/data/years_count2.csv", function(error, post) {
     });
   }
 
-
-
-
-
   function showEst() {
   
         d3.selectAll("g.points-est").transition().duration(500).style("opacity", function(d) {
@@ -863,13 +718,9 @@ d3.csv("/data/years_count2.csv", function(error, post) {
 
   };
 
-
-
-
 function showDis() {
 
     d3.selectAll("g.points-est").transition().duration(500).style("opacity", function(d) {
-
 
         var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
 
@@ -886,16 +737,12 @@ function showDis() {
 
 };
 
-
-
-
 function showAll() {
 
   totalShown = 0;
   num_mapped = 0;
 
   d3.selectAll("g.points-est").style("display", function(d) { 
-  
    
         var estArr = [d.est, d.re1, d.re2, d.re3];
         var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
@@ -903,7 +750,6 @@ function showAll() {
         // Bools are true if post office was alive at the time of brushMin and brushMax
         var startAlive = false;
         var endAlive = false;
-           
 
         // Determine whether or not a post is alive at the start and end of brush
         startAlive = isAliveStart(estArr, lifespanArr, brushStart);
@@ -948,17 +794,9 @@ function showAll() {
           //d3.select(this).classed("shown", false);
         return "none";
 
-      
     });
 
 };
-
-
-
-
-/*path = d3.geo.path()
-    .projection(proj)
-    .pointRadius(1.5);*/
 
 // Printing the map
 
@@ -966,10 +804,6 @@ svg.append("path")
     .datum(graticule.outline)
     .attr("class", "background")
     .attr("d", path);
-
-
-
-
 
 function reproject(newProjection) {
   console.log("reprojecting");
@@ -979,15 +813,10 @@ d3.selectAll("g.points-est").transition().duration(500).attr("transform", functi
 d3.selectAll("path.boundary").transition().duration(500).attr("d",path);
 }
 
-
-
-
 function showRegular() {
   document.getElementById("regular").checked = true;
-  document.getElementById("tab3").style.zIndex ="-3";
-   document.getElementById("tab3").style.background="#f7f7f7"
   document.getElementById("tab2").style.zIndex ="-5";
-   document.getElementById("tab2").style.background="#F5F1DE"
+   document.getElementById("tab2").style.background="#f7f7f7"
   document.getElementById("tab1").style.zIndex ="-4";
    document.getElementById("tab1").style.background="#F5F1DE"
   showAll();
@@ -1014,8 +843,6 @@ function showRegular() {
 
 function showSnapshot() {
   document.getElementById("snapshot").checked = true;
-  document.getElementById("tab3").style.zIndex ="-5";
-  document.getElementById("tab3").style.background="#F5F1DE";
   document.getElementById("tab2").style.zIndex ="-4";
   document.getElementById("tab2").style.background="#F5F1DE";
   document.getElementById("tab1").style.zIndex ="-3";
@@ -1040,24 +867,7 @@ function showSnapshot() {
   d3.select("#keyLabel4").text("Shorter Lifespan");
 }
 
-function showEvent() {
-  document.getElementById("event").checked = true;
-  document.getElementById("tab3").style.zIndex ="-4";
-  document.getElementById("tab3").style.background="#F5F1DE"
-  document.getElementById("tab2").style.zIndex ="-3";
-  document.getElementById("tab2").style.background="#f7f7f7"
-  document.getElementById("tab1").style.zIndex ="-4";
-  document.getElementById("tab1").style.background="#F5F1DE"
-
-  //d3.select("barchart").selectAll("rect.brush.extent").transition().duration(750).style("fill-opacity", 0);
-  //d3.select("barchart").select("gbrush").brush.clear();
-
-  d3.select(".gbrush.brush.extent").attr("pointer-events", "none");
-
-}
-
 function resetMap() {
-
 
   var newProjection = d3.geo.azimuthalEqualArea()
     .translate([680, 380])
@@ -1067,12 +877,9 @@ function resetMap() {
 
     document.getElementById("mapView").checked = true;
 
-
   reproject(newProjection);
 
 }
-
-
 </script>
 
 <br></br>
@@ -1086,14 +893,7 @@ function resetMap() {
   </form>
 </div>
 
-
-
-
-<!--<div id="mapWindow"></div>
-
-<br></br>
-
-<div id="histogram"></div>-->
+<div id="information">
 
 <div id="selections">
    <h4 display="inline">Offices: </h4>
@@ -1140,20 +940,7 @@ function resetMap() {
 
 <p>The visualizations above (built with <a href="http://d3js.org">D3</a>) plot the opening, closing, and in some cases the re-opening and re-closing, of nearly 1,500 post offices in Oregon between 1847 and 1902. Click and drag on the bar chart to filter the post offices. The colored points indicate whether a post office was opened, existed, or closed during that time period. The table below provides details on demand.</p>
 
-<!-- <p>The <span style="color: red;">Red</span> points blah blah blah, the <span style="color: blue;">Blue</span> points blah blah blah.... Hover over points on the map to view more information about that post office.</p>
-
-<p>Some questions to consider: What happens <a href="">year-by-year</a>? Do post offices react to national events like the <a href="">Civil War</a>? Are there unique groupings of post offices based on <a href="">historical events in Oregon?</a> Are there patterns to <a href="">closed</a> or <a href="">opened</a> post offices?</p> -->
-
-
-<!-- TODO(jheppler): For the future: be able to click on a time-framed event and create the brush event for a given period of time. -->
-<!-- <div id="nav">
-    <ul>
-        <li><a href="#">Single Year</a></li>
-        <li><a href="#">Civil War</a></li>
-        <li><a href="#">Western Expansion</a></li>
-        <li><a href="#">Gilded Age</a></li>
-    </ul>
-</div> -->
+</div>
 
 
 
