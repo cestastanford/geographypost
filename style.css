@@ -1,7 +1,7 @@
 body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: rgb(51, 51, 51);
-  background-color: #f0f0f0; /*#F1F6F8;*/
+  background-color: #677279; /*#f0f0f0 #F1F6F8;*/
   text-rendering: optimizeLegibility;
   margin: 0;
   width: 1060px;
@@ -79,10 +79,10 @@ footer {
 
 #tab1 {
   width: 200px;
-  height: 100px;
+  height: 35px;
   position: absolute;
-  left: 40px;
-  top: 126px;
+  left: 600px;
+  top: 70px;
   box-shadow: 0px 5px 10px #888888;
   z-index: -3;
   border-radius: 15px;
@@ -92,10 +92,10 @@ footer {
 }
 #tab2 {
   width: 200px;
-  height: 100px;
+  height: 35px;
   position: absolute;
-  left: 230px;
-  top: 126px;
+  left: 815px;
+  top: 70px;
   box-shadow: 0px 5px 10px #888888;
   z-index: -4;
   border-radius: 15px;
@@ -106,10 +106,10 @@ footer {
 
 #tab3 {
   width: 200px;
-  height: 100px;
+  height: 35px;
   position: absolute;
-  left: 420px;
-  top: 126px;
+  left: 1030px;
+  top: 70px;
   box-shadow: 0px 5px 10px #888888;
   z-index: -5;
   border-radius: 15px;
@@ -167,13 +167,20 @@ footer {
   pointer-events: all;
   display: box;
   position: absolute;
-  top: 650px;
+  top: 550px;
   left: 75px;
 }
 
 #selections {
-  display: inline-block;
+  display: box;
   pointer-events: all;
+  position: absolute;
+  top: 310px;
+  left: 40px;
+}
+
+#selections h3 {
+  height: 15px;
 }
 
 #mapSelections {
@@ -188,9 +195,6 @@ footer {
   z-index: -1;
 }
 
-.toggles {
-  display: inline;
-}
 
 .arc {
   fill: none;
@@ -201,7 +205,7 @@ footer {
 /* Map Styles */
 
 #legendBox {
-  fill: beige;
+  fill: lightgrey;
   opacity: .8;
   stroke: darkgrey;
   stroke-width: 2px;
@@ -211,7 +215,7 @@ footer {
 }
 
 .background {
-      fill: #a4bac7;
+      fill: #677279;
       box-shadow: 5px 5px 10px #888888;
       pointer-events: all;
 }
@@ -314,7 +318,8 @@ footer {
   display: box;
   visibility: visible;
   position: relative;
-  top: -185px;
+  top: -255px;
+ /* background: grey;*/
 }
 
 .chartButton {
@@ -323,6 +328,15 @@ footer {
   stroke: #888;
   stroke-width: 2px;
   box-shadow: 5px 5px 10px #888888 inset;
+}
+
+.chartLegend {
+  text-anchor: left;
+  stroke-width: .25;
+  stroke: black;
+  display: box;
+  background-color: gainsboro; 
+  position: relative;
 }
 
 .axis path,
@@ -345,10 +359,12 @@ footer {
 
 .bar-est {
   fill: steelblue;
+  pointer-events: visible;
 }
 
 .bar-dis {
   fill: indianred;
+  pointer-events: visible;
 }
 
 
@@ -375,6 +391,39 @@ footer {
   stroke: #666;
 }*/
 
+#singleYearLabel {
+  font-size: 10px;
+  display: box;
+  position: absolute;
+  top: 725px;
+  left: 56px;
+}
+
+#forward {
+  position: absolute;
+  top: 750px;
+  left: 100px;
+  pointer-events: all;
+  z-index: 40;
+}
+
+#back {
+  position: absolute;
+  top: 750px;
+  left: 60px;
+  pointer-events:all;
+  z-index: 40;
+}
+
+#returnBrush {
+  pointer-events: visible;
+  position: absolute;
+  top: 750px;
+  left: 140px;
+  z-index: 40;
+}
+
+
 /* Header Styles */
 
 #info {
@@ -387,36 +436,77 @@ footer {
     font: normal 400 58px/1.6 'Yanone Kaffeesatz', sans-serif;
     letter-spacing: 1px;
     /*text-transform: uppercase;*/
-    padding: 0;
-    margin: 0;
+    padding: 10px;
+    margin: 10px;
     text-rendering: optimizeLegibility;
+    line-height: 25px;
+}
+
+#info h3 {
+  font:'Yanone Kaffeesatz', sans-serif;
+  text-rendering: optimizeLegibility;
+  padding: 10px;
+  margin: 10px;
 }
 
 #info p {
-    padding: 0;
-    margin: 0;
+    padding: 10;
+    margin: 10;
+}
+
+#aboutButton {
+  height: 30px;
+  width: 140px;
+  position: absolute;
+  top: 600px;
+  left: 40px;
+  text-align: center;
+  background-color: beige;
+  border-radius: 5px;
+  pointer-events: all;
+}
+
+#aboutLabel {
+  display: table-cell;
+  line-height: 30px;
+  width: 140px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+#aboutText {
+  float: middle;
+  position: relative;
+  width: 700px;
+  vertical-align: middle;
+  padding: 20px;
+  top: -850px;
+  left: 235px;
+  background-color: beige;
+  border: 1px solid black;
+  z-index: 50;
+  pointer-events: visible;
+  box-shadow: 5px 5px 10px #888888;
 }
 
 #about {
     margin: 0;
-    text-align: right;
+    text-align: left;
     text-transform: none;
     letter-spacing: 1px;
     font-size: 0.75em;
-    line-height: 2.333em;
-    line-height: 3.5em;
+    line-height: 2px;
   }
-  #about:before {
+  #about:after {
     display: block;
     content: "";
     height: 0;
     border-top: 1px solid rgba(60, 60, 60, 0.25);
-    border-bottom: 1px solid #fff;
   }
   #about ul {
     list-style: none;
-    margin: 0;
-    padding: 0;
+    margin: 10;
+    padding: 10;
   }
   #about ul li {
     display: inline;
@@ -426,9 +516,9 @@ footer {
     content: " · ";
     padding: 0 4px;
   }
-  #about ul li a {
+  /*#about ul li a {
     text-decoration: underline;
-  }
+  }*/
 
   span.sc {
     text-transform: uppercase;
