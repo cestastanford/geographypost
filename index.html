@@ -242,6 +242,7 @@ function ready(error, us, post) {
     .scaleExtent([.5, 8.5])
     .on("zoom", zoomed);
 
+   var pathsG = svg.append("g");
    var features = svg.append("g"); 
 
    pathsG.append("path")
