@@ -1,11 +1,10 @@
 body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Lato', "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: rgb(51, 51, 51);
   background-color: #677279; /*#f0f0f0 #F1F6F8;*/
   text-rendering: optimizeLegibility;
   margin: 0;
   width: 1060px;
-  min-height: 1000px;
   pointer-events: none;
   /*z-index: -20;*/
 }
@@ -80,52 +79,26 @@ footer {
 }*/
 
 #tab1 {
-  width: 200px;
-  height: 35px;
   position: absolute;
-  left: 600px;
+  left: 755px;
   top: 70px;
-  box-shadow: 0px 5px 10px #888888;
-  z-index: -3;
-  border-radius: 15px;
-  background-color: #f7f7f7;
   pointer-events: all;
  
 }
 #tab2 {
-  width: 200px;
-  height: 35px;
   position: absolute;
-  left: 815px;
+  left: 880px;
   top: 70px;
-  box-shadow: 0px 5px 10px #888888;
-  z-index: -4;
-  border-radius: 15px;
-  background-color: #F5F1DE;
   pointer-events:all;
  
 }
 
 #tab3 {
-  width: 200px;
-  height: 35px;
   position: absolute;
-  left: 1030px;
+  left: 990px;
   top: 70px;
-  box-shadow: 0px 5px 10px #888888;
-  z-index: -5;
-  border-radius: 15px;
-  background-color: #F5F1DE;
   pointer-events: all;
-
 }
-
-.tabLabel {
-  margin: 5px;
-  text-align: center;
-  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-}
-
 
 .svg {
   position: absolute;
@@ -169,15 +142,31 @@ footer {
   pointer-events: all;
   display: box;
   position: absolute;
-  top: 550px;
-  left: 75px;
+  top: 585px;
+  left: 65px;
+}
+
+#zoom_in {
+  pointer-events: all;
+  display: box;
+  position: absolute;
+  top: 220px;
+  left: 1215px;
+}
+
+#zoom_out {
+  pointer-events: all;
+  display: box;
+  position: absolute;
+  top: 220px;
+  left: 1250px;
 }
 
 #selections {
   display: box;
   pointer-events: all;
   position: absolute;
-  top: 310px;
+  top: 355px;
   left: 40px;
 }
 
@@ -196,7 +185,6 @@ footer {
   pointer-events: fill;
   z-index: -1;
 }
-
 
 .arc {
   fill: none;
@@ -229,15 +217,15 @@ footer {
 }
 
 .land {
-      fill: #E3DAC9; /*#E9D6B3;*/
-      stroke: #766951;
+      fill: #727E86; /*E3DAC9; /*#E9D6B3;*/
+      stroke: #727e86;
       fill-opacity: .7;
       pointer-events: visible;
 }
 
 .boundary {
       fill: none;
-      stroke: #a5967e;
+      stroke: #677279;
       pointer-events: visible;
 }
 
@@ -358,18 +346,6 @@ footer {
   font-color: grey;
 }
 
-
-.bar-est {
-  fill: steelblue;
-  pointer-events: visible;
-}
-
-.bar-dis {
-  fill: indianred;
-  pointer-events: visible;
-}
-
-
 .grid .tick {
     stroke: lightgrey;
     opacity: 0.7;
@@ -377,8 +353,6 @@ footer {
 .grid path {
       stroke-width: 0;
 }
-
-
 
 .brush .extent {
   stroke: #fff;
@@ -485,11 +459,11 @@ footer {
   padding: 20px;
   top: -850px;
   left: 235px;
-  background-color: beige;
+  background-color: #727E86;
   border: 1px solid black;
   z-index: 50;
   pointer-events: visible;
-  box-shadow: 5px 5px 10px #888888;
+  box-shadow: 5px 5px 10px #3C4246;
 }
 
 #about {
@@ -533,10 +507,10 @@ footer {
   }
 
       a:link {
-          color: steelblue;
+          color: #d2c5b3;
       }
       a:visited {
-          color: steelblue;
+          color: #d2c5b3;
       }
       a:hover, a:active {
           color: #005580;
