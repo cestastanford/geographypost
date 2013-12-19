@@ -24,3 +24,18 @@ Three disclaimers are in order. First, the map is missing a significant amount o
 The map uses data from Richard Helbock, United States Post Offices, Volumes 1-8. Available for purchase at: [http://www.la-posta.com/images/ebooks.htm](http://geonames.usgs.gov/")</a>. We extend our gratitude to Richard Helbock for his incredible work to compile this data.
 
 This visualization was built using [D3.js](http://d3js.org) by Jocelyn Hickox and [Jason Heppler](http://jasonheppler.org) as part of the [Geography of the Post](www.stanford.edu/group/spatialhistory/cgi-bin/site/project.php?id=1059) project at Stanford's [Center for Spatial and Textual Analysis](http://cesta.stanford.edu). Special thanks to Tara Balakrishnan for her initial work and to Elijah Meeks for his technical help.</p>
+
+Installation
+------------
+
+To run this locally pull down a local copy and use Python's SimpleHTTPServer to 
+run the visualization.
+
+1. Open the Terminal (on Mac), under `Applications > Utilities > Terminal`.
+2. In the terminal, navigate to directory to where you want the files to be. For example, `cd ~/Desktop`.
+3. Now clone the files locally: `git clone https://github.com/stanford-history/geographypost.git`. 
+   This will copy the files to a new directory called `geographyofthepost`.
+4. Change your directory to the `geographyofthepost`: `cd geographyofthepost/`.
+5. In this directory, run `python -m SimpleHTTPServer 8888 &`. Now visit 
+   [http://localhost:8888/](http://localhost:8888/). More information about 
+   running D3 locally can be found in the [documentation](https://github.com/mbostock/d3/wiki#installing).
