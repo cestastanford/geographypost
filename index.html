@@ -502,7 +502,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
     
     var brush = d3.svg.brush()
         .x(x)
-        // .extent([.3, .5])
+        .extent([340, 500])
         .on("brush", brushmove);
 
     var freqs = d3.layout.stack()(["frequency", "frequency_discontinued"].map(function (type) {
@@ -655,7 +655,7 @@ function isAliveStart(estArr, lifeSpanArr, brushDate) {
         }
     }
     return false;
-}
+};
 
 function isAliveEnd(estArr, lifeSpanArr, brushDate) {
     for (var j = 0; j < arrSize; j++) {
@@ -664,7 +664,7 @@ function isAliveEnd(estArr, lifeSpanArr, brushDate) {
         }
     }
     return false;
-}
+};
 
 //If the post office was established during the brush, it existed during the brush.
 //Only post offices that were dead at the start and end of the brush are passed to this function.
@@ -675,7 +675,7 @@ function isDuring(est, brushMin, brushMax) {
         }
     }
     return false;
-}
+};
 
 function colorPoints() {
 
@@ -712,8 +712,7 @@ function colorPoints() {
         }
 
     });
-
-}
+};
 
 function styleOpacity() {
 
@@ -758,7 +757,7 @@ function styleOpacity() {
         }
 
     });
-}
+};
 
 function showEst() {
     d3.selectAll("g.points-est").transition().duration(500).style("opacity", function (d) {
@@ -806,7 +805,7 @@ function showEstAndDis() {
         }
         return fadeOpacity;
     });
-}
+};
 
 function showAll() {
     totalShown = 0;
@@ -891,8 +890,7 @@ function filterPoints() {
     } else {
         showAll();
     }
-
-}
+};
 
 // For use in year-by-year: show only offices that were established or discontinued during that year
 // TODO(jheppler): Change this so it un-draws the points rather than hides them
@@ -929,7 +927,7 @@ function showEstDis() {
         }
 
     });
-}
+};
 
 // Reprojecting the map
 
@@ -941,7 +939,7 @@ function reproject(newProjection) {
         return "translate(" + newProjection([d.long, d.lat]) + ")";
     });
     d3.selectAll("path.boundary").transition().duration(500).attr("d", path);
-}
+};
 
 function showRegular() {
     fadeOpacity = .1;
@@ -969,7 +967,7 @@ function showRegular() {
     d3.select("#keyLabel2").style("display", "block");
     d3.select("#keyLabel3").style("display", "block");
     d3.select("#keyLabel4").text("Estab. and Closed");
-}
+};
 
 function showSnapshot() {
     fadeOpacity = 0;
@@ -994,7 +992,7 @@ function showSnapshot() {
     document.getElementById("keyCircle4").style.fill = autoColor;
     document.getElementById("keyCircle4").style.opacity = .25;
     d3.select("#keyLabel4").text("Shorter Lifespan");
-}
+};
 
 function showEvent() {
     document.getElementById("event").checked = true;
@@ -1006,8 +1004,7 @@ function showEvent() {
     document.getElementById("tab1").style.background = "#F5F1DE"
 
     d3.select(".gbrush.brush.extent").attr("pointer-events", "none");
-
-}
+};
 
 // When called, reprojects the map to the original projection
 function resetMap() {
@@ -1042,7 +1039,7 @@ function showAbout() {
     } else {
         document.getElementById("aboutText").style.display = "none";
     }
-}
+};
 
 // If brush is active, highlights first possible year. Otherwise, moves the display forward a year.
 function yearForward() {
@@ -1082,7 +1079,7 @@ function yearForward() {
 
     // Update start and end years in upper right-hand corner of the map
     d3.select("#brushYears").text(currYear);
-}
+};
 
 // If brush is active, highlights first possible year. Otherwise, moves the display forward a year.
 function yearBack() {
