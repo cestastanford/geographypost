@@ -5,9 +5,9 @@
 <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet' type='text/css'>
 <link href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,300' rel='stylesheet' type='text/css'>
 
-<link href="style.css" rel="stylesheet" type="text/css">
-<link href="tipsy.css" rel="stylesheet" type="text/css">
-<link href="bootstrap.css" rel="stylesheet" type="text/css">
+<link href="css/style.css" rel="stylesheet" type="text/css">
+<link href="css/tipsy.css" rel="stylesheet" type="text/css">
+<link href="css/bootstrap.css" rel="stylesheet" type="text/css">
 
 <script src="lib/d3.v3.min.js" charset="utf-8"></script>
 <script src="lib/queue.v1.min.js" charset="utf-8"></script>
@@ -106,12 +106,12 @@ var legend_x = 25,
     mapped_y = legend_y + legend_height - 90;
 
 // Colors
-var aliveThroughout = "#B3C6D2"; //"#2166AC"; //Teal                // active throughout
-var diesDuring = "#31366C"; //"#B2182B"; //Pink                     // closed
-var bornDuring = "#D8A782" //"forestgreen";//"#52891A"; //Green     // established
-var aliveDuring = "#904424" //"darkviolet";//"#D88531"; //Orange    // est and closed
-var autoColor = "#D2C5B3"; // "#c00"; //"#356581"; //red
-var currYearColor = "#C5C59E"; //"red";
+var aliveThroughout = "#94B2C5"; //"#B3C6D2"; // active throughout
+var diesDuring =  "#866564"; //"#31366C"; // closed
+var bornDuring =  "#464635"; //"#D8A782"  // established
+var aliveDuring =  "#C5C59E"; //"#904424" // est and closed
+var autoColor = "#D2C5B3";
+var currYearColor = "#C5C59E";
 
 // Brush Dates
 var brushStart = 1849; // TODO(jheppler): find `floor` date automatically
@@ -216,7 +216,9 @@ function ready(error, us, post) {
         .append("use")
         .attr("xlink:href", "#land");
 
-    svg.call(zoom);
+    svg
+      .call(zoom)
+      .on("mousewheel.zoom", null); // turn off mousewheel scrolling -- use click to zoom
 
     // Zoom function
     function zoomed() {
@@ -408,7 +410,7 @@ function ready(error, us, post) {
     // Printing all points
     postoffices = pointsDrawnToG.selectAll("g.points-est")
         .data(post)
-        .enter().append("g")
+      .enter().append("g")
         .attr("class", "points-est")
         .style("fill", "midnightblue")
         .attr("transform", function (d) {
@@ -467,15 +469,15 @@ function ready(error, us, post) {
             }
 
         });
-
     }
 }
+
 
 //********************************************
 // Graphing the year counts as a bar chart
 //********************************************
 
-// Prepare the canvas
+// Prepare the barchart canvas
 var barchart = d3.select("body").append("svg")
     .attr("class", "barchart")
     .attr("width", $(document).width())
@@ -488,6 +490,7 @@ var barchart = d3.select("body").append("svg")
 var yDom = [0, 0];
 var xDom = [0, 0];
 
+// Plot the data
 d3.csv("data/years_count2.csv", function (error, post) {
 
     // Coercion since CSV is untyped
@@ -499,7 +502,8 @@ d3.csv("data/years_count2.csv", function (error, post) {
     
     var brush = d3.svg.brush()
         .x(x)
-        .on("brushend", brushed);
+        // .extent([.3, .5])
+        .on("brush", brushmove);
 
     var freqs = d3.layout.stack()(["frequency", "frequency_discontinued"].map(function (type) {
         return post.map(function (d) {
@@ -530,19 +534,18 @@ d3.csv("data/years_count2.csv", function (error, post) {
         .call(x_axis)
         .attr("transform", "translate(0," + barchart_height + ")");
 
-    // why is this here?
-    var w = barchart_width - barchart_margin.right - barchart_margin.left;
-
     // y axis
     barchart.append("g")
         .attr("class", "y axis")
         .call(y_axis)
         .attr("transform", "translate(" + w + ",0)");
-
+    
+    var w = barchart_width - barchart_margin.right - barchart_margin.left;
+    
     // Add a group for each cause.
     var freq = barchart.selectAll("g.freq")
         .data(freqs)
-        .enter().append("g")
+      .enter().append("g")
         .attr("class", "freq")
         .style("fill", function (d, i) {
             return z(i);
@@ -552,7 +555,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
     // Add a rect for each date.
     rect = freq.selectAll("rect")
         .data(Object)
-        .enter().append("rect")
+      .enter().append("rect")
         .attr("class", "bar")
         .attr("x", function (d) {
             return x(d.x);
@@ -565,26 +568,33 @@ d3.csv("data/years_count2.csv", function (error, post) {
         })
         .attr("width", x.rangeBand())
         .attr("id", function (d) {
-            return "year-" + d.year;
+            return d["year"];
         });
 
     // Draw the brush
-    var gbrush = barchart.append("g")
-        .attr("class", "brush")
-        .call(brush)
-        .selectAll("rect")
-        .attr("y", -6)
-        .attr("height", barchart_height + 7)
-//        .append("title")
-//        .text("Drag left or right to brush along this axis.")
-        .on("brush", brushed);
+    var arc = d3.svg.arc()
+      .outerRadius(barchart_height / 5)
+      .startAngle(0)
+      .endAngle(function(d, i) { return i ? -Math.PI : Math.PI; });
+
+    var brushg = barchart.append("g")
+      .attr("class", "brush")
+      .call(brush);
+
+    brushg.selectAll(".resize").append("path")
+        .attr("transform", "translate(0," +  barchart_height / 2 + ")")
+        .attr("d", arc);
+
+    brushg.selectAll("rect")
+        .attr("height", barchart_height);
+
+    brushmove();
 
     // ****************************************
     // Barchart Callbacks
     // ****************************************
 
-    function brushed() {
-
+    function brushmove() {
         b = brush.empty() ? [0, 2000] : brush.extent();
         newscale = d3.scale.linear();
         newscale.domain(x.range()).range(x.domain());
@@ -623,7 +633,6 @@ d3.csv("data/years_count2.csv", function (error, post) {
 
         // Update start and end years in upper right-hand corner of the map
         d3.select("#brushYears").text(brushStart + " - " + brushEnd);
-
 
         // Fade all years in the histogram not within the brush
         d3.selectAll("rect.bar").style("opacity", function (d, i) {
@@ -764,7 +773,6 @@ function showEst() {
         return fadeOpacity;
     });
     return fadeOpacity;
-
 };
 
 function showDis() {
@@ -798,7 +806,6 @@ function showEstAndDis() {
         }
         return fadeOpacity;
     });
-
 }
 
 function showAll() {
@@ -872,7 +879,6 @@ function showAll() {
     });
 };
 
-
 // When a filter checkbox is selected or unselected, update the points shown to reflect current filter
 function filterPoints() {
 
@@ -888,8 +894,8 @@ function filterPoints() {
 
 }
 
-
 // For use in year-by-year: show only offices that were established or discontinued during that year
+// TODO(jheppler): Change this so it un-draws the points rather than hides them
 function showEstDis() {
 
     d3.selectAll("g.points-est").style("display", function (d) {
@@ -917,10 +923,8 @@ function showEstDis() {
         for (var i = 0; i < arrSize; i++) {
             if (estArr[i] == currYear) {
                 d3.select(this).style("opacity", .8);
-                return "darkgreen"
             } else if ((estArr[i] + lifespanArr[i]) == currYear) {
                 d3.select(this).style("opacity", .8);
-                return "darkred";
             }
         }
 
@@ -1008,15 +1012,26 @@ function showEvent() {
 // When called, reprojects the map to the original projection
 function resetMap() {
 
-    var newProjection = d3.geo.azimuthalEqualArea()
-        .translate([680, 380])
-        .rotate([118.9, 0])
-        .center([11, 34.5])
-        .scale(770 * 2);
+    // var newProjection = d3.geo.azimuthalEqualArea()
+    //     .translate([680, 380])
+    //     .rotate([118.9, 0])
+    //     .center([11, 34.5])
+    //     .scale(770 * 2);
 
-    document.getElementById("mapView").checked = true;
+    // reproject(newProjection);
 
-    reproject(newProjection);
+  // clearTimeout(refreshTimer);
+  // refreshTimer = setTimeout('refreshMap()', 100);
+  // refreshSet++;
+
+  // carto.selectAll(".hirez").style("display","none");
+  // carto.selectAll(".adminUnits").style("display","none");
+  // carto.selectAll(".placeopacfilter").style("display","none");
+  // carto.selectAll(".lowrez").attr("d", path).style("display","block");
+  
+  // if (!d3.selectAll("g.arbPlace").empty()) {
+  //   d3.selectAll("g.arbPlace").attr("transform", function (d) {return translateProjection(d.coords)});
+  // }
 
 }
 
@@ -1027,7 +1042,6 @@ function showAbout() {
     } else {
         document.getElementById("aboutText").style.display = "none";
     }
-
 }
 
 // If brush is active, highlights first possible year. Otherwise, moves the display forward a year.
@@ -1093,16 +1107,18 @@ function yearBack() {
 
     // Update start and end years in upper right-hand corner of the map
     d3.select("#brushYears").text(currYear);
-
 }
 
 function returnBrush() {
-    currYear = 0;
+    // currYear = 0;
     document.getElementById("returnBrush").style.visibility = "hidden";
     d3.selectAll("rect.bar").style("fill", function () {
         return;
     });
     d3.selectAll(".brush").style("display", "block");
+    brushStart = 1849;
+    brushEnd = 1905;
+    d3.select("#brushYears").text(brushStart + " - " + brushEnd);
 }
 
 </script>
@@ -1131,8 +1147,8 @@ function returnBrush() {
 </div>
 
 <div class="btn-group" style="margin: 9px 0 5px;">
-    <!--<input type="button" class="btn btn-default" id="zoom_in" value="+" onclick="zoomin()"/>
-    <input type="button" class="btn btn-default"id="zoom_out" value="-" onclick="zoomout()"/>-->
+<!--     <input type="button" class="btn btn-default" id="zoom_in" value="+" onclick="zoomin()"/>
+    <input type="button" class="btn btn-default"id="zoom_out" value="-" onclick="zoomout()"/> -->
     <input type="button" class="btn btn-default" id="returnBrush" value="Return" style="visibility:hidden" onclick="returnBrush()"/>
 </div>
 

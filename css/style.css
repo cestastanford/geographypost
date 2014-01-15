@@ -354,6 +354,13 @@ footer {
       stroke-width: 0;
 }
 
+.resize path {
+  fill: #666;
+  fill-opacity: .8;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
 .brush .extent {
   stroke: #fff;
   stroke-opacity: .6;
@@ -362,10 +369,6 @@ footer {
   shape-rendering: crispEdges;
 }
 
-/*.brush .resize path {
-  fill: #eee;
-  stroke: #666;
-}*/
 
 #singleYearLabel {
   font-size: 10px;
