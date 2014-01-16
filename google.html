@@ -98,7 +98,7 @@ var y = d3.scale.linear().range([barchart_height, 0]);
 queue()
   .defer(d3.json, "/data/states.json")
   .defer(d3.json, "/data/us.json")
-  .defer(d3.csv, "/data/blevins.csv")
+  .defer(d3.csv, "/data/post_data.csv")
   .await(this.buildGridMap);
 
 // Create the Google Map
@@ -116,7 +116,7 @@ this.locationsMap = new google.maps.Map(d3.select("#map").node(), {
 });
 
 // Load the post office data. When the data comes back, create an overlay.
-d3.csv("/data/blevins.csv", function(data) {
+d3.csv("/data/post_data.csv", function(data) {
   var overlay = new google.maps.OverlayView();
 
   // Add the container when the overlay is added to the map.
