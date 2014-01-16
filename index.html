@@ -106,17 +106,17 @@ var legend_x = 25,
     mapped_y = legend_y + legend_height - 90;
 
 // Colors
-var aliveThroughout = "#94B2C5"; //"#B3C6D2"; // active throughout
-var diesDuring =  "#866564"; //"#31366C"; // closed
-var bornDuring =  "#464635"; //"#D8A782"  // established
-var aliveDuring =  "#C5C59E"; //"#904424" // est and closed
+var aliveThroughout = "#B3C6D2"; // active throughout
+var diesDuring =  "#31366C"; // closed
+var bornDuring =  "#D8A782"  // established
+var aliveDuring =  "#904424" // est and closed
 var autoColor = "#D2C5B3";
 var currYearColor = "#C5C59E";
 
 // Brush Dates
 var brushStart = 1849; // TODO(jheppler): find `floor` date automatically
 var brushEnd = 1903; // TODO(jheppler): find `ceiling` date automatically (end year + 1)
-var defaultDis = 1904;
+var defaultDis = 1905;
 var currYear = 0;
 var shownOpacity = .9;
 var fadeOpacity = 0;
@@ -140,7 +140,7 @@ var projection = d3.geo.azimuthalEqualArea()
 var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", "700")
-    .attr("class", "mapbox");
+    .attr("class", "mapviz");
 
 var graticule = d3.geo.graticule()
     .extent([
@@ -191,52 +191,32 @@ function ready(error, us, post) {
         .scaleExtent([.8, 8])
         .on("zoom", zoomed);
 
-    var geoFeatures = svg.append("g");
-    var pointsDrawnToG = svg.append("g");
+    var carto = svg.append("g");
+    var postOfficePoints = svg.append("g");
 
-    geoFeatures.append("path")
+    carto.append("path")
         .datum(graticule.outline)
         .attr("class", "background")
         .attr("d", path);
 
-    geoFeatures.append("path")
+    carto.append("path")
         .datum(topojson.feature(us, us.objects.land))
         .attr("class", "land")
         .attr("d", path);
 
-    land = geoFeatures.append("path")
+    land = carto.append("path")
         .datum(topojson.mesh(us, us.objects.states, function (a, b) {
             return a.id !== b.id;
         }))
         .attr("class", "boundary")
         .attr("d", path);
 
-    geoFeatures.append("clipPath")
+    carto.append("clipPath")
         .attr("id", "clip")
         .append("use")
         .attr("xlink:href", "#land");
 
-    svg
-      .call(zoom)
-      .on("mousewheel.zoom", null); // turn off mousewheel scrolling -- use click to zoom
-
-    // Zoom function
-    function zoomed() {
-        pointsDrawnToG.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-        geoFeatures.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-        geoFeatures.select(".boundary").style("stroke-width", 1.5 / d3.event.scale + "px");
-        if (currentZoom != d3.event.scale) {
-            currentZoom = d3.event.scale;
-            svg.selectAll("circle.points-est").attr("r", function () {
-                return 2.5 / d3.event.scale + "px"
-            });
-        }
-        labelSize = 16 / d3.event.scale;
-        d3.select(".map-tooltip").style("font-size", 16 / d3.event.scale + "px");
-    }
-
     // Make the legend
-
     var legend = svg.append("g")
         .attr("class", "legend");
 
@@ -359,10 +339,10 @@ function ready(error, us, post) {
 
     // Post office toggles
     // Chart showing the percentage of mapped to unmapped data points within the given brush
-    var mapped = legend.append("g");
+    var mappedChart = legend.append("g");
 
     // Mapped bar
-    mapped.append("rect")
+    mappedChart.append("rect")
         .attr("id", "onMap")
         .attr("x", legend_x + 40)
         .attr("y", mapped_y - mappedHeight)
@@ -370,14 +350,14 @@ function ready(error, us, post) {
         .attr("height", mappedHeight);
 
     // "Mapped" label
-    mapped.append("text")
+    mappedChart.append("text")
         .text("Mapped")
         .attr("class", "mapText")
         .attr("y", mapped_y + 15)
         .attr("x", legend_x + 25);
 
     // Mapped percentage label
-    mapped.append("text")
+    mappedChart.append("text")
         .text(mappedHeight + "%")
         .attr("class", "percentLabel")
         .attr("id", "mappedPercent")
@@ -385,7 +365,7 @@ function ready(error, us, post) {
         .attr("x", legend_x + 41);
 
     // Unmapped bar
-    mapped.append("rect")
+    mappedChart.append("rect")
         .attr("id", "notOnMap")
         .attr("x", legend_x + 95)
         .attr("y", mapped_y - unmappedHeight)
@@ -393,7 +373,7 @@ function ready(error, us, post) {
         .attr("height", unmappedHeight);
 
     // Unmapped percentage label
-    mapped.append("text")
+    mappedChart.append("text")
         .text(unmappedHeight + "%")
         .attr("class", "percentLabel")
         .attr("id", "unmappedPercent")
@@ -401,14 +381,18 @@ function ready(error, us, post) {
         .attr("x", legend_x + 96);
 
     // "Unmapped" label
-    mapped.append("text")
+    mappedChart.append("text")
         .text("Unmapped")
         .attr("class", "mapText")
         .attr("y", mapped_y + 15)
         .attr("x", legend_x + 80);
 
+    svg
+      .call(zoom)
+      .on("mousewheel.zoom", null); // turn off mousewheel scrolling -- use click to zoom
+
     // Printing all points
-    postoffices = pointsDrawnToG.selectAll("g.points-est")
+    postoffices = postOfficePoints.selectAll("g.points-est")
         .data(post)
       .enter().append("g")
         .attr("class", "points-est")
@@ -452,6 +436,21 @@ function ready(error, us, post) {
             return "Name: " + d["Name"] + "<br>" + "Established: " + d["Est"] + "<br>" + "Discontinued: " + d["Dis1"];
         }
     });
+
+    // Zoom function
+    function zoomed() {
+        postOfficePoints.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        carto.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        carto.select(".boundary").style("stroke-width", 1.5 / d3.event.scale + "px");
+        if (currentZoom != d3.event.scale) {
+            currentZoom = d3.event.scale;
+            svg.selectAll("circle.points-est").attr("r", function () {
+                return 2.5 / d3.event.scale + "px"
+            });
+        }
+        labelSize = 16 / d3.event.scale;
+        d3.select(".map-tooltip").style("font-size", 16 / d3.event.scale + "px");
+    }
 
     // On hover, show point labels
     function showLabel(d, i) {
@@ -502,7 +501,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
     
     var brush = d3.svg.brush()
         .x(x)
-        .extent([340, 500])
+        // .extent([340, 500])
         .on("brush", brushmove);
 
     var freqs = d3.layout.stack()(["frequency", "frequency_discontinued"].map(function (type) {
@@ -758,50 +757,50 @@ function styleOpacity() {
 };
 
 function showEst() {
-    d3.selectAll("g.points-est").transition().duration(500).style("opacity", function (d) {
+    d3.selectAll("g.points-est").transition().duration(500).style("display", function (d) {
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
 
         for (var i = 0; i < arrSize; i++) {
             if (estArr[i] <= brushEnd && estArr[i] >= brushStart) {
-                return shownOpacity;
+                return "block";
             }
         }
-        return fadeOpacity;
+        return "none";
     });
-    return fadeOpacity;
+    return "none";
 };
 
 function showDis() {
 
-    d3.selectAll("g.points-est").transition().duration(500).style("opacity", function (d) {
+    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {//.style("opacity", function (d) {
 
         var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
 
         for (var i = 0; i < arrSize; i++) {
             if (disArr[i] <= brushEnd && disArr[i] >= brushStart) {
-                return shownOpacity;
+                return "block";
             }
         }
-        return fadeOpacity;
+        return "none";
     });
 };
 
 function showEstAndDis() {
 
-    d3.selectAll("g.points-est").transition().duration(500).style("opacity", function (d) {
+    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {//.style("opacity", function (d) {
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
         var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
 
         for (var i = 0; i < arrSize; i++) {
             if (disArr[i] <= brushEnd && disArr[i] >= brushStart) {
-                return shownOpacity;
+                return "block";
             } else if (estArr[i] <= brushEnd && estArr[i] >= brushStart) {
-                return shownOpacity;
+                return "block";
             }
         }
-        return fadeOpacity;
+        return "none";
     });
 };
 
