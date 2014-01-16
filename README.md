@@ -36,7 +36,7 @@ run the visualization.
 3. Now clone the files locally: `git clone https://github.com/stanford-history/geographypost.git`. 
    This will copy the files to a new directory called `geographyofthepost`.
 4. Change your directory to the `geographyofthepost`: `cd geographyofthepost/`.
-5. In this directory, run `python -m SimpleHTTPServer 8888`. Now visit 
+5. In this directory, run `rake server`. Now visit 
    [http://localhost:8888/](http://localhost:8888/). Turn off the server by 
    hitting `CTRL + C`. More information about 
    running D3 locally can be found in the [documentation](https://github.com/mbostock/d3/wiki#installing).

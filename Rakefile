@@ -13,5 +13,5 @@ end
 
 desc "Run the development server"
 task :server do
-  sh "ruby -run -e httpd . -p 4000"
+  sh "ruby -run -e httpd . -p 8888"
 end 
