@@ -1,7 +1,7 @@
 body {
   font-family: 'Lato', "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: rgb(51, 51, 51);
-  background-color: #677279; /*#f0f0f0 #F1F6F8;*/
+  color: #fff;
+  background-color: #444; /*#f0f0f0 #F1F6F8;*/
   text-rendering: optimizeLegibility;
   margin: 0;
   width: 1060px;
@@ -83,14 +83,14 @@ footer {
   left: 755px;
   top: 70px;
   pointer-events: all;
- 
+
 }
 #tab2 {
   position: absolute;
   left: 880px;
   top: 70px;
   pointer-events:all;
- 
+
 }
 
 #tab3 {
@@ -195,7 +195,7 @@ footer {
 /* Map Styles */
 
 #legendBox {
-  fill: lightgrey;
+  fill: #5D5D5D;
   opacity: .8;
   stroke: darkgrey;
   stroke-width: 2px;
@@ -205,7 +205,7 @@ footer {
 }
 
 .background {
-      fill: #677279;
+      fill: #444;
       box-shadow: 5px 5px 10px #888888;
       pointer-events: all;
 }
@@ -217,15 +217,15 @@ footer {
 }
 
 .land {
-      fill: #727E86; /*E3DAC9; /*#E9D6B3;*/
-      stroke: #727e86;
+      fill: #3C3C3C; /*E3DAC9; /*#E9D6B3;*/
+      stroke: #444;
       fill-opacity: .7;
       pointer-events: visible;
 }
 
 .boundary {
       fill: none;
-      stroke: #677279;
+      stroke: #444;
       pointer-events: visible;
 }
 
@@ -247,7 +247,7 @@ footer {
 }
 
 /*Label shown on hover*/
-.map-tooltip { 
+.map-tooltip {
   background-color: #f99;
   border: 1px solid #808080;
   margin-top: 15px;
@@ -266,14 +266,14 @@ footer {
 .mapText {
   font-size: 12px;
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-  fill: darkslategray;
+  fill: #9C9C9C;
 }
 
 
 .legendText {
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
   font-size: 14px;
-  fill: darkslategray;
+  fill: #fff;
   text-anchor: right;
 }
 
@@ -281,7 +281,7 @@ footer {
 .yearText {
   font-size: 16px;
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-  fill: darkslategray;
+  fill: #fff;
 }
 
 .percentLabel {
@@ -325,15 +325,19 @@ footer {
   stroke-width: .25;
   stroke: black;
   display: box;
-  background-color: gainsboro; 
+  background-color: gainsboro;
   position: relative;
 }
 
 .axis path,
 .axis line {
   fill: none;
-  stroke: #000;
+  stroke: #fff;
   shape-rendering: crispEdges;
+}
+
+.axis text {
+  font-size: 12px;
 }
 
 .x.axis path {
@@ -406,7 +410,7 @@ footer {
 /* Header Styles */
 
 #info {
-    color: #333;
+    color: #fff;
     padding: 20px 0 3px;
     z-index: -10;
     margin-left: 2em;
@@ -492,7 +496,7 @@ footer {
     display: inline;
   }
   #about ul li:not(:first-child):before {
-    color: rgba(60, 60, 60, 0.5);
+    color: #fff;
     content: " · ";
     padding: 0 4px;
   }
@@ -549,4 +553,4 @@ footer {
   #nav ul li a {
     text-decoration: underline;
   }
-  
+

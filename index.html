@@ -83,10 +83,11 @@ var width = 1300, //$(document).width(),
     barchart_height = 180 - barchart_margin.top - barchart_margin.bottom,
     centered,
     barWidth = 25,
-    num_mapped = 50, 
+    num_mapped = 50,
     totalShown = 100,
     mappedHeight = 57,
-    unmappedHeight = 43;
+    unmappedHeight = 43,
+    muckHack = 0;
 
 var z = d3.scale.ordinal().range(["steelblue", "indianred"]);
 currentZoom = -99;
@@ -110,7 +111,7 @@ var aliveThroughout = "#B3C6D2"; // active throughout
 var diesDuring =  "#31366C"; // closed
 var bornDuring =  "#D8A782"  // established
 var aliveDuring =  "#904424" // est and closed
-var autoColor = "#D2C5B3";
+var autoColor = "#A6DCEB";
 var currYearColor = "#C5C59E";
 
 // Brush Dates
@@ -323,7 +324,7 @@ function ready(error, us, post) {
         })
         .attr("r", 5)
         .style("fill", autoColor)
-        .style("opacity", .25);
+        .style("opacity", .5);
 
     key.append("text")
         .attr("class", "legendText")
@@ -335,7 +336,6 @@ function ready(error, us, post) {
             return legend_y + 3 * legend_margin + 10 + key_y
         })
         .text("Shorter Lifespan");
-
 
     // Post office toggles
     // Chart showing the percentage of mapped to unmapped data points within the given brush
@@ -389,7 +389,8 @@ function ready(error, us, post) {
 
     svg
       .call(zoom)
-      .on("mousewheel.zoom", null); // turn off mousewheel scrolling -- use click to zoom
+      .on("mousewheel.zoom", null)
+      .on("wheel.zoom", null);
 
     // Printing all points
     postoffices = postOfficePoints.selectAll("g.points-est")
@@ -398,7 +399,7 @@ function ready(error, us, post) {
         .attr("class", "points-est")
         .style("fill", "midnightblue")
         .attr("transform", function (d) {
-            return "translate(" + projection([d.long, d.lat]) + ")";
+            return "translate(" + projection([d.long, d.lat]) + ")"; //fix
         })
         .on("mouseover", showLabel)
         .on("mouseout", function () {
@@ -409,8 +410,12 @@ function ready(error, us, post) {
                 } else {
                     return z[i]
                 }
-            }); 
+            });
         });
+
+        d3.selectAll("g.points-est").filter(function(d) {return d["long"] == 0 && d["long"] == ""}).remove()
+
+        unMappedPost = post.filter(function(el) {return el["long"] == 0 && el["long"] == ""});
 
     postoffices
         .append("circle")
@@ -498,11 +503,12 @@ d3.csv("data/years_count2.csv", function (error, post) {
         d["frequency_discontinued"] = +d["frequency_discontinued"];
         d["year"] = d3.time.format("%Y").parse(d["year"]).getFullYear();
     });
-    
+
     var brush = d3.svg.brush()
         .x(x)
         // .extent([340, 500])
-        .on("brush", brushmove);
+        .on("brush", brushmove)
+        .on("brushend", brushend);
 
     var freqs = d3.layout.stack()(["frequency", "frequency_discontinued"].map(function (type) {
         return post.map(function (d) {
@@ -531,16 +537,18 @@ d3.csv("data/years_count2.csv", function (error, post) {
     barchart.append("g")
         .attr("class", "x axis")
         .call(x_axis)
+        .style("fill", "#fff")
         .attr("transform", "translate(0," + barchart_height + ")");
 
     // y axis
     barchart.append("g")
         .attr("class", "y axis")
         .call(y_axis)
+        .style("fill", "#fff")
         .attr("transform", "translate(" + w + ",0)");
-    
+
     var w = barchart_width - barchart_margin.right - barchart_margin.left;
-    
+
     // Add a group for each cause.
     var freq = barchart.selectAll("g.freq")
         .data(freqs)
@@ -588,20 +596,20 @@ d3.csv("data/years_count2.csv", function (error, post) {
         .attr("height", barchart_height);
 
     // ****************************************
-    // Barchart Callbacks
+    //            Barchart Callbacks
     // ****************************************
 
     function brushmove() {
         b = brush.empty() ? [0, 2000] : brush.extent();
         newscale = d3.scale.linear();
         newscale.domain(x.range()).range(x.domain());
-        var year_begin = newscale(b[0]);
-        var year_end = newscale(b[1]);
+        var year_begin = newscale(b[0]); // remove?
+        var year_end = newscale(b[1]); // remove?
 
         brushStart = Math.ceil(year_begin);
         brushEnd = Math.floor(year_end);
 
-        // To make math work, set a disestablish date of greater than the maximum 
+        // To make math work, set a disestablish date of greater than the maximum
         // date in the span of years if a post office is never disestablished.
         var defaultDis = 1905;
 
@@ -637,10 +645,19 @@ d3.csv("data/years_count2.csv", function (error, post) {
         });
     }
 
+    function brushend() {
+        if (!d3.event.sourceEvent) return; // only transition after input
+            d3.select(this).transition()
+            .call(brush.extent(brush.extent().map(function(d) { return d3.round(d, 1); })))
+            .call(brush.event);
+    }
+
 });
 
 // ****************************************
 // Post office status functions
+// These indicate one of four categories that a post office can be in during a
+// d3.js brush event.
 // ****************************************
 
 var arrSize = 4;
@@ -694,13 +711,13 @@ function colorPoints() {
 
         if (document.getElementById("regular").checked == true) {
             if (startAlive && endAlive) { //Alive throughout (or at least at start and end)
-                return aliveThroughout; //Teal
+                return aliveThroughout;
             } else if (startAlive && !endAlive) { //Dies during brush
-                return diesDuring; //Red
+                return diesDuring;
             } else if (!startAlive && endAlive) { //Established during brush
-                return bornDuring; //Yellow
+                return bornDuring;
             } else if (isDuring(estArr, brushStart, brushEnd)) { //Est. and dies during brush.
-                return aliveDuring; //Pink
+                return aliveDuring;
             } else {
                 return "black";
             }
@@ -749,7 +766,6 @@ function styleOpacity() {
                     }
                 }
             }
-            var nm = d.name;
             return percentAlive / brushSpan;
         }
 
@@ -812,67 +828,26 @@ function showAll() {
     var totalPoints = 0;
     var totalUnshown = 0;
 
-    d3.selectAll("g.points-est").style("display", function (d) {
+    d3.selectAll("g.points-est").style("opacity", function (d) {
         totalPoints++;
 
-        var estArr = [d.est, d.re1, d.re2, d.re3];
-        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
-
-        // Bools are true if post office was alive at the time of brushMin and brushMax
-        var startAlive = false;
-        var endAlive = false;
-
-        // Determine whether or not a post is alive at the start and end of brush
-        startAlive = isAliveStart(estArr, lifespanArr, brushStart);
-        endAlive = isAliveEnd(estArr, lifespanArr, brushEnd);
+//        var estArr = [d.est, d.re1, d.re2, d.re3];
 
         // Show all offices alive at some point if 'all', only established during that time if 'established', and only disestablished if 'disestablished' radio button selected
         // Buggy: does not account for discontinuity in otherwise-classed offices.
         // Buggy: only goes into effect when the brush is changed; not automatic.
-        if (startAlive && endAlive) {
-            d3.select(this).transition().duration(500).style("opacity", shownOpacity);
+        if (isDuring([d.est, d.re1, d.re2, d.re3], brushStart, brushEnd)) {
+            d3.select(this).style("opacity", shownOpacity);
             totalShown++;
-            if (d["Latitude"] == 0 || d["Latitude"] == "") {
-                num_unmapped++;
-                return "none";
-            } else {
                 num_mapped++;
-                return "block";
-            }
-        } else if (startAlive && !endAlive) {
-            d3.select(this).transition().duration(500).style("opacity", shownOpacity);
-            totalShown++;
-            if (d["Latitude"] == 0 || d["Latitude"] == "") {
-                num_unmapped++;
-                return "none";
-            } else {
-                num_mapped++;
-                return "block";
-            }
-        } else if (!startAlive && endAlive) {
-            d3.select(this).transition().duration(500).style("opacity", shownOpacity);
-            totalShown++;
-            if (d["Latitude"] == 0 || d["Latitude"] == "") {
-                num_unmapped++;
-                return "none";
-            } else {
-                num_mapped++;
-                return "block";
-            }
-        } else if (isDuring(estArr, brushStart, brushEnd)) {
-            d3.select(this).transition().duration(500).style("opacity", shownOpacity);
-            totalShown++;
-            if (d["Latitude"] == 0 || d["Latitude"] == "") {
-                num_unmapped++;
-                return "none";
-            } else {
-                num_mapped++;
-                return "block";
-            }
+                return 1;
         }
-        return "none";
+        return 0;
 
     });
+
+  totalShown += unMappedPost.filter(function(el) {return isDuring([el.est, el.re1, el.re2, el.re3],brushStart, brushEnd)}).length;
+
 };
 
 // When a filter checkbox is selected or unselected, update the points shown to reflect current filter
@@ -890,7 +865,6 @@ function filterPoints() {
 };
 
 // For use in year-by-year: show only offices that were established or discontinued during that year
-// TODO(jheppler): Change this so it un-draws the points rather than hides them
 function showEstDis() {
 
     d3.selectAll("g.points-est").style("display", function (d) {
@@ -1004,30 +978,30 @@ function showEvent() {
 };
 
 // When called, reprojects the map to the original projection
-function resetMap() {
+// function resetMap() {
 
-    // var newProjection = d3.geo.azimuthalEqualArea()
-    //     .translate([680, 380])
-    //     .rotate([118.9, 0])
-    //     .center([11, 34.5])
-    //     .scale(770 * 2);
+//     // var newProjection = d3.geo.azimuthalEqualArea()
+//     //     .translate([680, 380])
+//     //     .rotate([118.9, 0])
+//     //     .center([11, 34.5])
+//     //     .scale(770 * 2);
 
-    // reproject(newProjection);
+//     // reproject(newProjection);
 
-  // clearTimeout(refreshTimer);
-  // refreshTimer = setTimeout('refreshMap()', 100);
-  // refreshSet++;
+//   // clearTimeout(refreshTimer);
+//   // refreshTimer = setTimeout('refreshMap()', 100);
+//   // refreshSet++;
 
-  // carto.selectAll(".hirez").style("display","none");
-  // carto.selectAll(".adminUnits").style("display","none");
-  // carto.selectAll(".placeopacfilter").style("display","none");
-  // carto.selectAll(".lowrez").attr("d", path).style("display","block");
-  
-  // if (!d3.selectAll("g.arbPlace").empty()) {
-  //   d3.selectAll("g.arbPlace").attr("transform", function (d) {return translateProjection(d.coords)});
-  // }
+//   // carto.selectAll(".hirez").style("display","none");
+//   // carto.selectAll(".adminUnits").style("display","none");
+//   // carto.selectAll(".placeopacfilter").style("display","none");
+//   // carto.selectAll(".lowrez").attr("d", path).style("display","block");
 
-}
+//   // if (!d3.selectAll("g.arbPlace").empty()) {
+//   //   d3.selectAll("g.arbPlace").attr("transform", function (d) {return translateProjection(d.coords)});
+//   // }
+
+// }
 
 // Fade in the box containing the information about the project
 function showAbout() {
@@ -1040,6 +1014,7 @@ function showAbout() {
 
 // If brush is active, highlights first possible year. Otherwise, moves the display forward a year.
 function yearForward() {
+    // TODO(jheppler): Let's rework this so it uses the Brush properly
     if (currYear == 0) {
         d3.selectAll(".brush").style("display", "none");
         d3.selectAll("rect.bar").style("opacity", 1);
@@ -1113,6 +1088,10 @@ function returnBrush() {
     brushStart = 1849;
     brushEnd = 1905;
     d3.select("#brushYears").text(brushStart + " - " + brushEnd);
+}
+
+function intervalCounter() {
+  // create this; usable for the brush and for panning/movement
 }
 
 </script>
