@@ -50,19 +50,13 @@
             name="data"
             value="snapshot"
             onclick="showSnapshot()"
-            checked="checked"/>Snapshot View
-    <input type="radio"
-            id="event"
-            class="datamode"
-            name="data"
-            value="event"
-            onClick="showEvent()"/>Event View
+            checked="checked"/>Duration View
     <input type="radio"
             id="regular"
             class="datamode"
             name="data"
             value="regular"
-            onclick="showRegular()"/>Regular View
+            onclick="showRegular()"/>Status View
  </form>
 </div>
 
@@ -71,23 +65,25 @@
 //********************************************
 // Global variables
 //********************************************
-var width = 1300, //$(document).width(),
+var width = $(document).width(),
     height = 750,
-    barchart_margin = {
+    margin = {
         top: 20,
         right: 40,
         bottom: 30,
         left: 20
     },
-    barchart_width = $(document).width() - barchart_margin.left - barchart_margin.right - 300,
-    barchart_height = 180 - barchart_margin.top - barchart_margin.bottom,
+    barchart_width = $(document).width() - margin.left - margin.right - 300,
+    barchart_height = 180 - margin.top - margin.bottom,
     centered,
     barWidth = 25,
     num_mapped = 50,
     totalShown = 100,
     mappedHeight = 57,
     unmappedHeight = 43,
-    muckHack = 0;
+    currYear = 0,
+    shownOpacity = .9,
+    fadeOpacity = 0;
 
 var z = d3.scale.ordinal().range(["steelblue", "indianred"]);
 currentZoom = -99;
@@ -107,22 +103,19 @@ var legend_x = 25,
     mapped_y = legend_y + legend_height - 90;
 
 // Colors
-var aliveThroughout = "#B3C6D2"; // active throughout
-var diesDuring =  "#31366C"; // closed
-var bornDuring =  "#D8A782"  // established
-var aliveDuring =  "#904424" // est and closed
-var autoColor = "#A6DCEB";
-var currYearColor = "#C5C59E";
+var aliveThroughout = "#009939"; //"#9CC3A7"; // active throughout
+var diesDuring =  "#ff6600"; //"#C3B0B0"; // closed
+var bornDuring =  "0089cd";//"#F6ADF6";  // established
+var aliveDuring = "#C00000"; //"#ADF6EB" // est and closed
+var autoColor = "#15b290";
+var currYearColor = "#CB709D";
 
 // Brush Dates
 var brushStart = 1849; // TODO(jheppler): find `floor` date automatically
 var brushEnd = 1903; // TODO(jheppler): find `ceiling` date automatically (end year + 1)
 var defaultDis = 1905;
-var currYear = 0;
-var shownOpacity = .9;
-var fadeOpacity = 0;
 
-// Get our data ready
+// Get our map data ready
 queue()
     .defer(d3.json, "data/us.json")
     .defer(d3.csv, "data/post_data.csv")
@@ -139,7 +132,7 @@ var projection = d3.geo.azimuthalEqualArea()
     .scale(1170 * 2);
 
 var svg = d3.select("body").append("svg")
-    .attr("width", width)
+    .attr("width", width - margin.right)
     .attr("height", "700")
     .attr("class", "mapviz");
 
@@ -190,7 +183,9 @@ function ready(error, us, post) {
         .translate([0, 0])
         .scale(1)
         .scaleExtent([.8, 8])
-        .on("zoom", zoomed);
+        .on("zoomstart", zoomstart)
+        .on("zoom", zoomed)
+        .on("zoomend", zoomend);
 
     var carto = svg.append("g");
     var postOfficePoints = svg.append("g");
@@ -388,9 +383,7 @@ function ready(error, us, post) {
         .attr("x", legend_x + 80);
 
     svg
-      .call(zoom)
-      .on("mousewheel.zoom", null)
-      .on("wheel.zoom", null);
+      .call(zoom);
 
     // Printing all points
     postoffices = postOfficePoints.selectAll("g.points-est")
@@ -399,7 +392,7 @@ function ready(error, us, post) {
         .attr("class", "points-est")
         .style("fill", "midnightblue")
         .attr("transform", function (d) {
-            return "translate(" + projection([d.long, d.lat]) + ")"; //fix
+            return "translate(" + projection([d.long, d.lat]) + ")";
         })
         .on("mouseover", showLabel)
         .on("mouseout", function () {
@@ -426,13 +419,12 @@ function ready(error, us, post) {
     styleOpacity();
 
     // *********************************************
-    // Map Callbacks
+    // Map Functions
     // *********************************************
 
     var labelSize = 16;
 
     // Some jQuery for the tooltip
-    //TODO(jheppler): Rewrite this so we don't have to use jQuery
     $('g.points-est').tipsy({
         gravity: 's',
         html: true,
@@ -442,7 +434,12 @@ function ready(error, us, post) {
         }
     });
 
-    // Zoom function
+    // Zoom functions
+
+    function zoomstart() {
+        d3.selectAll("g.points-est").style("display", "none");
+    }
+
     function zoomed() {
         postOfficePoints.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
         carto.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
@@ -457,7 +454,11 @@ function ready(error, us, post) {
         d3.select(".map-tooltip").style("font-size", 16 / d3.event.scale + "px");
     }
 
-    // On hover, show point labels
+    function zoomend() {
+        d3.selectAll("g.points-est").transition().duration(600).style("display", "block");
+    }
+
+    // On hover, lifespan of a post office
     function showLabel(d, i) {
         this.parentNode.appendChild(this);
         var startDate = d.est;
@@ -485,11 +486,11 @@ function ready(error, us, post) {
 var barchart = d3.select("body").append("svg")
     .attr("class", "barchart")
     .attr("width", $(document).width())
-.attr("height", barchart_height + barchart_margin.top + barchart_margin.bottom)
+    .attr("height", barchart_height + margin.top + margin.bottom)
     .attr("y", height - barchart_height - 100)
     .attr("x", legend_x + legend_width)
     .append("g")
-    .attr("transform", "translate(" + (barchart_margin.left + legend_x + legend_width + 10) + "," + barchart_margin.top + ")");
+    .attr("transform", "translate(" + (margin.left + legend_x + legend_width + 10) + "," + margin.top + ")");
 
 var yDom = [0, 0];
 var xDom = [0, 0];
@@ -504,9 +505,9 @@ d3.csv("data/years_count2.csv", function (error, post) {
         d["year"] = d3.time.format("%Y").parse(d["year"]).getFullYear();
     });
 
-    var brush = d3.svg.brush()
+    brush = d3.svg.brush()
         .x(x)
-        // .extent([340, 500])
+        .on("brushstart", brushstart)
         .on("brush", brushmove)
         .on("brushend", brushend);
 
@@ -545,9 +546,9 @@ d3.csv("data/years_count2.csv", function (error, post) {
         .attr("class", "y axis")
         .call(y_axis)
         .style("fill", "#fff")
-        .attr("transform", "translate(" + w + ",0)");
+        .attr("transform", "translate(" + barchart_width + ",0)");
 
-    var w = barchart_width - barchart_margin.right - barchart_margin.left;
+    // var w = barchart_width - margin.right - margin.left;
 
     // Add a group for each cause.
     var freq = barchart.selectAll("g.freq")
@@ -580,7 +581,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
 
     // Draw the brush
     var arc = d3.svg.arc()
-      .outerRadius(barchart_height / 5)
+      .outerRadius(barchart_height / 9)
       .startAngle(0)
       .endAngle(function(d, i) { return i ? -Math.PI : Math.PI; });
 
@@ -595,14 +596,30 @@ d3.csv("data/years_count2.csv", function (error, post) {
     brushg.selectAll("rect")
         .attr("height", barchart_height);
 
+
     // ****************************************
-    //            Barchart Callbacks
+    // Barchart Functions
     // ****************************************
 
+    function brushstart() {
+        clearPointData();
+    }
+
+    function brushend() {
+        d3.selectAll("g.points-est").style("display", "block");
+        showAll();
+        colorPoints();
+        styleOpacity();
+    }
+
     function brushmove() {
+
         b = brush.empty() ? [0, 2000] : brush.extent();
         newscale = d3.scale.linear();
         newscale.domain(x.range()).range(x.domain());
+
+        // console.log(brush.extent());
+
         var year_begin = newscale(b[0]); // remove?
         var year_end = newscale(b[1]); // remove?
 
@@ -644,14 +661,6 @@ d3.csv("data/years_count2.csv", function (error, post) {
             return d.x >= year_begin && d.x <= year_end ? "1" : ".4"
         });
     }
-
-    function brushend() {
-        if (!d3.event.sourceEvent) return; // only transition after input
-            d3.select(this).transition()
-            .call(brush.extent(brush.extent().map(function(d) { return d3.round(d, 1); })))
-            .call(brush.event);
-    }
-
 });
 
 // ****************************************
@@ -661,6 +670,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
 // ****************************************
 
 var arrSize = 4;
+
 //Returns whether or not the post office was alive at a given date
 function isAliveStart(estArr, lifeSpanArr, brushDate) {
     for (var i = 0; i < arrSize; i++) {
@@ -789,7 +799,7 @@ function showEst() {
 
 function showDis() {
 
-    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {//.style("opacity", function (d) {
+    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {
 
         var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
 
@@ -804,7 +814,7 @@ function showDis() {
 
 function showEstAndDis() {
 
-    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {//.style("opacity", function (d) {
+    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
         var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
@@ -828,21 +838,65 @@ function showAll() {
     var totalPoints = 0;
     var totalUnshown = 0;
 
-    d3.selectAll("g.points-est").style("opacity", function (d) {
+    d3.selectAll("g.points-est").style("display", function (d) {
         totalPoints++;
 
-//        var estArr = [d.est, d.re1, d.re2, d.re3];
+        var estArr = [d.est, d.re1, d.re2, d.re3];
+        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+
+        // Bools are true if post office was alive at the time of brushMin and brushMax
+        var startAlive = false;
+        var endAlive = false;
+
+        // Determine whether or not a post is alive at the start and end of brush
+        startAlive = isAliveStart(estArr, lifespanArr, brushStart);
+        endAlive = isAliveEnd(estArr, lifespanArr, brushEnd);
 
         // Show all offices alive at some point if 'all', only established during that time if 'established', and only disestablished if 'disestablished' radio button selected
         // Buggy: does not account for discontinuity in otherwise-classed offices.
         // Buggy: only goes into effect when the brush is changed; not automatic.
-        if (isDuring([d.est, d.re1, d.re2, d.re3], brushStart, brushEnd)) {
+        if (startAlive && endAlive) {
             d3.select(this).style("opacity", shownOpacity);
             totalShown++;
+            if (d["Latitude"] == 0 || d["Latitude"] == "") {
+                num_unmapped++;
+                return "none";
+            } else {
                 num_mapped++;
-                return 1;
+                return "block";
+            }
+        } else if (startAlive && !endAlive) {
+            d3.select(this).style("opacity", shownOpacity);
+            totalShown++;
+            if (d["Latitude"] == 0 || d["Latitude"] == "") {
+                num_unmapped++;
+                return "none";
+            } else {
+                num_mapped++;
+                return "block";
+            }
+        } else if (!startAlive && endAlive) {
+            d3.select(this).style("opacity", shownOpacity);
+            totalShown++;
+            if (d["Latitude"] == 0 || d["Latitude"] == "") {
+                num_unmapped++;
+                return "none";
+            } else {
+                num_mapped++;
+                return "block";
+            }
+        } else if (isDuring(estArr, brushStart, brushEnd)) {
+            d3.select(this).style("opacity", shownOpacity);
+            totalShown++;
+            if (d["Latitude"] == 0 || d["Latitude"] == "") {
+                num_unmapped++;
+                return "none";
+            } else {
+                num_mapped++;
+                return "block";
+            }
         }
-        return 0;
+        return "none";
 
     });
 
@@ -900,6 +954,10 @@ function showEstDis() {
     });
 };
 
+function clearPointData() {
+    d3.selectAll("g.points-est").transition().duration(600).style("display", "none");
+}
+
 // Reprojecting the map
 
 function reproject(newProjection) {
@@ -926,7 +984,6 @@ function showRegular() {
     colorPoints();
     styleOpacity();
     d3.selectAll("g.key").transition().duration(1000).style("opacity", .8);
-
     document.getElementById("keyCircle1").style.fill = bornDuring;
     document.getElementById("keyCircle2").style.fill = diesDuring;
     document.getElementById("keyCircle3").style.fill = aliveThroughout;
@@ -964,44 +1021,6 @@ function showSnapshot() {
     document.getElementById("keyCircle4").style.opacity = .25;
     d3.select("#keyLabel4").text("Shorter Lifespan");
 };
-
-function showEvent() {
-    document.getElementById("event").checked = true;
-    document.getElementById("tab3").style.zIndex = "-4";
-    document.getElementById("tab3").style.background = "#F5F1DE"
-    document.getElementById("tab2").style.zIndex = "-3";
-    document.getElementById("tab2").style.background = "#f7f7f7"
-    document.getElementById("tab1").style.zIndex = "-4";
-    document.getElementById("tab1").style.background = "#F5F1DE"
-
-    d3.select(".gbrush.brush.extent").attr("pointer-events", "none");
-};
-
-// When called, reprojects the map to the original projection
-// function resetMap() {
-
-//     // var newProjection = d3.geo.azimuthalEqualArea()
-//     //     .translate([680, 380])
-//     //     .rotate([118.9, 0])
-//     //     .center([11, 34.5])
-//     //     .scale(770 * 2);
-
-//     // reproject(newProjection);
-
-//   // clearTimeout(refreshTimer);
-//   // refreshTimer = setTimeout('refreshMap()', 100);
-//   // refreshSet++;
-
-//   // carto.selectAll(".hirez").style("display","none");
-//   // carto.selectAll(".adminUnits").style("display","none");
-//   // carto.selectAll(".placeopacfilter").style("display","none");
-//   // carto.selectAll(".lowrez").attr("d", path).style("display","block");
-
-//   // if (!d3.selectAll("g.arbPlace").empty()) {
-//   //   d3.selectAll("g.arbPlace").attr("transform", function (d) {return translateProjection(d.coords)});
-//   // }
-
-// }
 
 // Fade in the box containing the information about the project
 function showAbout() {
@@ -1088,10 +1107,6 @@ function returnBrush() {
     brushStart = 1849;
     brushEnd = 1905;
     d3.select("#brushYears").text(brushStart + " - " + brushEnd);
-}
-
-function intervalCounter() {
-  // create this; usable for the brush and for panning/movement
 }
 
 </script>

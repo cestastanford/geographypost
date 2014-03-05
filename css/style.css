@@ -1,7 +1,8 @@
 body {
   font-family: 'Lato', "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 300;
   color: #fff;
-  background-color: #444; /*#f0f0f0 #F1F6F8;*/
+  background-color: #000; /*#f0f0f0 #F1F6F8;*/
   text-rendering: optimizeLegibility;
   margin: 0;
   width: 1060px;
@@ -197,16 +198,14 @@ footer {
 #legendBox {
   fill: #5D5D5D;
   opacity: .8;
-  stroke: darkgrey;
+  stroke: #333;
   stroke-width: 2px;
-  box-shadow: 5px 5px 10px #888888;
   pointer-events: all;
   border-radius: 10px;
 }
 
 .background {
-      fill: #444;
-      box-shadow: 5px 5px 10px #888888;
+      fill: #000;
       pointer-events: all;
 }
 
@@ -265,13 +264,11 @@ footer {
 
 .mapText {
   font-size: 12px;
-  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-  fill: #9C9C9C;
+  fill: #fff;
 }
 
 
 .legendText {
-  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
   font-size: 14px;
   fill: #fff;
   text-anchor: right;
@@ -285,7 +282,7 @@ footer {
 }
 
 .percentLabel {
-  fill: #888;
+  fill: #fff;
   font-size: 11px;
 }
 
@@ -418,8 +415,8 @@ footer {
 
 #info h1 {
     font: normal 400 58px/1.6 'Yanone Kaffeesatz', sans-serif;
+    color: #15b290;
     letter-spacing: 1px;
-    /*text-transform: uppercase;*/
     padding: 10px;
     margin: 10px;
     text-rendering: optimizeLegibility;
@@ -445,7 +442,6 @@ footer {
   top: 600px;
   left: 40px;
   text-align: center;
-  background-color: beige;
   border-radius: 5px;
   pointer-events: all;
 }
@@ -466,11 +462,11 @@ footer {
   padding: 20px;
   top: -850px;
   left: 235px;
-  background-color: #727E86;
+  background-color: #444;
   border: 1px solid black;
   z-index: 50;
   pointer-events: visible;
-  box-shadow: 5px 5px 10px #3C4246;
+  box-shadow: 5px 5px 10px #333;
 }
 
 #about {
