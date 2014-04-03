@@ -288,12 +288,12 @@ footer {
 
 
 #onMap {
-  fill: #838B83;
+  fill: #009939;
   fill-opacity: .8;
 }
 
 #notOnMap {
-  fill: #8B7D7B;
+  fill: #C00000;
   fill-opacity: .8;
 }
 
@@ -457,7 +457,7 @@ footer {
 #aboutText {
   float: middle;
   position: relative;
-  width: 700px;
+  width: 900px;
   vertical-align: middle;
   padding: 20px;
   top: -850px;
@@ -509,15 +509,15 @@ footer {
     text-transform: uppercase;
   }
 
-      a:link {
-          color: #d2c5b3;
-      }
-      a:visited {
-          color: #d2c5b3;
-      }
-      a:hover, a:active {
-          color: #005580;
-      }
+  a:link {
+      color: #15b290;
+  }
+  a:visited {
+      color: #15b290;
+  }
+  a:hover, a:active {
+      color: #12987B;
+  }
 
   #nav {
     margin: 0;
@@ -549,4 +549,3 @@ footer {
   #nav ul li a {
     text-decoration: underline;
   }
-
