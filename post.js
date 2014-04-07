@@ -121,7 +121,7 @@ function ready(error, us, post) {
         .translate([0, 0])
         .scale(1)
         .scaleExtent([.8, 8])
-        .on("zoomstart", zoomstart)
+        // .on("zoomstart", zoomstart)
         .on("zoom", zoomed)
         .on("zoomend", zoomend);
 
@@ -399,24 +399,23 @@ function ready(error, us, post) {
     // Zoom functions
     // *********************************************
 
-    function zoomstart() {
-        d3.selectAll("g.points-est").style("display", "none");
-    }
-
     function zoomed() {
+        d3.selectAll("g.points-est").style("display", "none");
+
         currentZoom = -99;
 
         postOfficePoints.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+
         carto.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+
         carto.select(".boundary").style("stroke-width", 1.5 / d3.event.scale + "px");
+
         if (currentZoom != d3.event.scale) {
             currentZoom = d3.event.scale;
             svg.selectAll("circle.points-est").attr("r", function () {
                 return 2.5 / d3.event.scale + "px"
             });
         }
-        labelSize = 16 / d3.event.scale;
-        d3.select(".map-tooltip").style("font-size", 16 / d3.event.scale + "px");
     }
 
     function zoomend() {
