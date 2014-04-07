@@ -95,10 +95,10 @@ function ready(error, us, post) {
         d.re1 = parseInt(d.Re1.split("-")[0]);
         d.re2 = parseInt(d.Re2.split("-")[0]);
         d.re3 = parseInt(d.Re3.split("-")[0]);
-        d.dis1 = parseInt(d.Dis1.split("-")[0]);
-        d.dis1 = parseInt(d.Dis1.split("-")[0]);
-        if (d.Dis1 == "") {
-            d.dis1 = defaultDis;
+        d.dis = parseInt(d.dis.split("-")[0]);
+        d.dis = parseInt(d.Dis1.split("-")[0]);
+        if (d.dis == "") {
+            d.dis = defaultDis;
         }
         d.dis2 = parseInt(d.Dis2.split("-")[0]);
         if (d.Dis2 == "") {
@@ -371,7 +371,7 @@ function ready(error, us, post) {
     function showLabel(d, i) {
         this.parentNode.appendChild(this);
         var startDate = d.est;
-        var endDate = d.dis1;
+        var endDate = d.dis;
         d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d) {
 
             if (d.x >= startDate && d.x <= endDate) {
@@ -391,7 +391,7 @@ function ready(error, us, post) {
         html: true,
         title: function () {
             var d = this.__data__;
-            return "Name: " + d["Name"] + "<br>" + "Established: " + d["Est"] + "<br>" + "Discontinued: " + d["Dis1"];
+            return "Name: " + d["Name"] + "<br>" + "Established: " + d["Est"] + "<br>" + "Discontinued: " + d["dis"];
         }
     });
 
@@ -659,7 +659,7 @@ function colorPoints() {
         // Arrays of established dates and subsequent life spans of a single post office.
         // Note: assumes there are exactly 4 establish dates in the data
         var estArr = [d.est, d.re1, d.re2, d.re3];
-        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+        var lifespanArr = [d.dis - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
         // Bools are true if post office was alive at the time of brushMin and brushMax
         var startAlive = false;
@@ -701,7 +701,7 @@ function styleOpacity() {
             return shownOpacity;
         } else if (document.getElementById("snapshot").checked == true) {
             var estArr = [d.est, d.re1, d.re2, d.re3];
-            var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+            var lifespanArr = [d.dis - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
             // Bools are true if post office was alive at the time of brushMin and brushMax
             var startAlive = false;
@@ -757,7 +757,7 @@ function showDis() {
 
     d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {
 
-        var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
+        var disArr = [d.dis, d.dis2, d.dis3, d.dis4];
 
         for (var i = 0; i < arrSize; i++) {
             if (disArr[i] <= brushEnd && disArr[i] >= brushStart) {
@@ -773,7 +773,7 @@ function showEstAndDis() {
     d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
-        var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
+        var disArr = [d.dis, d.dis2, d.dis3, d.dis4];
 
         for (var i = 0; i < arrSize; i++) {
             if (disArr[i] <= brushEnd && disArr[i] >= brushStart) {
@@ -798,7 +798,7 @@ function showAll() {
         totalPoints++;
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
-        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+        var lifespanArr = [d.dis - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
         // Bools are true if post office was alive at the time of brushMin and brushMax
         var startAlive = false;
@@ -880,7 +880,7 @@ function showEstDis() {
     d3.selectAll("g.points-est").style("display", function (d) {
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
-        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+        var lifespanArr = [d.dis - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
         for (var i = 0; i < arrSize; i++) {
             if (estArr[i] == currYear) {
@@ -897,7 +897,7 @@ function showEstDis() {
     d3.selectAll("circle.points-est").style("fill", function (d) {
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
-        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+        var lifespanArr = [d.dis - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
         for (var i = 0; i < arrSize; i++) {
             if (estArr[i] == currYear) {
