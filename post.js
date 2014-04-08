@@ -24,6 +24,14 @@ var width = $(document).width(),
     fadeOpacity = 0,
     refreshSet = 0;
 
+var zoom = d3.behavior.zoom()
+    .translate([0, 0])
+    .scale(1)
+    .scaleExtent([.8, 8])
+    // .on("zoomstart", zoomstart)
+    .on("zoom", zoomed)
+    .on("zoomend", zoomend);
+
 // Scales
 var x = d3.scale.ordinal().rangeRoundBands([0, barchart_width - 60], .1);
 var y = d3.scale.linear().range([barchart_height, 0]);
@@ -84,6 +92,9 @@ var graticule = d3.geo.graticule()
 path = d3.geo.path()
     .projection(projection);
 
+var carto = svg.append("g");
+var postOfficePoints = svg.append("g");
+
 // Printing the map
 function ready(error, us, post) {
 
@@ -95,10 +106,10 @@ function ready(error, us, post) {
         d.re1 = parseInt(d.Re1.split("-")[0]);
         d.re2 = parseInt(d.Re2.split("-")[0]);
         d.re3 = parseInt(d.Re3.split("-")[0]);
-        d.dis = parseInt(d.dis.split("-")[0]);
-        d.dis = parseInt(d.Dis1.split("-")[0]);
-        if (d.dis == "") {
-            d.dis = defaultDis;
+        d.dis1 = parseInt(d.Dis1.split("-")[0]);
+        d.dis1 = parseInt(d.Dis1.split("-")[0]);
+        if (d.Dis1 == "") {
+            d.dis1 = defaultDis;
         }
         d.dis2 = parseInt(d.Dis2.split("-")[0]);
         if (d.Dis2 == "") {
@@ -116,17 +127,6 @@ function ready(error, us, post) {
         d.lat = d["Latitude"];
         d.long = d["Longitude"];
     });
-
-    var zoom = d3.behavior.zoom()
-        .translate([0, 0])
-        .scale(1)
-        .scaleExtent([.8, 8])
-        // .on("zoomstart", zoomstart)
-        .on("zoom", zoomed)
-        .on("zoomend", zoomend);
-
-    var carto = svg.append("g");
-    var postOfficePoints = svg.append("g");
 
     carto.append("path")
         .datum(graticule.outline)
@@ -371,7 +371,7 @@ function ready(error, us, post) {
     function showLabel(d, i) {
         this.parentNode.appendChild(this);
         var startDate = d.est;
-        var endDate = d.dis;
+        var endDate = d.dis1;
         d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d) {
 
             if (d.x >= startDate && d.x <= endDate) {
@@ -391,36 +391,9 @@ function ready(error, us, post) {
         html: true,
         title: function () {
             var d = this.__data__;
-            return "Name: " + d["Name"] + "<br>" + "Established: " + d["Est"] + "<br>" + "Discontinued: " + d["dis"];
+            return "Name: " + d["Name"] + "<br>" + "Established: " + d["Est"] + "<br>" + "Discontinued: " + d["Dis1"];
         }
     });
-
-    // *********************************************
-    // Zoom functions
-    // *********************************************
-
-    function zoomed() {
-        d3.selectAll("g.points-est").style("display", "none");
-
-        currentZoom = -99;
-
-        postOfficePoints.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-
-        carto.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-
-        carto.select(".boundary").style("stroke-width", 1.5 / d3.event.scale + "px");
-
-        if (currentZoom != d3.event.scale) {
-            currentZoom = d3.event.scale;
-            svg.selectAll("circle.points-est").attr("r", function () {
-                return 2.5 / d3.event.scale + "px"
-            });
-        }
-    }
-
-    function zoomend() {
-        d3.selectAll("g.points-est").transition().duration(600).style("display", "block");
-    }
 
 }
 
@@ -659,7 +632,7 @@ function colorPoints() {
         // Arrays of established dates and subsequent life spans of a single post office.
         // Note: assumes there are exactly 4 establish dates in the data
         var estArr = [d.est, d.re1, d.re2, d.re3];
-        var lifespanArr = [d.dis - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
         // Bools are true if post office was alive at the time of brushMin and brushMax
         var startAlive = false;
@@ -701,7 +674,7 @@ function styleOpacity() {
             return shownOpacity;
         } else if (document.getElementById("snapshot").checked == true) {
             var estArr = [d.est, d.re1, d.re2, d.re3];
-            var lifespanArr = [d.dis - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+            var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
             // Bools are true if post office was alive at the time of brushMin and brushMax
             var startAlive = false;
@@ -757,7 +730,7 @@ function showDis() {
 
     d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {
 
-        var disArr = [d.dis, d.dis2, d.dis3, d.dis4];
+        var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
 
         for (var i = 0; i < arrSize; i++) {
             if (disArr[i] <= brushEnd && disArr[i] >= brushStart) {
@@ -773,7 +746,7 @@ function showEstAndDis() {
     d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
-        var disArr = [d.dis, d.dis2, d.dis3, d.dis4];
+        var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
 
         for (var i = 0; i < arrSize; i++) {
             if (disArr[i] <= brushEnd && disArr[i] >= brushStart) {
@@ -798,7 +771,7 @@ function showAll() {
         totalPoints++;
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
-        var lifespanArr = [d.dis - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
         // Bools are true if post office was alive at the time of brushMin and brushMax
         var startAlive = false;
@@ -880,7 +853,7 @@ function showEstDis() {
     d3.selectAll("g.points-est").style("display", function (d) {
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
-        var lifespanArr = [d.dis - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
         for (var i = 0; i < arrSize; i++) {
             if (estArr[i] == currYear) {
@@ -897,7 +870,7 @@ function showEstDis() {
     d3.selectAll("circle.points-est").style("fill", function (d) {
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
-        var lifespanArr = [d.dis - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
         for (var i = 0; i < arrSize; i++) {
             if (estArr[i] == currYear) {
@@ -1068,4 +1041,47 @@ function returnBrush() {
     brushStart = 1849;
     brushEnd = 1905;
     d3.select("#brushYears").text(brushStart + " - " + brushEnd);
+}
+
+// *********************************************
+// Zoom functions
+// *********************************************
+
+function zoomed() {
+    d3.selectAll("g.points-est").style("display", "none");
+
+    currentZoom = -99;
+
+    postOfficePoints.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+
+    carto.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    carto.select(".boundary").style("stroke-width", 1.5 / d3.event.scale + "px");
+
+    if (currentZoom != d3.event.scale) {
+        currentZoom = d3.event.scale;
+        svg.selectAll("circle.points-est").attr("r", function () {
+            return 2.5 / d3.event.scale + "px"
+        });
+    }
+}
+
+function zoomend() {
+    d3.selectAll("g.points-est").transition().duration(600).style("display", "block");
+}
+
+function zoomManual(zoomDirection) {
+
+  if (zoomDirection == "in") {
+    var newZoom = zoom.scale() * 1.5;
+    var newX = ((zoom.translate()[0] - (width / 2)) * 1.5) + width / 2;
+    var newY = ((zoom.translate()[1] - (height / 2)) * 1.5) + height / 2;
+  }
+  else {
+    var newZoom = zoom.scale() * .75;
+    var newX = ((zoom.translate()[0] - (width / 2)) * .75) + width / 2;
+    var newY = ((zoom.translate()[1] - (height / 2)) * .75) + height / 2;
+  }
+
+  zoom.scale(newZoom).translate([newX,newY])
+    zoomed();
 }
