@@ -42,6 +42,7 @@
   <p class="btn btn-info">About</p>
 </div>
 
+
 <div id="datamode">
   <form display: "inline">
     <input type="radio"
@@ -73,6 +74,7 @@
 
 <input type="button" class="btn btn-info" value="Close" onclick="showAbout()"/>
 
+
 </div>
 
 <div id="resetMap">
@@ -93,18 +95,13 @@
 
 <div id="information">
 
-<p id="singleYearLabel">Select Single Year</p>
+<!-- <p id="singleYearLabel">Select Single Year</p> -->
 
-<div class="btn-group" style="margin: 9px 0 5px;">
+<!-- <div class="btn-group" style="margin: 9px 0 5px;">
     <input type="button" class="btn btn-info" id="forward" value=">>" onclick="yearForward()"/>
       <input type="button" class="btn btn-info"id="back" value="<<" onclick="yearBack()"/>
     <input type="button" class="btn btn-info" id="returnBrush" value="Return" style="visibility:hidden" onclick="returnBrush()"/>
-</div>
-
-<div class="btn-group" style="margin: 9px 0 5px;">
-  <button type="button" id="zoom_in" class="btn btn-info" onclick="manualZoom('in');">Zoom in</button>
-  <button type="button" id="zoom_out" class="btn btn-info" onclick="manualZoom('out');">Zoom out</button>
-</div>
+</div> -->
 
 <div id="selections">
   <h3 class="yearText">Filter by: </h3>
@@ -122,6 +119,9 @@
             value="Discontinued"
             onclick="filterPoints()"/>Discontinued
  </form>
+
+ <button type="button" id="zoom_in" class="btn btn-info" onclick="manualZoom('in');">Zoom in</button>
+      <button type="button" id="zoom_out" class="btn btn-info" onclick="manualZoom('out');">Zoom out</button>
 </div>
 
 <footer>
