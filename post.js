@@ -29,8 +29,8 @@ var zoom = d3.behavior.zoom()
     .scale(1)
     .scaleExtent([.8, 8])
     // .on("zoomstart", zoomstart)
-    .on("zoom", zoomed)
-    .on("zoomend", zoomend);
+    .on("zoom", zoomed);
+    // .on("zoomend", zoomend);
 
 // Scales
 var x = d3.scale.ordinal().rangeRoundBands([0, barchart_width - 60], .1);
@@ -328,7 +328,9 @@ function ready(error, us, post) {
         .attr("x", legend_x + 80);
 
     svg
-      .call(zoom);
+      .call(zoom)
+      .on("mousewheel.zoom", null) // disable mousewheel
+      .on("wheel.zoom", null); // disable mousewheel
 
     // Printing points
     postoffices = postOfficePoints.selectAll("g.points-est")
@@ -1048,40 +1050,52 @@ function returnBrush() {
 // *********************************************
 
 function zoomed() {
-    d3.selectAll("g.points-est").style("display", "none");
+    // currentZoom = -99;
 
-    currentZoom = -99;
+    postOfficePoints.attr("transform", "translate(" + zoom.translate()[0]  +"," + zoom.translate()[1] + ")scale(" + zoom.scale() + ")");
 
-    postOfficePoints.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    carto.attr("transform", "translate(" + zoom.translate()[0] +"," + zoom.translate()[1] + ")scale(" + zoom.scale() + ")");
+    carto.select(".boundary").style("stroke-width", (1 / zoom.scale()) + "px");
 
-    carto.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-    carto.select(".boundary").style("stroke-width", 1.5 / d3.event.scale + "px");
-
-    if (currentZoom != d3.event.scale) {
-        currentZoom = d3.event.scale;
-        svg.selectAll("circle.points-est").attr("r", function () {
-            return 2.5 / d3.event.scale + "px"
-        });
-    }
+    // currentZoom = -99;
+    // if (currentZoom != zoom.scale()) {
+    //     currentZoom = zoom.scale();
+    //     svg.selectAll("circle.points-est").attr("r", function () {
+    //         return 2.5 / zoom.scale() + "px"
+    //     });
+    // }
+    //
 }
 
-function zoomend() {
-    d3.selectAll("g.points-est").transition().duration(600).style("display", "block");
-}
+// function zoomend() {
+//     d3.selectAll("g.points-est").transition().duration(600).style("display", "block");
+// }
 
-function zoomManual(zoomDirection) {
+function manualZoom(zoomDirection) {
+
+
+
+var newTransX = (((zoom.translate()[0] - width/2) * 1.5) + width/2);
+var newTransY = (((zoom.translate()[1] - height/2) * 1.5) + height/2);
+var newScale = zoom.scale() * 1.5;
 
   if (zoomDirection == "in") {
-    var newZoom = zoom.scale() * 1.5;
-    var newX = ((zoom.translate()[0] - (width / 2)) * 1.5) + width / 2;
-    var newY = ((zoom.translate()[1] - (height / 2)) * 1.5) + height / 2;
-  }
-  else {
-    var newZoom = zoom.scale() * .75;
-    var newX = ((zoom.translate()[0] - (width / 2)) * .75) + width / 2;
-    var newY = ((zoom.translate()[1] - (height / 2)) * .75) + height / 2;
-  }
 
-  zoom.scale(newZoom).translate([newX,newY])
-    zoomed();
+    }
+     else {
+    newTransX = (((zoom.translate()[0] - width/2) * .85) + width/2);
+    newTransY = (((zoom.translate()[1] - height/2) * .85) + height/2);
+    newScale = zoom.scale() * .85;
+      }
+postOfficePoints.attr("transform", "translate(" + newTransX +","+newTransY + ")scale(" + newScale + ")");
+
+carto.attr("transform", "translate(" + newTransX +","+newTransY + ")scale(" + newScale + ")");
+carto.select(".boundary").style("stroke-width", (1 / newScale) + "px");
+
+  svg.selectAll("circle.points-est").attr("r", function () {
+      return (2.5 / newScale) + "px"
+  });
+
+  zoom.translate([newTransX,newTransY]).scale(newScale);
+  // zoomed();
 }

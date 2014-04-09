@@ -147,22 +147,6 @@ footer {
   left: 65px;
 }
 
-#zoom_in {
-  pointer-events: all;
-  display: box;
-  position: absolute;
-  top: 220px;
-  left: 1215px;
-}
-
-#zoom_out {
-  pointer-events: all;
-  display: box;
-  position: absolute;
-  top: 220px;
-  left: 1250px;
-}
-
 #selections {
   display: box;
   pointer-events: all;

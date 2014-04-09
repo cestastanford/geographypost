@@ -42,10 +42,6 @@
   <p class="btn btn-info">About</p>
 </div>
 
-<!-- <button onclick="zoomManual('in');">Zoom in</button>
-<button onclick="zoomManual('out');">Zoom out</button> -->
-
-
 <div id="datamode">
   <form display: "inline">
     <input type="radio"
@@ -105,6 +101,11 @@
     <input type="button" class="btn btn-info" id="returnBrush" value="Return" style="visibility:hidden" onclick="returnBrush()"/>
 </div>
 
+<div class="btn-group" style="margin: 9px 0 5px;">
+  <button type="button" id="zoom_in" class="btn btn-info" onclick="manualZoom('in');">Zoom in</button>
+  <button type="button" id="zoom_out" class="btn btn-info" onclick="manualZoom('out');">Zoom out</button>
+</div>
+
 <div id="selections">
   <h3 class="yearText">Filter by: </h3>
   <form display= "box">
@@ -121,10 +122,6 @@
             value="Discontinued"
             onclick="filterPoints()"/>Discontinued
  </form>
-
- <button id="button1" onclick="zoomManual('in');">Zoom in</button>
- <button id="button2" onclick="zoomManual('out');">Zoom out</button>
-
 </div>
 
 <footer>
