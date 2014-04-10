@@ -78,8 +78,8 @@ var projection = d3.geo.azimuthalEqualArea()
     .scale(1170 * 2);
 
 var svg = d3.select("body").append("svg")
-    .attr("width", width - margin.right)
-    .attr("height", "700")
+    .attr("width", width)
+    .attr("height", height)
     .attr("class", "mapviz");
 
 var graticule = d3.geo.graticule()
@@ -106,7 +106,6 @@ function ready(error, us, post) {
         d.re1 = parseInt(d.Re1.split("-")[0]);
         d.re2 = parseInt(d.Re2.split("-")[0]);
         d.re3 = parseInt(d.Re3.split("-")[0]);
-        d.dis1 = parseInt(d.Dis1.split("-")[0]);
         d.dis1 = parseInt(d.Dis1.split("-")[0]);
         if (d.Dis1 == "") {
             d.dis1 = defaultDis;
@@ -330,8 +329,9 @@ function ready(error, us, post) {
     svg
       .call(zoom)
       .on("mousewheel.zoom", null) // disable mousewheel
-      .on("wheel.zoom", null); // disable mousewheel
-
+      .on("wheel.zoom", null) // disable mousewheel
+      .on("dblclick.zoom", null);  // disable doubleclick zoom
+      
     // Printing points
     postoffices = postOfficePoints.selectAll("g.points-est")
         .data(post)
@@ -376,7 +376,7 @@ function ready(error, us, post) {
         var endDate = d.dis1;
         d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d) {
 
-            if (d.x >= startDate && d.x <= endDate) {
+            if (d.x >= startDate && d.x <= (endDate || "2000")) {
                 return "goldenrod";
             }
 
@@ -1098,4 +1098,18 @@ carto.select(".boundary").style("stroke-width", (1 / newScale) + "px");
 
   zoom.translate([newTransX,newTransY]).scale(newScale);
   // zoomed();
+}
+
+function reprojectMap() {
+
+    var newProjection = d3.geo.azimuthalEqualArea()
+        .translate([680, 380])
+        .rotate([118.9, 0])
+        .center([11, 34.5])
+        .scale(770 * 2);
+
+    document.getElementById("mapView").checked = true;
+
+    reproject(newProjection);
+
 }
