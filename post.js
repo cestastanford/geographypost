@@ -331,7 +331,7 @@ function ready(error, us, post) {
       .on("mousewheel.zoom", null) // disable mousewheel
       .on("wheel.zoom", null) // disable mousewheel
       .on("dblclick.zoom", null);  // disable doubleclick zoom
-      
+
     // Printing points
     postoffices = postOfficePoints.selectAll("g.points-est")
         .data(post)
@@ -534,7 +534,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
     // }
 
     function brushmove() {
-        d3.selectAll("g.points-est").transition().duration(600).style("display", "none");
+
     }
 
     function brushend() {
