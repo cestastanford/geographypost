@@ -69,6 +69,7 @@ var defaultDis = 1905;
 queue()
     .defer(d3.json, "data/us.json")
     .defer(d3.csv, "data/post_data.csv")
+    .defer(d3.csv, "data/years_count2.csv")
     .await(ready);
 
 var projection = d3.geo.azimuthalEqualArea()
@@ -528,13 +529,29 @@ d3.csv("data/years_count2.csv", function (error, post) {
     // Barchart Functions
     // ****************************************
 
-    // function brushstart() {
-    //     // d3.selectAll("g.points-est").transition().duration(600).style("display", "none");
-    //
-    // }
-
     function brushmove() {
+      // var extent0 = brush.extent(),
+          var extent1;
 
+      // if dragging, preserve the width of the extent
+      if (d3.event.mode === "move") {
+        var d0 = d3.time.year.round(brushStart),
+            d1 = d3.time.year.offset(d0, Math.round((brushEnd - brushStart) / 864e5));
+        extent1 = [d0, d1];
+      }
+
+      // otherwise, if resizing, round both dates
+      else {
+        extent1 = brushStart.map(d3.time.year.round);
+
+        // if empty when rounded, use floor & ceil instead
+        if (extent1[0] >= extent1[1]) {
+          extent1[0] = d3.time.year.floor(brushStart);
+          extent1[1] = d3.time.year.ceil(brushEnd);
+        }
+      }
+
+      d3.select(this).call(brush.extent(extent1));
     }
 
     function brushend() {
