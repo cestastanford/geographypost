@@ -37,7 +37,13 @@
 <div id="tab2" onclick="javascript:showRegular()">
   <p class="btn btn-default">Status View</p>
 </div>
-<div id="tab3" onclick="javascript:showAbout()">
+<div id="tab3" onclick="javascript:showTerrain()">
+  <p class="btn btn-default">Terrain View</p>
+</div>
+<div id="tab4" onclick="javascript:showChron()">
+  <p class="btn btn-default">Chronology View</p>
+</div>
+<div id="tab5" onclick="javascript:showAbout()">
   <p class="btn btn-default">About</p>
 </div>
 
@@ -147,7 +153,7 @@ queue()
 var projection = d3.geo.azimuthalEqualArea()
     .translate([680, 380])
     .rotate([118.9, 0])
-    .center([1, 37.5])
+    .center([6, 37.5])
     .scale(1170 * 2);
 
 var svg = d3.select("body").append("svg")
@@ -514,7 +520,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
         d["year"] = d3.time.format("%Y").parse(d["year"]).getFullYear();
     });
 
-    var brush = d3.svg.brush()
+    brush = d3.svg.brush()
         .x(x)
         .on("brush", brushmove)
         .on("brushend", brushend);
@@ -613,8 +619,8 @@ d3.csv("data/years_count2.csv", function (error, post) {
         newscale = d3.scale.linear();
         newscale.domain(x.range()).range(x.domain()).clamp(true);
         b = brush.extent();
-        var year_begin = newscale(b[0]);
-        var year_end = newscale(b[1]);
+        year_begin = newscale(b[0]);
+        year_end = newscale(b[1]);
 
         brushStart = Math.ceil(year_begin);
         brushEnd = Math.ceil(year_end);
@@ -624,18 +630,6 @@ d3.csv("data/years_count2.csv", function (error, post) {
     }
 
     function brushend() {
-        newscale = d3.scale.linear();
-        newscale.domain(x.range()).range(x.domain()).clamp(true);
-        b = brush.empty() ? [newscale(0), newscale(2000)] : brush.extent();
-        var year_begin = newscale(b[0]);
-        var year_end = newscale(b[1]);
-
-        brushStart = Math.ceil(year_begin);
-        brushEnd = Math.ceil(year_end);
-
-      // To make math work, set a disestablish date of greater than the maximum
-      // date in the span of years if a post office is never disestablished.
-      var defaultDis = 1905;
 
       // When brushed, depending on option selected call a function to show and style points
       filterPoints();
@@ -922,7 +916,6 @@ function filterPoints() {
 };
 
 // For use in year-by-year: show only offices that were established or discontinued during that year
-// TODO(jheppler): Change this so it un-draws the points rather than hides them
 function showEstDis() {
 
     d3.selectAll("g.points-est").style("display", function (d) {
@@ -956,18 +949,6 @@ function showEstDis() {
         }
 
     });
-};
-
-// Reprojecting the map
-
-function reproject(newProjection) {
-    console.log("reprojecting");
-    path.projection(newProjection)
-    d3.selectAll("path.land").transition().duration(500).attr("d", path);
-    d3.selectAll("g.points-est").transition().duration(500).attr("transform", function (d) {
-        return "translate(" + newProjection([d.long, d.lat]) + ")";
-    });
-    d3.selectAll("path.boundary").transition().duration(500).attr("d", path);
 };
 
 function showRegular() {
@@ -1035,9 +1016,10 @@ function showEvent() {
     d3.select(".gbrush.brush.extent").attr("pointer-events", "none");
 };
 
-// When called, reprojects the map to the original projection
-function resetMap() {
+function resetBrush() {
 
+    brush.clear();
+    d3.select(".gbrush").call(brush);
 
 }
 
@@ -1049,72 +1031,6 @@ function showAbout() {
         document.getElementById("aboutText").style.display = "none";
     }
 };
-
-// If brush is active, highlights first possible year. Otherwise, moves the display forward a year.
-// function yearForward() {
-//     if (currYear == 0) {
-//         d3.selectAll(".brush").style("display", "none");
-//         d3.selectAll("rect.bar").style("opacity", 1);
-//         currYear = 1847;
-//         document.getElementById("returnBrush").style.visibility = "visible";
-//     } else {
-//         currYear++;
-//     }
-
-//     d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d) {
-//         if (d.x == currYear) {
-//             var marker = d3.select("barchart").append("rect")
-//                 .attr("x", x(d.x))
-//                 .attr("width", x.rangeBand())
-//                 .attr("height", barchart_height);
-//             return currYearColor;
-//         }
-//     });
-
-//     d3.selectAll("rect.bar").attr("height", function (d) {
-//         if (d.x == currYear) {
-//             d3.select(this).attr("y", 0);
-//             return barchart_height;
-//         } else {
-//             d3.select(this).attr("y", function (d) {
-//                 return y(d.y0) + y(d.y) - barchart_height;
-//             });
-//             return barchart_height - y(d.y);
-//         }
-//     });
-//     brushStart = currYear;
-//     brushEnd = currYear;
-//     showAll();
-
-//     // Update start and end years in upper right-hand corner of the map
-//     d3.select("#brushYears").text(currYear);
-// };
-
-// // If brush is active, highlights first possible year. Otherwise, moves the display forward a year.
-// function yearBack() {
-//     if (currYear == 0) {
-//         d3.selectAll(".brush").style("display", "none");
-//         d3.selectAll("rect.bar").style("opacity", 1);
-//         currYear = 1902;
-//         document.getElementById("returnBrush").style.visibility = "visible";
-//     } else {
-//         currYear--;
-//     }
-
-//     d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d) {
-//         if (d.x == currYear) {
-//             return currYearColor;
-//         }
-//     });
-//     console.log(currYear);
-//     brushStart = currYear;
-//     brushEnd = currYear;
-//     showAll();
-
-//     // Update start and end years in upper right-hand corner of the map
-//     d3.select("#brushYears").text(currYear);
-// }
-
 
 
 // *********************************************
@@ -1216,7 +1132,7 @@ function resizePath(d) {
     name="returnBrush"
     value="Remove Brush"
     class="btn btn-default"
-    onclick="resetMap()"/>Reset Map
+    onclick="resetBrush()"/>Reset Map
 
 </div>
 

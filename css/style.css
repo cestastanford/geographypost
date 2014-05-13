@@ -81,14 +81,14 @@ footer {
 
 #tab1 {
   position: absolute;
-  left: 755px;
+  left: 680px;
   top: 70px;
   pointer-events: all;
 
 }
 #tab2 {
   position: absolute;
-  left: 880px;
+  left: 789px;
   top: 70px;
   pointer-events:all;
 
@@ -96,7 +96,21 @@ footer {
 
 #tab3 {
   position: absolute;
-  left: 990px;
+  left: 880px;
+  top: 70px;
+  pointer-events: all;
+}
+
+#tab4 {
+  position: absolute;
+  left: 976px;
+  top: 70px;
+  pointer-events: all;
+}
+
+#tab5 {
+  position: absolute;
+  left: 1102px;
   top: 70px;
   pointer-events: all;
 }
@@ -143,7 +157,7 @@ footer {
   pointer-events: all;
   display: box;
   position: absolute;
-  top: 548px;
+  top: 648px;
   left: 65px;
 }
 
@@ -230,7 +244,7 @@ footer {
 }
 
 /*Label shown on hover*/
-.map-tooltip {
+/*.map-tooltip {
   background-color: #f99;
   border: 1px solid #808080;
   margin-top: 15px;
@@ -244,7 +258,7 @@ footer {
   position: absolute;
   z-index: 13;
   width: 85px;
-}
+}*/
 
 .mapText {
   font-size: 12px;
@@ -281,6 +295,23 @@ footer {
   fill-opacity: .8;
 }
 
+
+.tooltip {
+  font-size: 12pt;
+  color: black;
+  position: absolute;
+  top: 440px;
+  left: 25px;
+
+  /*float: right;*/
+  background-color: #fff;
+  border: 1px solid silver;
+  padding: .5em;
+  min-width: 175px;
+  pointer-events: none;
+  z-Index: 1000;
+  /*left: 1000px;*/
+}
 
 /* Graph Styles */
 
