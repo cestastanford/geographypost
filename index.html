@@ -16,6 +16,8 @@
 <script src="lib/jquery-1.10.2.min.js" charset="utf-8"></script>
 <script src="lib/jquery-ui.js" charset="utf-8"></script>
 <script src="lib/jquery.tipsy.js" charset="utf-8"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
 </head>
 
 <body>
@@ -63,43 +65,33 @@
 
 <script type="text/javascript" src="post.js"></script>
 
-<div id="aboutText" style="display:block">
+<!-- <div id="aboutText" style="display:block">
     <p>The U.S. postal system was the nation's largest communications network in the nineteenth century. This visualization maps the spread of that network in the American West by charting the opening and closing of individual post offices over time. Users can click-and-drag the bar chart to see the extent of the network for any span of years. "Normal View" offers a snapshot of offices that were in existence at any point during a particular period. "Detailed View" gives more information about individual offices - whether they were opened, closed, and whether or not they were in existence for the entirety of the selected period.</p>
 
     <p>Three disclaimers are in order. First, the map is missing a significant amount of data. We attempted to find the locations of post offices by looking them up in the <a href="http://geonames.usgs.gov/">Geographic Names Information System (GNIS)</a>, but we were not successful for many post offices. In order to capture this missing data, the sidebar displays how many post offices are mapped and how many are missing from the map for the selected time period. Second, we have not captured when an office changed names. A name change shows up as if it were a brand-new post office, with the old office "closing" and the new office "opening," even if they were one and the same post office in continuous operation. Finally, the close date of an office represents a final date at which an office ceased to exist. Multiple openings and closings of the same office are not represented.</p>
 
+    <h3>How to Use</h3>
+    <p>The stacked bar chart along the bottom is a timeline of post office openings (blue) and closings (red), year by year. Users can brush the chart to set spans of time and view how post offices changed over time. As you create a brush, you will notice that the points on the map update to reflect information about the given span of time. The "Duration View" shows the age of a post office. The more opaque a point is, the older a post office is for a given span of time. The "Status View" shows what happened to a post office within a span of time. You can clear out your selections by clicking "Reset Map."</p>
+
+    <h3>About the Map</h3>
     <p>The map uses data from Richard Helbock, United States Post Offices, Volumes 1-8. Available for purchase at: <a href="http://www.la-posta.com/images/ebooks.htm">http://www.la-posta.com/images/ebooks.htm</a>. We extend our gratitude to Richard Helbock for his incredible work to compile this data.</p>
 
     <p>This visualization was built using <a href="d3js.org">D3</a> by Jocelyn Hickox and <a href="http://jasonheppler.org/">Jason Heppler</a> as part of the <a href="http://www.stanford.edu/group/spatialhistory/cgi-bin/site/project.php?id=1059">Geography of the Post</a> project at Stanford's <a href="http://cesta.stanford.edu/">Center for Spatial and Textual Analysis</a>. Special thanks to Tara Balakrishnan for her initial work and to Elijah Meeks for additional technical help.</p>
 
 <input type="button" class="btn btn-info" value="Close" onclick="showAbout()"/>
 
-
-</div>
+</div> -->
 
 <div id="resetMap">
-  <form>
     <button
-    name="resetMap"
-    value="Reset Map"
-    class="btn btn-info"
-    onclick="resetMap()"/>Reset Map
-  </form>
+    name="returnBrush"
+    value="Remove Brush"
+    class="btn btn-default"
+    onclick="resetBrush()"/>Reset Map
+
 </div>
 
-<!-- <div class="btn-group" style="margin: 9px 0 5px;">
-    <input type="button" class="btn btn-info" id="returnBrush" value="Return" style="visibility:hidden" onclick="returnBrush()"/>
-</div> -->
-
 <div id="information">
-
-<!-- <p id="singleYearLabel">Select Single Year</p> -->
-
-<!-- <div class="btn-group" style="margin: 9px 0 5px;">
-    <input type="button" class="btn btn-info" id="forward" value=">>" onclick="yearForward()"/>
-      <input type="button" class="btn btn-info"id="back" value="<<" onclick="yearBack()"/>
-    <input type="button" class="btn btn-info" id="returnBrush" value="Return" style="visibility:hidden" onclick="returnBrush()"/>
-</div> -->
 
 <div id="selections">
   <h3 class="yearText">Filter by: </h3>
@@ -118,9 +110,26 @@
             onclick="filterPoints()"/>Discontinued
  </form>
 
- <button type="button" id="zoom_in" class="btn btn-info" onclick="manualZoom('in');">Zoom in</button>
-      <button type="button" id="zoom_out" class="btn btn-info" onclick="manualZoom('out');">Zoom out</button>
+<button type="button" id="zoom_in" class="btn btn-info" onclick="manualZoom('in');">Zoom in</button>
+<button type="button" id="zoom_out" class="btn btn-info" onclick="manualZoom('out');">Zoom out</button>
+
+<div id="tooltipView"></div>
 </div>
+
+<div style="width: 700px; margin: 0 auto;">
+<h3 id="#aboutMap">About the Map</h3>
+<p>The U.S. postal system was the nation's largest communications network in the nineteenth century. This visualization maps the spread of that network in the American West by charting the opening and closing of individual post offices over time. Users can click-and-drag the bar chart to see the extent of the network for any span of years. "Normal View" offers a snapshot of offices that were in existence at any point during a particular period. "Detailed View" gives more information about individual offices - whether they were opened, closed, and whether or not they were in existence for the entirety of the selected period.</p>
+
+ <p>Three disclaimers are in order. First, the map is missing a significant amount of data. We attempted to find the locations of post offices by looking them up in the <a href="http://geonames.usgs.gov/">Geographic Names Information System (GNIS)</a>, but we were not successful for many post offices. In order to capture this missing data, the sidebar displays how many post offices are mapped and how many are missing from the map for the selected time period. Second, we have not captured when an office changed names. A name change shows up as if it were a brand-new post office, with the old office "closing" and the new office "opening," even if they were one and the same post office in continuous operation. Finally, the close date of an office represents a final date at which an office ceased to exist. Multiple openings and closings of the same office are not represented.</p>
+
+ <h3>How to Use</h3>
+ <p>The stacked bar chart along the bottom is a timeline of post office openings (blue) and closings (red), year by year. Users can brush the chart to set spans of time and view how post offices changed over time. As you create a brush, you will notice that the points on the map update to reflect information about the given span of time. The "Duration View" shows the age of a post office. The more opaque a point is, the older a post office is for a given span of time. The "Status View" shows what happened to a post office within a span of time. You can clear out your selections by clicking "Reset Map."</p>
+
+ <h3>About the Data</h3>
+ <p>The map uses data from Richard Helbock, United States Post Offices, Volumes 1-8. Available for purchase at: <a href="http://www.la-posta.com/images/ebooks.htm">http://www.la-posta.com/images/ebooks.htm</a>. We extend our gratitude to Richard Helbock for his incredible work to compile this data.</p>
+
+ <p>This visualization was built using <a href="d3js.org">D3</a> by Jocelyn Hickox and <a href="http://jasonheppler.org/">Jason Heppler</a> as part of the <a href="http://www.stanford.edu/group/spatialhistory/cgi-bin/site/project.php?id=1059">Geography of the Post</a> project at Stanford's <a href="http://cesta.stanford.edu/">Center for Spatial and Textual Analysis</a>. Special thanks to Tara Balakrishnan for her initial work and to Elijah Meeks for additional technical help.</p>
+ </div>
 
 <footer>
   <span style="float:right;">

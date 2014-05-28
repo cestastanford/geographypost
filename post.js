@@ -4,25 +4,20 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-var width = $(document).width(),
+var width = 1200,
     height = 750,
-    margin = {
-        top: 20,
-        right: 40,
-        bottom: 30,
-        left: 20
-    },
-    barchart_width = $(document).width() - margin.left - margin.right - 300,
-    barchart_height = 180 - margin.top - margin.bottom,
+    barchart_margin = {top: 20, right: 40, bottom: 30, left: 20},
+    barchart_width = width - barchart_margin.left - barchart_margin.right - 250,
+    barchart_height = 180 - barchart_margin.top - barchart_margin.bottom,
+    centered,
     barWidth = 25,
     num_mapped = 50,
     totalShown = 100,
     mappedHeight = 57,
-    unmappedHeight = 43,
-    currYear = 0,
-    shownOpacity = .9,
-    fadeOpacity = 0,
-    refreshSet = 0;
+    unmappedHeight = 43;
+
+var z = d3.scale.ordinal().range(["steelblue", "indianred"]);
+currentZoom = -99;
 
 var zoom = d3.behavior.zoom()
     .translate([0, 0])
@@ -40,7 +35,7 @@ var y = d3.scale.linear().range([barchart_height, 0]);
 var legend_x = 25,
     legend_y = 30,
     legend_width = 175,
-    legend_height = 420,
+    legend_height = 520,
     legend_margin = 20
     key_y = 40,
     key_x = 16,
@@ -55,9 +50,23 @@ var autoColor = "#15b290";
 var currYearColor = "#CB709D";
 
 // Brush Dates
-var brushStart = 1849; // TODO(jheppler): find `floor` date automatically
-var brushEnd = 1903; // TODO(jheppler): find `ceiling` date automatically (end year + 1)
+var brushStart = 1849;
+var brushEnd = 1903;
 var defaultDis = 1905;
+var currYear = 0;
+var shownOpacity = .9;
+var fadeOpacity = 0;
+
+var tooltip = d3.select("body")
+  .append("tooltipView")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+// Get our data ready
+queue()
+    .defer(d3.json, "data/us.json")
+    .defer(d3.csv, "data/post_data.csv")
+    .await(ready);
 
 ///////////////////////////////////////////////////////////////////////
 //
@@ -65,22 +74,15 @@ var defaultDis = 1905;
 //
 ///////////////////////////////////////////////////////////////////////
 
-// Get our map data ready
-queue()
-    .defer(d3.json, "data/us.json")
-    .defer(d3.csv, "data/post_data.csv")
-    .defer(d3.csv, "data/years_count2.csv")
-    .await(ready);
-
 var projection = d3.geo.azimuthalEqualArea()
     .translate([680, 380])
     .rotate([118.9, 0])
-    .center([1, 37.5])
+    .center([6, 37.5])
     .scale(1170 * 2);
 
 var svg = d3.select("body").append("svg")
     .attr("width", width)
-    .attr("height", height)
+    .attr("height", "700")
     .attr("class", "mapviz");
 
 var graticule = d3.geo.graticule()
@@ -98,6 +100,7 @@ var postOfficePoints = svg.append("g");
 
 // Printing the map
 function ready(error, us, post) {
+    if (error) { console.log(error); }
 
     // A little coercion, since the CSV is untyped.
     post.forEach(function (d, i) {
@@ -107,6 +110,7 @@ function ready(error, us, post) {
         d.re1 = parseInt(d.Re1.split("-")[0]);
         d.re2 = parseInt(d.Re2.split("-")[0]);
         d.re3 = parseInt(d.Re3.split("-")[0]);
+        d.dis1 = parseInt(d.Dis1.split("-")[0]);
         d.dis1 = parseInt(d.Dis1.split("-")[0]);
         if (d.Dis1 == "") {
             d.dis1 = defaultDis;
@@ -150,7 +154,35 @@ function ready(error, us, post) {
         .append("use")
         .attr("xlink:href", "#land");
 
-    // Make the legend
+    svg
+     .call(zoom)
+     .on("mousewheel.zoom", null) // disable mousewheel
+     .on("wheel.zoom", null) // disable mousewheel
+     .on("dblclick.zoom", null);  // disable doubleclick zoom
+
+    // Printing all points
+    postoffices = postOfficePoints.selectAll("g.points-est")
+        .data(post)
+      .enter().append("g")
+        .attr("class", "points-est")
+        .style("fill", "midnightblue")
+        .attr("transform", function (d) {
+            return "translate(" + projection([d.long, d.lat]) + ")";
+        })
+        .on("mouseover", showLabel)
+        .on("mouseout", removeLabel);
+
+    postoffices
+        .append("circle")
+        .attr("r", 2.5)
+        .attr("class", "points-est")
+        .style("fill", autoColor);
+
+
+    //********************************
+    // Legend
+    //********************************
+
     var legend = svg.append("g")
         .attr("class", "legend");
 
@@ -163,13 +195,7 @@ function ready(error, us, post) {
         .style();
 
     // Numbers showing the start and end brush dates.
-    var brushYears = legend.append("g");
-
-    // Brush Dates
-    var brushStart = 1849; // TODO(jheppler): find `floor` date automatically
-    var brushEnd = 1903; // TODO(jheppler): find `ceiling` date automatically (end year + 1)
-    var defaultDis = 1905;
-
+    var brushYears = legend.append("g")
     brushYears.append("text")
         .attr("id", "brushYears")
         .classed("yearText", true)
@@ -177,7 +203,7 @@ function ready(error, us, post) {
         .attr("x", legend_x + 35)
         .attr("y", legend_y + 12);
 
-    var key = legend.append("g");
+    var key = legend.append("g")
 
     // Established during brush
     key.append("circle")
@@ -263,7 +289,7 @@ function ready(error, us, post) {
         })
         .attr("r", 5)
         .style("fill", autoColor)
-        .style("opacity", .5);
+        .style("opacity", .25);
 
     key.append("text")
         .attr("class", "legendText")
@@ -276,9 +302,11 @@ function ready(error, us, post) {
         })
         .text("Shorter Lifespan");
 
-    // Post office toggles
-    // Bar chart showing the percentage of mapped to unmapped data points within
-    // the given brush
+    //********************************
+    // Post office toggles - Chart showing the percentage of mapped to
+    // unmapped data points within the given brush
+    //********************************
+
     var mappedChart = legend.append("g");
 
     // Mapped bar
@@ -327,57 +355,37 @@ function ready(error, us, post) {
         .attr("y", mapped_y + 15)
         .attr("x", legend_x + 80);
 
-    svg
-      .call(zoom)
-      .on("mousewheel.zoom", null) // disable mousewheel
-      .on("wheel.zoom", null) // disable mousewheel
-      .on("dblclick.zoom", null);  // disable doubleclick zoom
-
-    // Printing points
-    postoffices = postOfficePoints.selectAll("g.points-est")
-        .data(post)
-      .enter().append("g")
-        .attr("class", "points-est")
-        .style("fill", "midnightblue")
-        .attr("transform", function (d) {
-            return "translate(" + projection([d.long, d.lat]) + ")";
-        })
-        .on("mouseover", showLabel)
-        .on("mouseout", function () {
-            d3.selectAll("text.map-tooltip").remove();
-            d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d, i) {
-                if (d.x == currYear) {
-                    return currYearColor;
-                } else {
-                    return z[i]
-                }
-            });
-        });
-
-        d3.selectAll("g.points-est").filter(function(d) {return d["long"] == 0 && d["long"] == ""}).remove()
-
-        unMappedPost = post.filter(function(el) {return el["long"] == 0 && el["long"] == ""});
-
-    postoffices
-        .append("circle")
-        .attr("r", 2.5)
-        .attr("class", "points-est")
-        .style("fill", autoColor);
-
     styleOpacity();
 
     // *********************************************
-    // Map Functions
+    // Map Callbacks
     // *********************************************
 
-    // On hover, lifespan of a post office
+    var labelSize = 16;
+
+    // Zoom function
+    function zoomed() {
+        postOfficePoints.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        carto.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        carto.select(".boundary").style("stroke-width", 1.5 / d3.event.scale + "px");
+        if (currentZoom != d3.event.scale) {
+            currentZoom = d3.event.scale;
+            svg.selectAll("circle.points-est").attr("r", function () {
+                return 2.5 / d3.event.scale + "px"
+            });
+        }
+        // labelSize = 16 / d3.event.scale;
+        // d3.select(".map-tooltip").style("font-size", 16 / d3.event.scale + "px");
+    }
+
+    // On hover, show point labels
     function showLabel(d, i) {
         this.parentNode.appendChild(this);
         var startDate = d.est;
         var endDate = d.dis1;
         d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d) {
 
-            if (d.x >= startDate && d.x <= (endDate || "2000")) {
+            if (d.x >= startDate && d.x <= endDate) {
                 return "goldenrod";
             }
 
@@ -386,44 +394,44 @@ function ready(error, us, post) {
             }
 
         });
+
+        tooltip.transition().duration(200).style("opacity", .8);
+        tooltip.html(tooltipText(d));
     }
 
-    // Some jQuery for the mouseover tooltip
-    $('g.points-est').tipsy({
-        gravity: 's',
-        html: true,
-        title: function () {
-            var d = this.__data__;
-            return "Name: " + d["Name"] + "<br>" + "Established: " + d["Est"] + "<br>" + "Discontinued: " + d["Dis1"];
-        }
-    });
+    function removeLabel(d,i) {
+      // d3.selectAll("text.map-tooltip").remove();
+      tooltip.transition().duration(500).style("opacity", 0);
 
+      d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d, i) {
+          if (d.x == currYear) {
+              return currYearColor;
+          } else {
+              return z[i]
+          }
+      });
+    }
 }
 
 
-///////////////////////////////////////////////////////////////////////
-//
-// Graphing the year counts as a bar chart.
-//
-///////////////////////////////////////////////////////////////////////
+//********************************************
+// Graphing the year counts as a bar chart
+//********************************************
 
 // Prepare the barchart canvas
 var barchart = d3.select("body").append("svg")
     .attr("class", "barchart")
     .attr("width", $(document).width())
-    .attr("height", barchart_height + margin.top + margin.bottom)
+.attr("height", barchart_height + barchart_margin.top + barchart_margin.bottom)
     .attr("y", height - barchart_height - 100)
     .attr("x", legend_x + legend_width)
     .append("g")
-    .attr("transform", "translate(" + (margin.left + legend_x + legend_width + 10) + "," + margin.top + ")");
+    .attr("transform", "translate(" + (barchart_margin.left + legend_x + legend_width + 10) + "," + barchart_margin.top + ")");
 
-var yDom = [0, 0];
-var xDom = [0, 0];
+// var yDom = [0, 0];
+// var xDom = [0, 0];
 
-// Set the stacked barchart colors
-var z = d3.scale.ordinal().range(["#0089cd", "#C00000"]);
-
-// Plot the barchart data
+// Plot the data
 d3.csv("data/years_count2.csv", function (error, post) {
 
     // Coercion since CSV is untyped
@@ -435,9 +443,9 @@ d3.csv("data/years_count2.csv", function (error, post) {
 
     brush = d3.svg.brush()
         .x(x)
-        // .on("brushstart", brushstart)
         .on("brush", brushmove)
         .on("brushend", brushend);
+        // .extent([0,0]);
 
     var freqs = d3.layout.stack()(["frequency", "frequency_discontinued"].map(function (type) {
         return post.map(function (d) {
@@ -455,28 +463,28 @@ d3.csv("data/years_count2.csv", function (error, post) {
         return d.y0 + d.y;
     })]);
 
-    yDom = y.domain;
-    xDom = x.domain;
+    // yDom = y.domain;
+    // xDom = x.domain;
 
     // Axis variables for the bar chart
-    x_axis = d3.svg.axis().scale(x).tickValues([1846, 1850, 1855, 1860, 1865, 1870, 1875, 1880, 1885, 1890, 1895, 1900]).orient("bottom");
+    x_axis = d3.svg.axis().scale(x).tickValues([1850, 1855, 1860, 1865, 1870, 1875, 1880, 1885, 1890, 1895, 1900]).orient("bottom");
     y_axis = d3.svg.axis().scale(y).orient("right");
 
     // x axis
     barchart.append("g")
         .attr("class", "x axis")
-        .call(x_axis)
         .style("fill", "#fff")
-        .attr("transform", "translate(0," + barchart_height + ")");
+        .attr("transform", "translate(0," + barchart_height + ")")
+        .call(x_axis);
 
     // y axis
     barchart.append("g")
         .attr("class", "y axis")
-        .call(y_axis)
         .style("fill", "#fff")
-        .attr("transform", "translate(" + barchart_width + ",0)");
+        .attr("transform", "translate(" + barchart_width + ",0)")
+        .call(y_axis);
 
-    // var w = barchart_width - margin.right - margin.left;
+    var w = barchart_width - barchart_margin.right - barchart_margin.left;
 
     // Add a group for each cause.
     var freq = barchart.selectAll("g.freq")
@@ -509,11 +517,11 @@ d3.csv("data/years_count2.csv", function (error, post) {
 
     // Draw the brush
     var arc = d3.svg.arc()
-      .outerRadius(barchart_height / 12)
+      .outerRadius(barchart_height / 15)
       .startAngle(0)
       .endAngle(function(d, i) { return i ? -Math.PI : Math.PI; });
 
-    var brushg = barchart.append("g")
+    brushg = barchart.append("g")
       .attr("class", "brush")
       .call(brush);
 
@@ -524,95 +532,66 @@ d3.csv("data/years_count2.csv", function (error, post) {
     brushg.selectAll("rect")
         .attr("height", barchart_height);
 
-
     // ****************************************
-    // Barchart Functions
+    // Barchart Callbacks
     // ****************************************
 
     function brushmove() {
-      // var extent0 = brush.extent(),
-          var extent1;
+        newscale = d3.scale.linear();
+        newscale.domain(x.range()).range(x.domain()).clamp(true);
+        b = brush.extent();
+        year_begin = newscale(b[0]);
+        year_end = newscale(b[1]);
 
-      // if dragging, preserve the width of the extent
-      if (d3.event.mode === "move") {
-        var d0 = d3.time.year.round(brushStart),
-            d1 = d3.time.year.offset(d0, Math.round((brushEnd - brushStart) / 864e5));
-        extent1 = [d0, d1];
-      }
+        brushStart = Math.ceil(year_begin);
+        brushEnd = Math.ceil(year_end);
 
-      // otherwise, if resizing, round both dates
-      else {
-        extent1 = brushStart.map(d3.time.year.round);
+        // Snap to rect edge
+        d3.select("g.brush").call(brush.extent([newscale.invert(brushStart), newscale.invert(brushEnd)]));
 
-        // if empty when rounded, use floor & ceil instead
-        if (extent1[0] >= extent1[1]) {
-          extent1[0] = d3.time.year.floor(brushStart);
-          extent1[1] = d3.time.year.ceil(brushEnd);
-        }
-      }
-
-      d3.select(this).call(brush.extent(extent1));
+        // Fade all years in the histogram not within the brush
+        d3.selectAll("rect.bar").style("opacity", function (d, i) {
+            return d.x >= year_begin && d.x < year_end ? "1" : ".4"
+        });
     }
 
     function brushend() {
 
-        b = brush.empty() ? [0, 2000] : brush.extent();
-        newscale = d3.scale.linear();
-        newscale.domain(x.range()).range(x.domain());
+      // When brushed, depending on option selected call a function to show and style points
+      filterPoints();
+      colorPoints();
+      styleOpacity();
 
-        // console.log(brush.extent());
+      // Update percent mapped vs percent unmapped bars. We want to show that some
+      // data isn't being mapped (where we're missing data, etc.)
+      mappedHeight = (num_mapped / totalShown) * 100;
+      unmappedHeight = ((totalShown - num_mapped) / totalShown) * 100;
+      d3.select("#onMap").attr("height", mappedHeight)
+          .attr("y", function () {
+              return mapped_y - mappedHeight
+          });
+      d3.select("#notOnMap").attr("height", unmappedHeight)
+          .attr("y", function () {
+              return mapped_y - unmappedHeight
+          });
+      d3.select("svg").append("brushYears");
+      d3.select("#mappedPercent").text(Math.round(mappedHeight) + "%");
+      d3.select("#unmappedPercent").text(Math.round(unmappedHeight) + "%");
+      d3.select("#mappedPercent").attr("y", mapped_y - mappedHeight - 3);
+      d3.select("#unmappedPercent").attr("y", mapped_y - unmappedHeight - 3);
 
-        var year_begin = newscale(b[0]); // remove?
-        var year_end = newscale(b[1]); // remove?
+      // Update start and end years in upper right-hand corner of the map
+      d3.select("#brushYears").text(brushStart + " - " + brushEnd);
 
-        brushStart = Math.ceil(year_begin);
-        brushEnd = Math.floor(year_end);
-
-        // To make math work, set a disestablish date of greater than the maximum
-        // date in the span of years if a post office is never disestablished.
-        var defaultDis = 1905;
-
-        // When brushed, depending on option selected call a function to show and style points
-        filterPoints();
-        colorPoints();
-        styleOpacity();
-
-        // Update percent mapped vs percent unmapped bars
-        mappedHeight = (num_mapped / totalShown) * 100;
-        //console.log(mappedHeight);
-        unmappedHeight = ((totalShown - num_mapped) / totalShown) * 100;
-        d3.select("#onMap").attr("height", mappedHeight)
-            .attr("y", function () {
-                return mapped_y - mappedHeight
-            });
-        d3.select("#notOnMap").attr("height", unmappedHeight)
-            .attr("y", function () {
-                return mapped_y - unmappedHeight
-            });
-        d3.select("svg").append("brushYears");
-        d3.select("#mappedPercent").text(Math.round(mappedHeight) + "%");
-        d3.select("#unmappedPercent").text(Math.round(unmappedHeight) + "%");
-        d3.select("#mappedPercent").attr("y", mapped_y - mappedHeight - 3);
-        d3.select("#unmappedPercent").attr("y", mapped_y - unmappedHeight - 3);
-
-        // Update start and end years in upper right-hand corner of the map
-        d3.select("#brushYears").text(brushStart + " - " + brushEnd);
-
-        // Fade all years in the histogram not within the brush
-        d3.selectAll("rect.bar").style("opacity", function (d, i) {
-            return d.x >= year_begin && d.x <= year_end ? "1" : ".4"
-        });
     }
+
 });
 
 // ****************************************
 // Post office status functions
-// These indicate one of four categories that a post office can be in during a
-// d3.js brush event.
 // ****************************************
 
 var arrSize = 4;
-
 //Returns whether or not the post office was alive at a given date
 function isAliveStart(estArr, lifeSpanArr, brushDate) {
     for (var i = 0; i < arrSize; i++) {
@@ -632,8 +611,8 @@ function isAliveEnd(estArr, lifeSpanArr, brushDate) {
     return false;
 };
 
-// If the post office was established during the brush, it existed during the brush.
-// Only post offices that were dead at the start and end of the brush are passed to this function.
+//If the post office was established during the brush, it existed during the brush.
+//Only post offices that were dead at the start and end of the brush are passed to this function.
 function isDuring(est, brushMin, brushMax) {
     for (var k = 0; k < arrSize; k++) {
         if (brushMin <= est[k] && est[k] <= brushMax) {
@@ -663,13 +642,13 @@ function colorPoints() {
 
         if (document.getElementById("regular").checked == true) {
             if (startAlive && endAlive) { //Alive throughout (or at least at start and end)
-                return aliveThroughout;
+                return aliveThroughout; //Teal
             } else if (startAlive && !endAlive) { //Dies during brush
-                return diesDuring;
+                return diesDuring; //Red
             } else if (!startAlive && endAlive) { //Established during brush
-                return bornDuring;
+                return bornDuring; //Yellow
             } else if (isDuring(estArr, brushStart, brushEnd)) { //Est. and dies during brush.
-                return aliveDuring;
+                return aliveDuring; //Pink
             } else {
                 return "black";
             }
@@ -679,12 +658,6 @@ function colorPoints() {
 
     });
 };
-
-///////////////////////////////////////////////////////////////////////
-//
-// Styling functions
-//
-///////////////////////////////////////////////////////////////////////
 
 function styleOpacity() {
 
@@ -724,6 +697,7 @@ function styleOpacity() {
                     }
                 }
             }
+            var nm = d.name;
             return percentAlive / brushSpan;
         }
 
@@ -747,7 +721,7 @@ function showEst() {
 
 function showDis() {
 
-    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {
+    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {//.style("opacity", function (d) {
 
         var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
 
@@ -762,7 +736,7 @@ function showDis() {
 
 function showEstAndDis() {
 
-    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {
+    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {//.style("opacity", function (d) {
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
         var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
@@ -804,7 +778,7 @@ function showAll() {
         // Buggy: does not account for discontinuity in otherwise-classed offices.
         // Buggy: only goes into effect when the brush is changed; not automatic.
         if (startAlive && endAlive) {
-            d3.select(this).style("opacity", shownOpacity);
+            d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
             if (d["Latitude"] == 0 || d["Latitude"] == "") {
                 num_unmapped++;
@@ -814,7 +788,7 @@ function showAll() {
                 return "block";
             }
         } else if (startAlive && !endAlive) {
-            d3.select(this).style("opacity", shownOpacity);
+            d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
             if (d["Latitude"] == 0 || d["Latitude"] == "") {
                 num_unmapped++;
@@ -824,7 +798,7 @@ function showAll() {
                 return "block";
             }
         } else if (!startAlive && endAlive) {
-            d3.select(this).style("opacity", shownOpacity);
+            d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
             if (d["Latitude"] == 0 || d["Latitude"] == "") {
                 num_unmapped++;
@@ -834,7 +808,7 @@ function showAll() {
                 return "block";
             }
         } else if (isDuring(estArr, brushStart, brushEnd)) {
-            d3.select(this).style("opacity", shownOpacity);
+            d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
             if (d["Latitude"] == 0 || d["Latitude"] == "") {
                 num_unmapped++;
@@ -847,9 +821,6 @@ function showAll() {
         return "none";
 
     });
-
-  totalShown += unMappedPost.filter(function(el) {return isDuring([el.est, el.re1, el.re2, el.re3],brushStart, brushEnd)}).length;
-
 };
 
 // When a filter checkbox is selected or unselected, update the points shown to reflect current filter
@@ -902,27 +873,6 @@ function showEstDis() {
     });
 };
 
-function clearPointData() {
-    d3.selectAll("g.points-est").transition().duration(600).style("display", "none");
-}
-
-function brushComplete() {
-  d3.selectAll("g.points-est").transition().duration(600).style("display", "block");
-}
-
-
-// Reprojecting the map
-
-function reproject(newProjection) {
-    console.log("reprojecting");
-    path.projection(newProjection)
-    d3.selectAll("path.land").transition().duration(500).attr("d", path);
-    d3.selectAll("g.points-est").transition().duration(500).attr("transform", function (d) {
-        return "translate(" + newProjection([d.long, d.lat]) + ")";
-    });
-    d3.selectAll("path.boundary").transition().duration(500).attr("d", path);
-};
-
 function showRegular() {
     fadeOpacity = .1;
     document.getElementById("regular").checked = true;
@@ -937,6 +887,7 @@ function showRegular() {
     colorPoints();
     styleOpacity();
     d3.selectAll("g.key").transition().duration(1000).style("opacity", .8);
+
     document.getElementById("keyCircle1").style.fill = bornDuring;
     document.getElementById("keyCircle2").style.fill = diesDuring;
     document.getElementById("keyCircle3").style.fill = aliveThroughout;
@@ -975,7 +926,27 @@ function showSnapshot() {
     d3.select("#keyLabel4").text("Shorter Lifespan");
 };
 
-// Fade in the box containing the information about the project
+function showEvent() {
+    document.getElementById("event").checked = true;
+    document.getElementById("tab3").style.zIndex = "-4";
+    document.getElementById("tab3").style.background = "#F5F1DE"
+    document.getElementById("tab2").style.zIndex = "-3";
+    document.getElementById("tab2").style.background = "#f7f7f7"
+    document.getElementById("tab1").style.zIndex = "-4";
+    document.getElementById("tab1").style.background = "#F5F1DE"
+
+    d3.select(".gbrush.brush.extent").attr("pointer-events", "none");
+};
+
+function resetBrush() {
+    // d3.select(".brush").call(brush.clear());
+    // d3.selectAll("rect.bar").style("opacity", "1");
+    brush.clear();
+    brushg.call(brush);
+
+}
+
+// Show information about the project
 function showAbout() {
     if (document.getElementById("aboutText").style.display == "none") {
         document.getElementById("aboutText").style.display = "block";
@@ -984,149 +955,49 @@ function showAbout() {
     }
 };
 
-// If brush is active, highlights first possible year. Otherwise, moves the display forward a year.
-function yearForward() {
-    // TODO(jheppler): Let's rework this so it uses the Brush properly
-    if (currYear == 0) {
-        d3.selectAll(".brush").style("display", "none");
-        d3.selectAll("rect.bar").style("opacity", 1);
-        currYear = 1847;
-        document.getElementById("returnBrush").style.visibility = "visible";
-    } else {
-        currYear++;
-    }
-
-    d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d) {
-        if (d.x == currYear) {
-            var marker = d3.select("barchart").append("rect")
-                .attr("x", x(d.x))
-                .attr("width", x.rangeBand())
-                .attr("height", barchart_height);
-            return currYearColor;
-        }
-    });
-
-    d3.selectAll("rect.bar").attr("height", function (d) {
-        if (d.x == currYear) {
-            d3.select(this).attr("y", 0);
-            return barchart_height;
-        } else {
-            d3.select(this).attr("y", function (d) {
-                return y(d.y0) + y(d.y) - barchart_height;
-            });
-            return barchart_height - y(d.y);
-        }
-    });
-    brushStart = currYear;
-    brushEnd = currYear;
-    showAll();
-
-    // Update start and end years in upper right-hand corner of the map
-    d3.select("#brushYears").text(currYear);
-};
-
-// If brush is active, highlights first possible year. Otherwise, moves the display forward a year.
-function yearBack() {
-    if (currYear == 0) {
-        d3.selectAll(".brush").style("display", "none");
-        d3.selectAll("rect.bar").style("opacity", 1);
-        currYear = 1902;
-        document.getElementById("returnBrush").style.visibility = "visible";
-    } else {
-        currYear--;
-    }
-
-    d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d) {
-        if (d.x == currYear) {
-            return currYearColor;
-        }
-    });
-    console.log(currYear);
-    brushStart = currYear;
-    brushEnd = currYear;
-    showAll();
-
-    // Update start and end years in upper right-hand corner of the map
-    d3.select("#brushYears").text(currYear);
-}
-
-function returnBrush() {
-    // currYear = 0;
-    document.getElementById("returnBrush").style.visibility = "hidden";
-    d3.selectAll("rect.bar").style("fill", function () {
-        return;
-    });
-    d3.selectAll(".brush").style("display", "block");
-    brushStart = 1849;
-    brushEnd = 1905;
-    d3.select("#brushYears").text(brushStart + " - " + brushEnd);
-}
-
-// *********************************************
-// Zoom functions
-// *********************************************
+/**
+ * Zoom functions
+ */
 
 function zoomed() {
-    // currentZoom = -99;
-
     postOfficePoints.attr("transform", "translate(" + zoom.translate()[0]  +"," + zoom.translate()[1] + ")scale(" + zoom.scale() + ")");
-
     carto.attr("transform", "translate(" + zoom.translate()[0] +"," + zoom.translate()[1] + ")scale(" + zoom.scale() + ")");
     carto.select(".boundary").style("stroke-width", (1 / zoom.scale()) + "px");
-
-    // currentZoom = -99;
-    // if (currentZoom != zoom.scale()) {
-    //     currentZoom = zoom.scale();
-    //     svg.selectAll("circle.points-est").attr("r", function () {
-    //         return 2.5 / zoom.scale() + "px"
-    //     });
-    // }
-    //
 }
-
-// function zoomend() {
-//     d3.selectAll("g.points-est").transition().duration(600).style("display", "block");
-// }
 
 function manualZoom(zoomDirection) {
 
+  var newTransX = (((zoom.translate()[0] - width/2) * 1.5) + width/2);
+  var newTransY = (((zoom.translate()[1] - height/2) * 1.5) + height/2);
+  var newScale = zoom.scale() * 1.5;
 
+    if (zoomDirection == "in") {
 
-var newTransX = (((zoom.translate()[0] - width/2) * 1.5) + width/2);
-var newTransY = (((zoom.translate()[1] - height/2) * 1.5) + height/2);
-var newScale = zoom.scale() * 1.5;
-
-  if (zoomDirection == "in") {
-
+    } else {
+      newTransX = (((zoom.translate()[0] - width/2) * .85) + width/2);
+      newTransY = (((zoom.translate()[1] - height/2) * .85) + height/2);
+      newScale = zoom.scale() * .85;
     }
-     else {
-    newTransX = (((zoom.translate()[0] - width/2) * .85) + width/2);
-    newTransY = (((zoom.translate()[1] - height/2) * .85) + height/2);
-    newScale = zoom.scale() * .85;
-      }
-postOfficePoints.attr("transform", "translate(" + newTransX +","+newTransY + ")scale(" + newScale + ")");
 
-carto.attr("transform", "translate(" + newTransX +","+newTransY + ")scale(" + newScale + ")");
-carto.select(".boundary").style("stroke-width", (1 / newScale) + "px");
+  postOfficePoints.attr("transform", "translate(" + newTransX +","+newTransY + ")scale(" + newScale + ")");
 
-  svg.selectAll("circle.points-est").attr("r", function () {
-      return (2.5 / newScale) + "px"
-  });
+  carto.attr("transform", "translate(" + newTransX +","+newTransY + ")scale(" + newScale + ")");
+  carto.select(".boundary").style("stroke-width", (1 / newScale) + "px");
 
-  zoom.translate([newTransX,newTransY]).scale(newScale);
-  // zoomed();
+    svg.selectAll("circle.points-est").attr("r", function () {
+        return (2.5 / newScale) + "px"
+    });
+
+    zoom.translate([newTransX,newTransY]).scale(newScale);
+    // zoomed();
 }
 
-function reprojectMap() {
+function tooltipText(d) {
+    var officeName        = isNaN(d.name) ? "n/a" : d.name,
+        officeEstablished = isNaN(d.Est) ? "n/a" : d.Est,
+        officeClosed      = isNaN(d.Dis1) ? "n/a" : d.Dis1;
 
-    var newProjection = d3.geo.azimuthalEqualArea()
-        .translate([680, 380])
-        .rotate([118.9, 0])
-        .center([11, 34.5])
-        .scale(770 * 2);
-
-    document.getElementById("mapView").checked = true;
-
-    reproject(newProjection);
-
+    return  "<h5>" + d.name + "</h5>" +
+            "Established: " + d.Est + "<br>" +
+            "Closed: " + d.Dis1 + "<br>";
 }
