@@ -14,7 +14,8 @@ var width = 1200,
     num_mapped = 50,
     totalShown = 100,
     mappedHeight = 57,
-    unmappedHeight = 43;
+    unmappedHeight = 43,
+    brushYearEnd = 2000;
 
 var z = d3.scale.ordinal().range(["steelblue", "indianred"]);
 currentZoom = -99;
@@ -50,8 +51,8 @@ var autoColor = "#15b290";
 var currYearColor = "#CB709D";
 
 // Brush Dates
-var brushStart = 1849;
-var brushEnd = 1903;
+var brushYearStart = 1849;
+var brushYearEnd = 1903;
 var defaultDis = 1905;
 var currYear = 0;
 var shownOpacity = .9;
@@ -82,7 +83,7 @@ var projection = d3.geo.azimuthalEqualArea()
 
 var svg = d3.select("body").append("svg")
     .attr("width", width)
-    .attr("height", "700")
+    .attr("height", height)
     .attr("class", "mapviz");
 
 var graticule = d3.geo.graticule()
@@ -199,7 +200,7 @@ function ready(error, us, post) {
     brushYears.append("text")
         .attr("id", "brushYears")
         .classed("yearText", true)
-        .text(brushStart + " - " + brushEnd)
+        .text(brushYearStart + " - " + brushYearEnd)
         .attr("x", legend_x + 35)
         .attr("y", legend_y + 12);
 
@@ -532,60 +533,62 @@ d3.csv("data/years_count2.csv", function (error, post) {
     brushg.selectAll("rect")
         .attr("height", barchart_height);
 
-    // ****************************************
-    // Barchart Callbacks
-    // ****************************************
 
-    function brushmove() {
-        newscale = d3.scale.linear();
-        newscale.domain(x.range()).range(x.domain()).clamp(true);
-        b = brush.extent();
-        year_begin = newscale(b[0]);
-        year_end = newscale(b[1]);
-
-        brushStart = Math.ceil(year_begin);
-        brushEnd = Math.ceil(year_end);
-
-        // Snap to rect edge
-        d3.select("g.brush").call(brush.extent([newscale.invert(brushStart), newscale.invert(brushEnd)]));
-
-        // Fade all years in the histogram not within the brush
-        d3.selectAll("rect.bar").style("opacity", function (d, i) {
-            return d.x >= year_begin && d.x < year_end ? "1" : ".4"
-        });
-    }
-
-    function brushend() {
-
-      // When brushed, depending on option selected call a function to show and style points
-      filterPoints();
-      colorPoints();
-      styleOpacity();
-
-      // Update percent mapped vs percent unmapped bars. We want to show that some
-      // data isn't being mapped (where we're missing data, etc.)
-      mappedHeight = (num_mapped / totalShown) * 100;
-      unmappedHeight = ((totalShown - num_mapped) / totalShown) * 100;
-      d3.select("#onMap").attr("height", mappedHeight)
-          .attr("y", function () {
-              return mapped_y - mappedHeight
-          });
-      d3.select("#notOnMap").attr("height", unmappedHeight)
-          .attr("y", function () {
-              return mapped_y - unmappedHeight
-          });
-      d3.select("svg").append("brushYears");
-      d3.select("#mappedPercent").text(Math.round(mappedHeight) + "%");
-      d3.select("#unmappedPercent").text(Math.round(unmappedHeight) + "%");
-      d3.select("#mappedPercent").attr("y", mapped_y - mappedHeight - 3);
-      d3.select("#unmappedPercent").attr("y", mapped_y - unmappedHeight - 3);
-
-      // Update start and end years in upper right-hand corner of the map
-      d3.select("#brushYears").text(brushStart + " - " + brushEnd);
-
-    }
 
 });
+
+// ****************************************
+// Barchart Callbacks
+// ****************************************
+
+function brushmove() {
+    newscale = d3.scale.linear();
+    newscale.domain(x.range()).range(x.domain()).clamp(true);
+    b = brush.extent();
+    year_begin = newscale(b[0]);
+    year_end = newscale(b[1]);
+
+    brushYearStart = Math.ceil(year_begin);
+    brushYearEnd = Math.ceil(year_end);
+
+    // Snap to rect edge
+    d3.select("g.brush").call(brush.extent([newscale.invert(brushYearStart), newscale.invert(brushYearEnd)]));
+
+    // Fade all years in the histogram not within the brush
+    d3.selectAll("rect.bar").style("opacity", function (d, i) {
+        return d.x >= year_begin && d.x < year_end ? "1" : ".4"
+    });
+}
+
+function brushend() {
+
+  // When brushed, depending on option selected call a function to show and style points
+  filterPoints();
+  colorPoints();
+  styleOpacity();
+
+  // Update percent mapped vs percent unmapped bars. We want to show that some
+  // data isn't being mapped (where we're missing data, etc.)
+  mappedHeight = (num_mapped / totalShown) * 100;
+  unmappedHeight = ((totalShown - num_mapped) / totalShown) * 100;
+  d3.select("#onMap").attr("height", mappedHeight)
+      .attr("y", function () {
+          return mapped_y - mappedHeight
+      });
+  d3.select("#notOnMap").attr("height", unmappedHeight)
+      .attr("y", function () {
+          return mapped_y - unmappedHeight
+      });
+  d3.select("svg").append("brushYears");
+  d3.select("#mappedPercent").text(Math.round(mappedHeight) + "%");
+  d3.select("#unmappedPercent").text(Math.round(unmappedHeight) + "%");
+  d3.select("#mappedPercent").attr("y", mapped_y - mappedHeight - 3);
+  d3.select("#unmappedPercent").attr("y", mapped_y - unmappedHeight - 3);
+
+  // Update start and end years in upper right-hand corner of the map
+  d3.select("#brushYears").text(brushYearStart + " - " + brushYearEnd);
+
+}
 
 // ****************************************
 // Post office status functions
@@ -637,8 +640,8 @@ function colorPoints() {
         var endAlive = false;
 
         // Determine whether or not a post is alive at the start and end of brush
-        startAlive = isAliveStart(estArr, lifespanArr, brushStart);
-        endAlive = isAliveEnd(estArr, lifespanArr, brushEnd);
+        startAlive = isAliveStart(estArr, lifespanArr, brushYearStart);
+        endAlive = isAliveEnd(estArr, lifespanArr, brushYearEnd);
 
         if (document.getElementById("regular").checked == true) {
             if (startAlive && endAlive) { //Alive throughout (or at least at start and end)
@@ -647,7 +650,7 @@ function colorPoints() {
                 return diesDuring; //Red
             } else if (!startAlive && endAlive) { //Established during brush
                 return bornDuring; //Yellow
-            } else if (isDuring(estArr, brushStart, brushEnd)) { //Est. and dies during brush.
+            } else if (isDuring(estArr, brushYearStart, brushYearEnd)) { //Est. and dies during brush.
                 return aliveDuring; //Pink
             } else {
                 return "black";
@@ -673,27 +676,27 @@ function styleOpacity() {
             var endAlive = false;
 
             // Determine whether or not a post is alive at the start and end of brush
-            startAlive = isAliveStart(estArr, lifespanArr, brushStart);
-            endAlive = isAliveEnd(estArr, lifespanArr, brushEnd);
+            startAlive = isAliveStart(estArr, lifespanArr, brushYearStart);
+            endAlive = isAliveEnd(estArr, lifespanArr, brushYearEnd);
 
-            var brushSpan = brushEnd - brushStart;
+            var brushSpan = brushYearEnd - brushYearStart;
             var percentAlive = 0;
 
             for (var i = 0; i < arrSize; i++) {
                 // If the post office was alive at the start of the brush, add appropriate number of years
-                if (estArr[i] < brushStart && brushStart <= (estArr[i] + lifespanArr[i])) {
-                    if (estArr[i] + lifespanArr[i] >= brushEnd) {
+                if (estArr[i] < brushYearStart && brushYearStart <= (estArr[i] + lifespanArr[i])) {
+                    if (estArr[i] + lifespanArr[i] >= brushYearEnd) {
                         return 1;
                     } else {
-                        percentAlive += (estArr[i] + lifespanArr[i] - brushStart);
+                        percentAlive += (estArr[i] + lifespanArr[i] - brushYearStart);
                     }
                 }
                 // Otherwise, if the post office was established any number of times during the brush, add appropriate years
-                else if (brushStart <= estArr[i] && estArr[i] <= brushEnd) {
-                    if (brushEnd >= (estArr[i] + lifespanArr[i])) {
+                else if (brushYearStart <= estArr[i] && estArr[i] <= brushYearEnd) {
+                    if (brushYearEnd >= (estArr[i] + lifespanArr[i])) {
                         percentAlive += lifespanArr[i];
                     } else {
-                        percentAlive += (brushEnd - estArr[i]);
+                        percentAlive += (brushYearEnd - estArr[i]);
                     }
                 }
             }
@@ -710,7 +713,7 @@ function showEst() {
         var estArr = [d.est, d.re1, d.re2, d.re3];
 
         for (var i = 0; i < arrSize; i++) {
-            if (estArr[i] <= brushEnd && estArr[i] >= brushStart) {
+            if (estArr[i] <= brushYearEnd && estArr[i] >= brushYearStart) {
                 return "block";
             }
         }
@@ -726,7 +729,7 @@ function showDis() {
         var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
 
         for (var i = 0; i < arrSize; i++) {
-            if (disArr[i] <= brushEnd && disArr[i] >= brushStart) {
+            if (disArr[i] <= brushYearEnd && disArr[i] >= brushYearStart) {
                 return "block";
             }
         }
@@ -742,9 +745,9 @@ function showEstAndDis() {
         var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
 
         for (var i = 0; i < arrSize; i++) {
-            if (disArr[i] <= brushEnd && disArr[i] >= brushStart) {
+            if (disArr[i] <= brushYearEnd && disArr[i] >= brushYearStart) {
                 return "block";
-            } else if (estArr[i] <= brushEnd && estArr[i] >= brushStart) {
+            } else if (estArr[i] <= brushYearEnd && estArr[i] >= brushYearStart) {
                 return "block";
             }
         }
@@ -771,8 +774,8 @@ function showAll() {
         var endAlive = false;
 
         // Determine whether or not a post is alive at the start and end of brush
-        startAlive = isAliveStart(estArr, lifespanArr, brushStart);
-        endAlive = isAliveEnd(estArr, lifespanArr, brushEnd);
+        startAlive = isAliveStart(estArr, lifespanArr, brushYearStart);
+        endAlive = isAliveEnd(estArr, lifespanArr, brushYearEnd);
 
         // Show all offices alive at some point if 'all', only established during that time if 'established', and only disestablished if 'disestablished' radio button selected
         // Buggy: does not account for discontinuity in otherwise-classed offices.
@@ -807,7 +810,7 @@ function showAll() {
                 num_mapped++;
                 return "block";
             }
-        } else if (isDuring(estArr, brushStart, brushEnd)) {
+        } else if (isDuring(estArr, brushYearStart, brushYearEnd)) {
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
             if (d["Latitude"] == 0 || d["Latitude"] == "") {
