@@ -1,6 +1,9 @@
 <!DOCTYPE html>
+<html>
 <head>
 <meta charset="utf-8">
+
+<title>Geography of the Post</title>
 
 <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet' type='text/css'>
 <link href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,300' rel='stylesheet' type='text/css'>
@@ -8,7 +11,6 @@
 <link href="css/style.css" rel="stylesheet" type="text/css">
 <link href="css/tipsy.css" rel="stylesheet" type="text/css">
 <link href="css/bootstrap.css" rel="stylesheet" type="text/css">
-<link href="css/gh-fork-ribbon.css" rel="stylesheet" type="text/css">
 
 <script src="lib/d3.v3.min.js" charset="utf-8"></script>
 <script src="lib/queue.v1.min.js" charset="utf-8"></script>
@@ -21,8 +23,6 @@
 </head>
 
 <body>
-<title>Geography of the Post</title>
-
 <div id="info">
     <h1>Geography of the Post</h1>
     <h3>U.S. Post Offices in the Nineteenth-Century West</h3>
@@ -40,9 +40,9 @@
 <div id="tab2" onclick="javascript:showRegular()">
   <p class="btn btn-info">Status View</p>
 </div>
-<div id="tab3" onclick="javascript:showAbout()">
+<!-- <div id="tab3" onclick="javascript:showAbout()">
   <p class="btn btn-info">About</p>
-</div>
+</div> -->
 
 
 <div id="datamode">
@@ -76,7 +76,7 @@
     <h3>About the Map</h3>
     <p>The map uses data from Richard Helbock, United States Post Offices, Volumes 1-8. Available for purchase at: <a href="http://www.la-posta.com/images/ebooks.htm">http://www.la-posta.com/images/ebooks.htm</a>. We extend our gratitude to Richard Helbock for his incredible work to compile this data.</p>
 
-    <p>This visualization was built using <a href="d3js.org">D3</a> by Jocelyn Hickox and <a href="http://jasonheppler.org/">Jason Heppler</a> as part of the <a href="http://www.stanford.edu/group/spatialhistory/cgi-bin/site/project.php?id=1059">Geography of the Post</a> project at Stanford's <a href="http://cesta.stanford.edu/">Center for Spatial and Textual Analysis</a>. Special thanks to Tara Balakrishnan for her initial work and to Elijah Meeks for additional technical help.</p>
+    <p>This visualization was built using <a href="d3js.org">D3.js</a> by <a href="http://jasonheppler.org/">Jason Heppler</a> and Jocelyn Hickox as part of the <a href="http://www.stanford.edu/group/spatialhistory/cgi-bin/site/project.php?id=1059">Geography of the Post</a> project at Stanford's <a href="http://cesta.stanford.edu/">Center for Spatial and Textual Analysis</a>. Special thanks to Tara Balakrishnan for her initial work and to Elijah Meeks for additional technical help.</p>
 
 <input type="button" class="btn btn-info" value="Close" onclick="showAbout()"/>
 
@@ -115,8 +115,9 @@
 
 <div id="tooltipView"></div>
 </div>
+</div>
 
-<div style="width: 700px; margin: 0 auto;">
+<div class="aboutText">
 <h3 id="#aboutMap">About the Map</h3>
 <p>The U.S. postal system was the nation's largest communications network in the nineteenth century. This visualization maps the spread of that network in the American West by charting the opening and closing of individual post offices over time. Users can click-and-drag the bar chart to see the extent of the network for any span of years. "Normal View" offers a snapshot of offices that were in existence at any point during a particular period. "Detailed View" gives more information about individual offices - whether they were opened, closed, and whether or not they were in existence for the entirety of the selected period.</p>
 
@@ -128,20 +129,15 @@
  <h3>About the Data</h3>
  <p>The map uses data from Richard Helbock, United States Post Offices, Volumes 1-8. Available for purchase at: <a href="http://www.la-posta.com/images/ebooks.htm">http://www.la-posta.com/images/ebooks.htm</a>. We extend our gratitude to Richard Helbock for his incredible work to compile this data.</p>
 
- <p>This visualization was built using <a href="d3js.org">D3</a> by Jocelyn Hickox and <a href="http://jasonheppler.org/">Jason Heppler</a> as part of the <a href="http://www.stanford.edu/group/spatialhistory/cgi-bin/site/project.php?id=1059">Geography of the Post</a> project at Stanford's <a href="http://cesta.stanford.edu/">Center for Spatial and Textual Analysis</a>. Special thanks to Tara Balakrishnan for her initial work and to Elijah Meeks for additional technical help.</p>
+ <p>This visualization was built using <a href="d3js.org">D3.js</a> by <a href="http://jasonheppler.org/">Jason Heppler</a> and Jocelyn Hickox as part of the <a href="http://www.stanford.edu/group/spatialhistory/cgi-bin/site/project.php?id=1059">Geography of the Post</a> project at Stanford's <a href="http://cesta.stanford.edu/">Center for Spatial and Textual Analysis</a>. Special thanks to Tara Balakrishnan for her initial work and to Elijah Meeks for additional technical help.</p>
  </div>
 
 <footer>
   <span style="float:right;">
-    Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache License 2.0</a>.
+    Code released under the <a href="http://heppler.mit-license.org/">MIT License</a>.
   </span>
 
   Built by <a href="http://www.jasonheppler.org">Jason Heppler</a>, Jocelyn Hickcox, and Tara Balakrishnan. Special thanks to Elijah Meeks.
 
 </footer>
-
-<div class="github-fork-ribbon-wrapper right">
-    <div class="github-fork-ribbon">
-        <a href="https://github.com/stanford-history/geographypost">Beta</a>
-    </div>
-</div>
+</body>
