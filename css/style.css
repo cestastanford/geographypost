@@ -5,14 +5,12 @@ body {
   background-color: #000; /*#f0f0f0 #F1F6F8;*/
   text-rendering: optimizeLegibility;
   margin: 0;
-  width: 1060px;
   pointer-events: none;
-  /*z-index: -20;*/
 }
 
 td, th {
-    padding: 4px 8px;
-    font-size: 14px;
+  padding: 4px 8px;
+  font-size: 14px;
 }
 
 td {
@@ -38,18 +36,19 @@ footer {
   font-size: 12px;
   margin: 0 auto;
   width: 90%;
+  pointer-events: all;
 }
 
 /*svg text {
   font-size: 12px;
 }*/
 
-#placeholder {
+/*#placeholder {
   height: 40px;
   pointer-events: none;
   opacity: 0;
   z-index: -15;
-}
+}*/
 
 #gibberish {
   pointer-events: none;
@@ -112,6 +111,13 @@ footer {
   position: absolute;
   left: 1102px;
   top: 70px;
+  pointer-events: all;
+}
+
+.aboutText {
+  width: 700px;
+  margin: 0 auto;
+  margin-top: -230px;
   pointer-events: all;
 }
 
@@ -317,7 +323,7 @@ footer {
 
 .barchart {
   z-index: 30;
-  display: box;
+  display: block;
   visibility: visible;
   position: relative;
   top: -255px;
@@ -469,7 +475,7 @@ footer {
   vertical-align: middle;
 }
 
-#aboutText {
+/*#aboutText {
   float: middle;
   position: relative;
   width: 900px;
@@ -482,7 +488,7 @@ footer {
   z-index: 50;
   pointer-events: visible;
   box-shadow: 5px 5px 10px #333;
-}
+}*/
 
 #about {
     margin: 0;
