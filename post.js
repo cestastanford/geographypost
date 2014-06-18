@@ -881,8 +881,8 @@ function showRegular() {
     document.getElementById("regular").checked = true;
     document.getElementById("tab2").style.zIndex = "-3";
     document.getElementById("tab2").style.background = "#f7f7f7"
-    document.getElementById("tab3").style.zIndex = "-5";
-    document.getElementById("tab3").style.background = "#F5F1DE"
+    // document.getElementById("tab3").style.zIndex = "-5";
+    // document.getElementById("tab3").style.background = "#F5F1DE"
     document.getElementById("tab1").style.zIndex = "-4";
     document.getElementById("tab1").style.background = "#F5F1DE"
     showAll();
@@ -931,8 +931,8 @@ function showSnapshot() {
 
 function showEvent() {
     document.getElementById("event").checked = true;
-    document.getElementById("tab3").style.zIndex = "-4";
-    document.getElementById("tab3").style.background = "#F5F1DE"
+    // document.getElementById("tab3").style.zIndex = "-4";
+    // document.getElementById("tab3").style.background = "#F5F1DE"
     document.getElementById("tab2").style.zIndex = "-3";
     document.getElementById("tab2").style.background = "#f7f7f7"
     document.getElementById("tab1").style.zIndex = "-4";
