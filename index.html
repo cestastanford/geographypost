@@ -9,16 +9,13 @@
 <link href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,300' rel='stylesheet' type='text/css'>
 
 <link href="css/style.css" rel="stylesheet" type="text/css">
-<link href="css/tipsy.css" rel="stylesheet" type="text/css">
 <link href="css/bootstrap.css" rel="stylesheet" type="text/css">
 
 <script src="lib/d3.v3.min.js" charset="utf-8"></script>
 <script src="lib/queue.v1.min.js" charset="utf-8"></script>
 <script src="lib/topojson.v1.min.js" charset="utf-8"></script>
-<script src="lib/jquery-1.10.2.min.js" charset="utf-8"></script>
-<script src="lib/jquery-ui.js" charset="utf-8"></script>
-<script src="lib/jquery.tipsy.js" charset="utf-8"></script>
-<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
+
 
 </head>
 
@@ -29,6 +26,7 @@
     <div id="about">
         <ul>
             <li>Cameron Blevins</li>
+            <li>Jason Heppler</li>
             <li><span class="sc">Stanford University</span></li>
         </ul>
     </div>
@@ -40,9 +38,6 @@
 <div id="tab2" onclick="javascript:showRegular()">
   <p class="btn btn-info">Status View</p>
 </div>
-<!-- <div id="tab3" onclick="javascript:showAbout()">
-  <p class="btn btn-info">About</p>
-</div> -->
 
 
 <div id="datamode">
@@ -71,7 +66,6 @@
     value="Remove Brush"
     class="btn btn-default"
     onclick="resetBrush()"/>Reset Map
-
 </div>
 
 <div id="information">
@@ -117,7 +111,7 @@
 
 <footer>
   <span style="float:right;">
-    Code released under the <a href="http://heppler.mit-license.org/">MIT License</a>.
+    <a href="https://github.com/stanford-history/geographypost">Code</a> released under the <a href="http://heppler.mit-license.org/">MIT License</a>.
   </span>
 
   Built by <a href="http://www.jasonheppler.org">Jason Heppler</a>, Jocelyn Hickcox, and Tara Balakrishnan. Special thanks to Elijah Meeks.

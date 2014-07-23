@@ -422,7 +422,7 @@ function ready(error, us, post) {
 // Prepare the barchart canvas
 var barchart = d3.select("body").append("svg")
     .attr("class", "barchart")
-    .attr("width", $(document).width())
+    .attr("width", "100%")
 .attr("height", barchart_height + barchart_margin.top + barchart_margin.bottom)
     .attr("y", height - barchart_height - 100)
     .attr("x", legend_x + legend_width)
@@ -533,8 +533,6 @@ d3.csv("data/years_count2.csv", function (error, post) {
     brushg.selectAll("rect")
         .attr("height", barchart_height);
 
-
-
 });
 
 // ****************************************
@@ -542,22 +540,19 @@ d3.csv("data/years_count2.csv", function (error, post) {
 // ****************************************
 
 function brushmove() {
-    newscale = d3.scale.linear();
-    newscale.domain(x.range()).range(x.domain()).clamp(true);
-    b = brush.extent();
-    year_begin = newscale(b[0]);
-    year_end = newscale(b[1]);
+  y.domain(x.range()).range(x.domain()).clamp(true);
+  b = brush.extent();
 
-    brushYearStart = Math.ceil(year_begin);
-    brushYearEnd = Math.ceil(year_end);
+  brushYearStart = (brush.empty()) ? "1849" : Math.ceil(y(b[0]));
+  brushYearEnd = (brush.empty()) ? "1903" : Math.ceil(y(b[1]));
 
-    // Snap to rect edge
-    d3.select("g.brush").call(brush.extent([newscale.invert(brushYearStart), newscale.invert(brushYearEnd)]));
+  // Snap to rect edge
+  d3.select("g.brush").call((brush.empty()) ? brush.clear() : brush.extent([y.invert(brushYearStart), y.invert(brushYearEnd)]));
 
-    // Fade all years in the histogram not within the brush
-    d3.selectAll("rect.bar").style("opacity", function (d, i) {
-        return d.x >= year_begin && d.x < year_end ? "1" : ".4"
-    });
+  // Fade all years in the histogram not within the brush
+  d3.selectAll("rect.bar").style("opacity", function (d, i) {
+    return d.x >= brushYearStart && d.x < brushYearEnd || brush.empty() ? "1" : ".4"
+  });
 }
 
 function brushend() {
@@ -942,11 +937,9 @@ function showEvent() {
 };
 
 function resetBrush() {
-    // d3.select(".brush").call(brush.clear());
-    // d3.selectAll("rect.bar").style("opacity", "1");
-    brush.clear();
-    brushg.call(brush);
-
+  brush
+    .clear()
+    .event(d3.select(".brush"));
 }
 
 // Show information about the project

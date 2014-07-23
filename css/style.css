@@ -235,8 +235,8 @@ footer {
 .points-est {
     fill: green;
     fill-opacity: .7;
-   /* stroke: #888;
-    stroke-width: .7px;*/
+    stroke: black;
+    stroke-width: .3px;
     pointer-events: visible;
     z-index: 20;
 }
