@@ -82,7 +82,7 @@ var projection = d3.geo.azimuthalEqualArea()
     .scale(1170 * 2);
 
 var svg = d3.select("body").append("svg")
-    .attr("width", width)
+    .attr("width", "100%")
     .attr("height", height)
     .attr("class", "mapviz");
 
