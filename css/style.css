@@ -292,13 +292,14 @@ footer {
 
 
 #onMap {
-  fill: #009939;
+  /*fill: #009939;*/
+  fill: #15b290;
   fill-opacity: .8;
 }
 
 #notOnMap {
-  fill: #C00000;
-  fill-opacity: .8;
+  fill: #A6A6A6;
+  fill-opacity: 1.0;
 }
 
 
