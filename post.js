@@ -13,11 +13,14 @@ var width = 1200,
     barWidth = 25,
     num_mapped = 50,
     totalShown = 100,
-    mappedHeight = 57,
-    unmappedHeight = 43,
+    mappedHeight = 71,
+    unmappedHeight = 29,
     brushYearEnd = 2000;
 
-var z = d3.scale.ordinal().range(["steelblue", "indianred"]);
+/*var z = d3.scale.ordinal().range(["steelblue", "indianred"]);
+currentZoom = -99;*/
+
+var z = d3.scale.ordinal().range(["#193441", "#3E606F"]);
 currentZoom = -99;
 
 var zoom = d3.behavior.zoom()
@@ -51,7 +54,7 @@ var autoColor = "#15b290";
 var currYearColor = "#CB709D";
 
 // Brush Dates
-var brushYearStart = 1849;
+var brushYearStart = 1847;
 var brushYearEnd = 1903;
 var defaultDis = 1905;
 var currYear = 0;
@@ -437,7 +440,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
 
     // Coercion since CSV is untyped
     post.forEach(function (d) {
-        d["frequency"] = +d["frequency"];
+        d["frequency_established"] = +d["frequency_established"];
         d["frequency_discontinued"] = +d["frequency_discontinued"];
         d["year"] = d3.time.format("%Y").parse(d["year"]).getFullYear();
     });
@@ -448,7 +451,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
         .on("brushend", brushend);
         // .extent([0,0]);
 
-    var freqs = d3.layout.stack()(["frequency", "frequency_discontinued"].map(function (type) {
+    var freqs = d3.layout.stack()(["frequency_established", "frequency_discontinued"].map(function (type) {
         return post.map(function (d) {
             return {
                 x: d["year"],
