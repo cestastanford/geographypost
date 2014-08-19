@@ -17,9 +17,6 @@ var width = 1200,
     unmappedHeight = 29,
     brushYearEnd = 2000;
 
-/*var z = d3.scale.ordinal().range(["steelblue", "indianred"]);
-currentZoom = -99;*/
-
 var z = d3.scale.ordinal().range(["#193441", "#3E606F"]);
 currentZoom = -99;
 
@@ -27,9 +24,7 @@ var zoom = d3.behavior.zoom()
     .translate([0, 0])
     .scale(1)
     .scaleExtent([.8, 8])
-    // .on("zoomstart", zoomstart)
     .on("zoom", zoomed);
-    // .on("zoomend", zoomend);
 
 // Scales
 var x = d3.scale.ordinal().rangeRoundBands([0, barchart_width - 60], .1);
@@ -132,8 +127,8 @@ function ready(error, us, post) {
         if (d.Dis4 == "") {
             d.dis4 = defaultDis;
         }
-        d.lat = d["Latitude"];
-        d.long = d["Longitude"];
+        d.latitude = d["Latitude"];
+        d.longitude = d["Longitude"];
     });
 
     carto.append("path")
@@ -171,7 +166,7 @@ function ready(error, us, post) {
         .attr("class", "points-est")
         .style("fill", "midnightblue")
         .attr("transform", function (d) {
-            return "translate(" + projection([d.long, d.lat]) + ")";
+            return "translate(" + projection([d.longitude, d.latitude]) + ")";
         })
         .on("mouseover", showLabel)
         .on("mouseout", removeLabel);
@@ -449,7 +444,6 @@ d3.csv("data/years_count2.csv", function (error, post) {
         .x(x)
         .on("brush", brushmove)
         .on("brushend", brushend);
-        // .extent([0,0]);
 
     var freqs = d3.layout.stack()(["frequency_established", "frequency_discontinued"].map(function (type) {
         return post.map(function (d) {
@@ -467,9 +461,6 @@ d3.csv("data/years_count2.csv", function (error, post) {
         return d.y0 + d.y;
     })]);
 
-    // yDom = y.domain;
-    // xDom = x.domain;
-
     // Axis variables for the bar chart
     x_axis = d3.svg.axis().scale(x).tickValues([1850, 1855, 1860, 1865, 1870, 1875, 1880, 1885, 1890, 1895, 1900]).orient("bottom");
     y_axis = d3.svg.axis().scale(y).orient("right");
@@ -485,7 +476,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
     barchart.append("g")
         .attr("class", "y axis")
         .style("fill", "#fff")
-        .attr("transform", "translate(" + barchart_width + ",0)")
+        .attr("transform", "translate(" + (barchart_width - 75) + ",0)")
         .call(y_axis);
 
     var w = barchart_width - barchart_margin.right - barchart_margin.left;
@@ -546,7 +537,7 @@ function brushmove() {
   y.domain(x.range()).range(x.domain()).clamp(true);
   b = brush.extent();
 
-  brushYearStart = (brush.empty()) ? "1849" : Math.ceil(y(b[0]));
+  brushYearStart = (brush.empty()) ? "1847" : Math.ceil(y(b[0]));
   brushYearEnd = (brush.empty()) ? "1903" : Math.ceil(y(b[1]));
 
   // Snap to rect edge
@@ -586,6 +577,12 @@ function brushend() {
   // Update start and end years in upper right-hand corner of the map
   d3.select("#brushYears").text(brushYearStart + " - " + brushYearEnd);
 
+}
+
+function resetBrush() {
+  brush
+    .clear()
+    .event(d3.select(".brush"));
 }
 
 // ****************************************
@@ -877,10 +874,10 @@ function showEstDis() {
 function showRegular() {
     fadeOpacity = .1;
     document.getElementById("regular").checked = true;
-    document.getElementById("tab2").style.zIndex = "-3";
-    document.getElementById("tab2").style.background = "#f7f7f7"
-    document.getElementById("tab1").style.zIndex = "-4";
-    document.getElementById("tab1").style.background = "#F5F1DE"
+    document.getElementById("statusView").style.zIndex = "-3";
+    document.getElementById("statusView").style.background = "#f7f7f7"
+    document.getElementById("durationView").style.zIndex = "-4";
+    document.getElementById("durationView").style.background = "#F5F1DE"
     showAll();
     document.getElementById("selections").style.visibility = "visible";
     colorPoints();
@@ -903,10 +900,10 @@ function showRegular() {
 function showSnapshot() {
     fadeOpacity = 0;
     document.getElementById("snapshot").checked = true;
-    document.getElementById("tab2").style.zIndex = "-4";
-    document.getElementById("tab2").style.background = "#F5F1DE";
-    document.getElementById("tab1").style.zIndex = "-3";
-    document.getElementById("tab1").style.background = "#f7f7f7"
+    document.getElementById("statusView").style.zIndex = "-4";
+    document.getElementById("statusView").style.background = "#F5F1DE";
+    document.getElementById("durationView").style.zIndex = "-3";
+    document.getElementById("durationView").style.background = "#f7f7f7"
     showAll();
     colorPoints();
     d3.selectAll("g.key").transition().duration(1000).style("opacity", 0);
@@ -927,21 +924,13 @@ function showSnapshot() {
 
 function showEvent() {
     document.getElementById("event").checked = true;
-    // document.getElementById("tab3").style.zIndex = "-4";
-    // document.getElementById("tab3").style.background = "#F5F1DE"
-    document.getElementById("tab2").style.zIndex = "-3";
-    document.getElementById("tab2").style.background = "#f7f7f7"
-    document.getElementById("tab1").style.zIndex = "-4";
-    document.getElementById("tab1").style.background = "#F5F1DE"
+    document.getElementById("statusView").style.zIndex = "-3";
+    document.getElementById("statusView").style.background = "#f7f7f7"
+    document.getElementById("durationView").style.zIndex = "-4";
+    document.getElementById("durationView").style.background = "#F5F1DE"
 
     d3.select(".gbrush.brush.extent").attr("pointer-events", "none");
 };
-
-function resetBrush() {
-  brush
-    .clear()
-    .event(d3.select(".brush"));
-}
 
 // Show information about the project
 function showAbout() {
