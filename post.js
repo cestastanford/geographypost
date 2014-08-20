@@ -34,7 +34,7 @@ var y = d3.scale.linear().range([barchart_height, 0]);
 var legend_x = 25,
     legend_y = 30,
     legend_width = 175,
-    legend_height = 520,
+    legend_height = 620,
     legend_margin = 20
     key_y = 40,
     key_x = 16,
@@ -427,16 +427,13 @@ var barchart = d3.select("body").append("svg")
     .append("g")
     .attr("transform", "translate(" + (barchart_margin.left + legend_x + legend_width + 10) + "," + barchart_margin.top + ")");
 
-// var yDom = [0, 0];
-// var xDom = [0, 0];
-
 // Plot the data
 d3.csv("data/years_count2.csv", function (error, post) {
 
     // Coercion since CSV is untyped
     post.forEach(function (d) {
-        d["frequency_established"] = +d["frequency_established"];
-        d["frequency_discontinued"] = +d["frequency_discontinued"];
+        d["established"] = +d["established"];
+        d["discontinued"] = +d["discontinued"];
         d["year"] = d3.time.format("%Y").parse(d["year"]).getFullYear();
     });
 
@@ -445,7 +442,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
         .on("brush", brushmove)
         .on("brushend", brushend);
 
-    var freqs = d3.layout.stack()(["frequency_established", "frequency_discontinued"].map(function (type) {
+    var freqs = d3.layout.stack()(["established", "discontinued"].map(function (type) {
         return post.map(function (d) {
             return {
                 x: d["year"],
@@ -476,7 +473,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
     barchart.append("g")
         .attr("class", "y axis")
         .style("fill", "#fff")
-        .attr("transform", "translate(" + (barchart_width - 75) + ",0)")
+        .attr("transform", "translate(" + (barchart_width - 70) + ",0)")
         .call(y_axis);
 
     var w = barchart_width - barchart_margin.right - barchart_margin.left;
@@ -534,7 +531,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
 // ****************************************
 
 function brushmove() {
-  y.domain(x.range()).range(x.domain()).clamp(true);
+  y.domain(x.range()).range(x.domain());//.clamp(true);
   b = brush.extent();
 
   brushYearStart = (brush.empty()) ? "1847" : Math.ceil(y(b[0]));
@@ -568,13 +565,13 @@ function brushend() {
       .attr("y", function () {
           return mapped_y - unmappedHeight
       });
-  d3.select("svg").append("brushYears");
   d3.select("#mappedPercent").text(Math.round(mappedHeight) + "%");
   d3.select("#unmappedPercent").text(Math.round(unmappedHeight) + "%");
   d3.select("#mappedPercent").attr("y", mapped_y - mappedHeight - 3);
   d3.select("#unmappedPercent").attr("y", mapped_y - unmappedHeight - 3);
 
   // Update start and end years in upper right-hand corner of the map
+  d3.select("svg").append("brushYears");
   d3.select("#brushYears").text(brushYearStart + " - " + brushYearEnd);
 
 }
@@ -920,6 +917,8 @@ function showSnapshot() {
     document.getElementById("keyCircle4").style.fill = autoColor;
     document.getElementById("keyCircle4").style.opacity = .25;
     d3.select("#keyLabel4").text("Shorter Lifespan");
+
+
 };
 
 function showEvent() {

@@ -32,13 +32,12 @@
     </div>
 </div>
 
-<div id="tab1" onclick="javascript:showSnapshot()">
+<div id="durationView" class="durationView" onclick="javascript:showSnapshot()">
   <p class="btn btn-info">Duration View</p>
 </div>
-<div id="tab2" onclick="javascript:showRegular()">
+<div id="statusView" class="statusView" onclick="javascript:showRegular()">
   <p class="btn btn-info">Status View</p>
 </div>
-
 
 <div id="datamode">
   <form display: "inline">
@@ -72,7 +71,7 @@
 
 <div id="selections">
   <h3 class="yearText">Filter by: </h3>
-  <form display= "box">
+  <form display="box" class="estSelections">
     <input type="checkbox"
             id="estab"
             class="legendText"
