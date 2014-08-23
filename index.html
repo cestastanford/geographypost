@@ -27,6 +27,8 @@
     <div class="navbar-header">
     <span class="navbar-title">Geography of the Post</span>
     <span class="navbar-subtitle">U.S. Post Offices in the Nineteenth-Century West</span>
+    <button type="button" id="durationView" class="btn btn-info" onclick="showSnapshot()">Duration View</button>
+    <button type="button" id="statusView" class="btn btn-info" onclick="showRegular()">Status View</button>
         <div id="about">
             <ul>
                 <li>Cameron Blevins</li>
@@ -37,18 +39,6 @@
     </div>
   </div><!-- /.container-fluid -->
 </nav>
-
-<!-- <div id="info">
-    <h1>Geography of the Post</h1>
-    <h3>U.S. Post Offices in the Nineteenth-Century West</h3>
-    <div id="about">
-        <ul>
-            <li>Cameron Blevins</li>
-            <li>Jason Heppler</li>
-            <li><span class="sc">Stanford University</span></li>
-        </ul>
-    </div>
-</div> -->
 
 <div id="datamode">
   <form display: "inline">
@@ -100,16 +90,6 @@
 
 <button type="button" id="zoom_in" class="btn btn-info" onclick="manualZoom('in');">Zoom in</button>
 <button type="button" id="zoom_out" class="btn btn-info" onclick="manualZoom('out');">Zoom out</button>
-<br/>
-<button type="button" id="durationView" class="btn btn-info" onclick="showSnapshot()">Duration View</button>
-<button type="button" id="durationView" class="btn btn-info" onclick="showRegular()">Status View</button>
-<!-- <div id="durationView" class="durationView" onclick="javascript:showSnapshot()">
-  <p class="btn btn-info">Duration View</p>
-</div>
-<div id="statusView" class="statusView" onclick="javascript:showRegular()">
-  <p class="btn btn-info">Status View</p>
-</div>
- -->
 </div>
 </div>
 

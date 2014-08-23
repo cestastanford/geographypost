@@ -65,7 +65,7 @@ footer {
   border-radius: 15px;
 }
 
-/*#durationView {
+#durationView {
   position: absolute;
   left: 680px;
   top: 8px;
@@ -78,7 +78,7 @@ footer {
   top: 8px;
   pointer-events:all;
 
-}*/
+}
 
 .aboutText {
   width: 70%;
