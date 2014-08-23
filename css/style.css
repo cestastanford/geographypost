@@ -65,20 +65,20 @@ footer {
   border-radius: 15px;
 }
 
-#durationView {
+/*#durationView {
   position: absolute;
   left: 680px;
-  top: 70px;
+  top: 8px;
   pointer-events: all;
 
 }
 #statusView {
   position: absolute;
   left: 789px;
-  top: 70px;
+  top: 8px;
   pointer-events:all;
 
-}
+}*/
 
 .aboutText {
   width: 70%;
@@ -108,8 +108,8 @@ footer {
   pointer-events: all;
   display: box;
   position: absolute;
-  top: 745px;
-  left: 65px;
+  top: 620px;
+  left: 45px;
 }
 
 #selections {
@@ -117,7 +117,7 @@ footer {
   pointer-events: all;
   position: absolute;
   top: 308px;
-  left: 40px;
+  left: 20px;
 }
 
 #selections h3 {
@@ -145,10 +145,10 @@ footer {
 /* Map Styles */
 
 #legendBox {
-  fill: #5D5D5D;
-  opacity: .8;
-  stroke: #333;
-  stroke-width: 2px;
+  fill: #222;
+  /*opacity: .8;*/
+  stroke: #080808;
+  stroke-width: 1px;
   pointer-events: all;
   border-radius: 10px;
 }
@@ -240,17 +240,14 @@ footer {
   font-size: 12pt;
   color: black;
   position: absolute;
-  top: 440px;
-  left: 25px;
-
-  /*float: right;*/
+  top: 200px;
+  left: 0;
   background-color: #fff;
   border: 1px solid silver;
   padding: .5em;
   min-width: 175px;
   pointer-events: none;
-  z-Index: 1000;
-  /*left: 1000px;*/
+  z-index: 1000;
 }
 
 /* Graph Styles */
@@ -409,18 +406,20 @@ footer {
 }
 
 #about {
-    margin: 0;
+    /*margin: 0;*/
+    /*padding: 5px;*/
+    margin: 22px 5px 5px 5px;
     text-align: left;
     text-transform: none;
     letter-spacing: 1px;
-    font-size: 0.75em;
+    font-size: 0.65em;
     line-height: 2px;
+    float: right;
   }
   #about:after {
     display: block;
     content: "";
     height: 0;
-    border-top: 1px solid rgba(60, 60, 60, 0.25);
   }
   #about ul {
     list-style: none;
@@ -435,9 +434,6 @@ footer {
     content: " · ";
     padding: 0 4px;
   }
-  /*#about ul li a {
-    text-decoration: underline;
-  }*/
 
   #information {
     margin: 0 auto;
@@ -487,4 +483,30 @@ footer {
   }
   #nav ul li a {
     text-decoration: underline;
+  }
+
+  /* Customizing Bootstrap */
+
+  .navbar-title {
+    display: block;
+    font: normal 400 26px/1.6 'Yanone Kaffeesatz', sans-serif;
+    color: #15b290;
+    letter-spacing: 1px;
+    padding: 5px;
+    margin: 5px;
+    text-rendering: optimizeLegibility;
+    line-height: 25px;
+    float: left;
+  }
+
+  .navbar-header {
+    width: 100%;
+  }
+
+  .navbar-subtitle {
+    font-size: 16px;
+    display: block;
+    float: left;
+    padding: 5px;
+    margin: 8px 5px 5px 5px;
   }
