@@ -5,7 +5,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 var width = 1200,
-    height = 750,
+    height = 700,
     barchart_margin = {top: 20, right: 40, bottom: 30, left: 20},
     barchart_width = width - barchart_margin.left - barchart_margin.right - 250,
     barchart_height = 180 - barchart_margin.top - barchart_margin.bottom,
@@ -31,8 +31,8 @@ var x = d3.scale.ordinal().rangeRoundBands([0, barchart_width - 60], .1);
 var y = d3.scale.linear().range([barchart_height, 0]);
 
 // Legend variables
-var legend_x = 25,
-    legend_y = 30,
+var legend_x = 0,
+    legend_y = 5,
     legend_width = 175,
     legend_height = 620,
     legend_margin = 20
@@ -190,8 +190,7 @@ function ready(error, us, post) {
         .attr("x", legend_x)
         .attr("y", legend_y - 15)
         .attr("width", legend_width)
-        .attr("height", legend_height)
-        .style();
+        .attr("height", legend_height);
 
     // Numbers showing the start and end brush dates.
     var brushYears = legend.append("g")
@@ -413,9 +412,11 @@ function ready(error, us, post) {
 }
 
 
-//********************************************
-// Graphing the year counts as a bar chart
-//********************************************
+///////////////////////////////////////////////////////////////////////
+//
+// Bar Chart Timeline
+//
+///////////////////////////////////////////////////////////////////////
 
 // Prepare the barchart canvas
 var barchart = d3.select("body").append("svg")
@@ -483,9 +484,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
         .data(freqs)
       .enter().append("g")
         .attr("class", "freq")
-        .style("fill", function (d, i) {
-            return z(i);
-        })
+        .style("fill", function (d, i) { return z(i); })
         .style("stroke", "#CCE5E5");
 
     // Add a rect for each date.
@@ -493,19 +492,11 @@ d3.csv("data/years_count2.csv", function (error, post) {
         .data(Object)
       .enter().append("rect")
         .attr("class", "bar")
-        .attr("x", function (d) {
-            return x(d.x);
-        })
-        .attr("y", function (d) {
-            return y(d.y0) + y(d.y) - barchart_height;
-        })
-        .attr("height", function (d) {
-            return barchart_height - y(d.y);
-        })
+        .attr("x", function (d) { return x(d.x); })
+        .attr("y", function (d) { return y(d.y0) + y(d.y) - barchart_height; })
+        .attr("height", function (d) { return barchart_height - y(d.y); })
         .attr("width", x.rangeBand())
-        .attr("id", function (d) {
-            return d["year"];
-        });
+        .attr("id", function (d) { return d["year"]; });
 
     // Draw the brush
     var arc = d3.svg.arc()
@@ -531,50 +522,51 @@ d3.csv("data/years_count2.csv", function (error, post) {
 // ****************************************
 
 function brushmove() {
-  y.domain(x.range()).range(x.domain());//.clamp(true);
-  b = brush.extent();
+    y.domain(x.range()).range(x.domain());//.clamp(true);
+    b = brush.extent();
 
-  brushYearStart = (brush.empty()) ? "1847" : Math.ceil(y(b[0]));
-  brushYearEnd = (brush.empty()) ? "1903" : Math.ceil(y(b[1]));
+    brushYearStart = (brush.empty()) ? "1847" : Math.ceil(y(b[0]));
+    brushYearEnd = (brush.empty()) ? "1903" : Math.ceil(y(b[1]));
 
-  // Snap to rect edge
-  d3.select("g.brush").call((brush.empty()) ? brush.clear() : brush.extent([y.invert(brushYearStart), y.invert(brushYearEnd)]));
+    // Snap to rect edge
+    d3.select("g.brush").call((brush.empty()) ? brush.clear() : brush.extent([y.invert(brushYearStart), y.invert(brushYearEnd)]));
 
-  // Fade all years in the histogram not within the brush
-  d3.selectAll("rect.bar").style("opacity", function (d, i) {
-    return d.x >= brushYearStart && d.x < brushYearEnd || brush.empty() ? "1" : ".4"
-  });
+    // Fade all years in the histogram not within the brush
+    d3.selectAll("rect.bar").style("opacity", function (d, i) {
+      return d.x >= brushYearStart && d.x < brushYearEnd || brush.empty() ? "1" : ".4"
+    });
 }
 
 function brushend() {
+  brushYearEnd = (brush.empty()) ? brushYearEnd : Math.floor(y(b[1]));
+  brush.extent([b[0], Math.round(b[1]/10) * 10])
 
   // When brushed, depending on option selected call a function to show and style points
-  filterPoints();
-  colorPoints();
-  styleOpacity();
+    filterPoints();
+    colorPoints();
+    styleOpacity();
 
-  // Update percent mapped vs percent unmapped bars. We want to show that some
-  // data isn't being mapped (where we're missing data, etc.)
-  mappedHeight = (num_mapped / totalShown) * 100;
-  unmappedHeight = ((totalShown - num_mapped) / totalShown) * 100;
-  d3.select("#onMap").attr("height", mappedHeight)
-      .attr("y", function () {
-          return mapped_y - mappedHeight
-      });
-  d3.select("#notOnMap").attr("height", unmappedHeight)
-      .attr("y", function () {
-          return mapped_y - unmappedHeight
-      });
-  d3.select("#mappedPercent").text(Math.round(mappedHeight) + "%");
-  d3.select("#unmappedPercent").text(Math.round(unmappedHeight) + "%");
-  d3.select("#mappedPercent").attr("y", mapped_y - mappedHeight - 3);
-  d3.select("#unmappedPercent").attr("y", mapped_y - unmappedHeight - 3);
+    // Update percent mapped vs percent unmapped bars. We want to show that some
+    // data isn't being mapped (where we're missing data, etc.)
+    mappedHeight = (num_mapped / totalShown) * 100;
+    unmappedHeight = ((totalShown - num_mapped) / totalShown) * 100;
+    d3.select("#onMap").attr("height", mappedHeight)
+        .attr("y", function () {
+            return mapped_y - mappedHeight
+        });
+    d3.select("#notOnMap").attr("height", unmappedHeight)
+        .attr("y", function () {
+            return mapped_y - unmappedHeight
+        });
+    d3.select("#mappedPercent").text(Math.round(mappedHeight) + "%");
+    d3.select("#unmappedPercent").text(Math.round(unmappedHeight) + "%");
+    d3.select("#mappedPercent").attr("y", mapped_y - mappedHeight - 3);
+    d3.select("#unmappedPercent").attr("y", mapped_y - unmappedHeight - 3);
 
-  // Update start and end years in upper right-hand corner of the map
-  d3.select("svg").append("brushYears");
-  d3.select("#brushYears").text(brushYearStart + " - " + brushYearEnd);
-
-}
+    // Update start and end years in upper right-hand corner of the map
+    d3.select("svg").append("brushYears");
+    d3.select("#brushYears").text(brushYearStart == brushYearEnd ? brushYearStart : brushYearStart + " - " + brushYearEnd);
+  }
 
 function resetBrush() {
   brush
@@ -637,7 +629,7 @@ function colorPoints() {
 
         if (document.getElementById("regular").checked == true) {
             if (startAlive && endAlive) { //Alive throughout (or at least at start and end)
-                return aliveThroughout; //Teal
+                return aliveThroughout; // Teal
             } else if (startAlive && !endAlive) { //Dies during brush
                 return diesDuring; //Red
             } else if (!startAlive && endAlive) { //Established during brush
@@ -750,7 +742,8 @@ function showEstAndDis() {
 function showAll() {
     totalShown = 0;
     num_mapped = 0;
-    var num_unmapped = 0;
+    num_unmapped = 0;
+
 
     var totalPoints = 0;
     var totalUnshown = 0;
@@ -782,26 +775,26 @@ function showAll() {
                 num_mapped++;
                 return "block";
             }
-        } else if (startAlive && !endAlive) {
-            d3.select(this).transition().duration(500).style("opacity", shownOpacity);
-            totalShown++;
-            if (d["Latitude"] == 0 || d["Latitude"] == "") {
-                num_unmapped++;
-                return "none";
-            } else {
-                num_mapped++;
-                return "block";
-            }
-        } else if (!startAlive && endAlive) {
-            d3.select(this).transition().duration(500).style("opacity", shownOpacity);
-            totalShown++;
-            if (d["Latitude"] == 0 || d["Latitude"] == "") {
-                num_unmapped++;
-                return "none";
-            } else {
-                num_mapped++;
-                return "block";
-            }
+        // } else if (startAlive && !endAlive) {
+        //     d3.select(this).transition().duration(500).style("opacity", shownOpacity);
+        //     totalShown++;
+        //     if (d["Latitude"] == 0 || d["Latitude"] == "") {
+        //         num_unmapped++;
+        //         return "none";
+        //     } else {
+        //         num_mapped++;
+        //         return "block";
+        //     }
+        // } else if (!startAlive && endAlive) {
+        //     d3.select(this).transition().duration(500).style("opacity", shownOpacity);
+        //     totalShown++;
+        //     if (d["Latitude"] == 0 || d["Latitude"] == "") {
+        //         num_unmapped++;
+        //         return "none";
+        //     } else {
+        //         num_mapped++;
+        //         return "block";
+        //     }
         } else if (isDuring(estArr, brushYearStart, brushYearEnd)) {
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
@@ -816,6 +809,9 @@ function showAll() {
         return "none";
 
     });
+// console.log("Total shown: ", totalShown);
+// console.log("Mapped: ", num_mapped);
+// console.log("Not mapped: ", num_unmapped);
 };
 
 // When a filter checkbox is selected or unselected, update the points shown to reflect current filter
@@ -833,48 +829,51 @@ function filterPoints() {
 };
 
 // For use in year-by-year: show only offices that were established or discontinued during that year
-function showEstDis() {
+// function showEstDis() {
 
-    d3.selectAll("g.points-est").style("display", function (d) {
+//     d3.selectAll("g.points-est").style("display", function (d) {
 
-        var estArr = [d.est, d.re1, d.re2, d.re3];
-        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+//         var estArr = [d.est, d.re1, d.re2, d.re3];
+//         var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
-        for (var i = 0; i < arrSize; i++) {
-            if (estArr[i] == currYear) {
-                return "block"
-            } else if ((estArr[i] + lifespanArr[i]) == currYear) {
-                return "block";
-            } else {
-                return "none";
-            }
-        }
+//         for (var i = 0; i < arrSize; i++) {
+//             if (estArr[i] == currYear) {
+//                 return "block"
+//             } else if ((estArr[i] + lifespanArr[i]) == currYear) {
+//                 return "block";
+//             } else {
+//                 return "none";
+//             }
+//         }
 
-    });
+//     });
 
-    d3.selectAll("circle.points-est").style("fill", function (d) {
+//     d3.selectAll("circle.points-est").style("fill", function (d) {
 
-        var estArr = [d.est, d.re1, d.re2, d.re3];
-        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+//         var estArr = [d.est, d.re1, d.re2, d.re3];
+//         var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
 
-        for (var i = 0; i < arrSize; i++) {
-            if (estArr[i] == currYear) {
-                d3.select(this).style("opacity", .8);
-            } else if ((estArr[i] + lifespanArr[i]) == currYear) {
-                d3.select(this).style("opacity", .8);
-            }
-        }
+//         for (var i = 0; i < arrSize; i++) {
+//             if (estArr[i] == currYear) {
+//                 d3.select(this).style("opacity", .8);
+//             } else if ((estArr[i] + lifespanArr[i]) == currYear) {
+//                 d3.select(this).style("opacity", .8);
+//             }
+//         }
 
-    });
-};
+//     });
+// };
 
+/**
+ * View switching functions
+ */
 function showRegular() {
     fadeOpacity = .1;
     document.getElementById("regular").checked = true;
-    document.getElementById("statusView").style.zIndex = "-3";
-    document.getElementById("statusView").style.background = "#f7f7f7"
-    document.getElementById("durationView").style.zIndex = "-4";
-    document.getElementById("durationView").style.background = "#F5F1DE"
+    // document.getElementById("statusView").style.zIndex = "-3";
+    // document.getElementById("statusView").style.background = "#f7f7f7"
+    // document.getElementById("durationView").style.zIndex = "-4";
+    // document.getElementById("durationView").style.background = "#F5F1DE"
     showAll();
     document.getElementById("selections").style.visibility = "visible";
     colorPoints();
@@ -892,15 +891,16 @@ function showRegular() {
     d3.select("#keyLabel2").style("display", "block");
     d3.select("#keyLabel3").style("display", "block");
     d3.select("#keyLabel4").text("Estab. and Closed");
+
 };
 
 function showSnapshot() {
     fadeOpacity = 0;
     document.getElementById("snapshot").checked = true;
-    document.getElementById("statusView").style.zIndex = "-4";
-    document.getElementById("statusView").style.background = "#F5F1DE";
-    document.getElementById("durationView").style.zIndex = "-3";
-    document.getElementById("durationView").style.background = "#f7f7f7"
+    // document.getElementById("statusView").style.zIndex = "-4";
+    // document.getElementById("statusView").style.background = "#F5F1DE";
+    // document.getElementById("durationView").style.zIndex = "-3";
+    // document.getElementById("durationView").style.background = "#f7f7f7"
     showAll();
     colorPoints();
     d3.selectAll("g.key").transition().duration(1000).style("opacity", 0);
@@ -918,27 +918,26 @@ function showSnapshot() {
     document.getElementById("keyCircle4").style.opacity = .25;
     d3.select("#keyLabel4").text("Shorter Lifespan");
 
-
 };
 
-function showEvent() {
-    document.getElementById("event").checked = true;
-    document.getElementById("statusView").style.zIndex = "-3";
-    document.getElementById("statusView").style.background = "#f7f7f7"
-    document.getElementById("durationView").style.zIndex = "-4";
-    document.getElementById("durationView").style.background = "#F5F1DE"
+// function showEvent() {
+//     document.getElementById("event").checked = true;
+//     document.getElementById("statusView").style.zIndex = "-3";
+//     document.getElementById("statusView").style.background = "#f7f7f7"
+//     document.getElementById("durationView").style.zIndex = "-4";
+//     document.getElementById("durationView").style.background = "#F5F1DE"
 
-    d3.select(".gbrush.brush.extent").attr("pointer-events", "none");
-};
+//     d3.select(".gbrush.brush.extent").attr("pointer-events", "none");
+// };
 
 // Show information about the project
-function showAbout() {
-    if (document.getElementById("aboutText").style.display == "none") {
-        document.getElementById("aboutText").style.display = "block";
-    } else {
-        document.getElementById("aboutText").style.display = "none";
-    }
-};
+// function showAbout() {
+//     if (document.getElementById("aboutText").style.display == "none") {
+//         document.getElementById("aboutText").style.display = "block";
+//     } else {
+//         document.getElementById("aboutText").style.display = "none";
+//     }
+// };
 
 /**
  * Zoom functions
@@ -977,6 +976,9 @@ function manualZoom(zoomDirection) {
     // zoomed();
 }
 
+/**
+ * Tooltip display
+ */
 function tooltipText(d) {
     var officeName        = isNaN(d.name) ? "n/a" : d.name,
         officeEstablished = isNaN(d.Est) ? "n/a" : d.Est,
@@ -986,3 +988,12 @@ function tooltipText(d) {
             "Established: " + d.Est + "<br>" +
             "Closed: " + d.Dis1 + "<br>";
 }
+
+//function toggleSelection() {
+//	var currentColor = "#15b290";
+//
+//	return function() {
+//	  currentColor = currentColor == "#15b290" ? "#15b290" : "#12987B";
+//	  d3.select(this).style("background-color", currentColor);
+//	};
+//}
