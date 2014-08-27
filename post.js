@@ -80,7 +80,7 @@ var projection = d3.geo.azimuthalEqualArea()
     .scale(1170 * 2);
 
 var svg = d3.select("body").append("svg")
-    .attr("width", "100%")
+    .attr("width", width)
     .attr("height", height)
     .attr("class", "mapviz");
 
@@ -522,7 +522,7 @@ d3.csv("data/years_count2.csv", function (error, post) {
 // ****************************************
 
 function brushmove() {
-    y.domain(x.range()).range(x.domain());//.clamp(true);
+    y.domain(x.range()).range(x.domain());
     b = brush.extent();
 
     brushYearStart = (brush.empty()) ? "1847" : Math.ceil(y(b[0]));
@@ -751,8 +751,8 @@ function showAll() {
     d3.selectAll("g.points-est").style("display", function (d) {
         totalPoints++;
 
-        var estArr = [d.est, d.re1, d.re2, d.re3];
-        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+        var estArr = [d.est];
+        var lifespanArr = [d.dis1 - d.est];
 
         // Bools are true if post office was alive at the time of brushMin and brushMax
         var startAlive = false;
@@ -762,13 +762,12 @@ function showAll() {
         startAlive = isAliveStart(estArr, lifespanArr, brushYearStart);
         endAlive = isAliveEnd(estArr, lifespanArr, brushYearEnd);
 
-        // Show all offices alive at some point if 'all', only established during that time if 'established', and only disestablished if 'disestablished' radio button selected
-        // Buggy: does not account for discontinuity in otherwise-classed offices.
-        // Buggy: only goes into effect when the brush is changed; not automatic.
+        // Show all offices alive at some point if 'all', only established during that time if
+        // 'established', and only disestablished if 'disestablished' radio button selected
         if (startAlive && endAlive) {
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
-            if (d["Latitude"] == 0 || d["Latitude"] == "") {
+            if (d["Latitude"] === 0 || d["Latitude"] === "") {         // THIS LINE OF CODE ISN'T RIGHT
                 num_unmapped++;
                 return "none";
             } else {
@@ -798,7 +797,7 @@ function showAll() {
         } else if (isDuring(estArr, brushYearStart, brushYearEnd)) {
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
-            if (d["Latitude"] == 0 || d["Latitude"] == "") {
+            if (d["Latitude"] === 0 || d["Latitude"] === "") {                      // THIS LINE OF CODE ISN'T RIGHT
                 num_unmapped++;
                 return "none";
             } else {
@@ -809,9 +808,9 @@ function showAll() {
         return "none";
 
     });
-// console.log("Total shown: ", totalShown);
-// console.log("Mapped: ", num_mapped);
-// console.log("Not mapped: ", num_unmapped);
+console.log("Total possible offices: ", totalShown);
+console.log("Mapped offices: ", num_mapped);
+console.log("Not mapped offices: ", num_unmapped);
 };
 
 // When a filter checkbox is selected or unselected, update the points shown to reflect current filter
@@ -918,26 +917,9 @@ function showSnapshot() {
     document.getElementById("keyCircle4").style.opacity = .25;
     d3.select("#keyLabel4").text("Shorter Lifespan");
 
+    // d3.select("input[value='regular']").classed("active", true);
+
 };
-
-// function showEvent() {
-//     document.getElementById("event").checked = true;
-//     document.getElementById("statusView").style.zIndex = "-3";
-//     document.getElementById("statusView").style.background = "#f7f7f7"
-//     document.getElementById("durationView").style.zIndex = "-4";
-//     document.getElementById("durationView").style.background = "#F5F1DE"
-
-//     d3.select(".gbrush.brush.extent").attr("pointer-events", "none");
-// };
-
-// Show information about the project
-// function showAbout() {
-//     if (document.getElementById("aboutText").style.display == "none") {
-//         document.getElementById("aboutText").style.display = "block";
-//     } else {
-//         document.getElementById("aboutText").style.display = "none";
-//     }
-// };
 
 /**
  * Zoom functions
