@@ -25,18 +25,18 @@
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
-    <span class="navbar-title">Geography of the Post</span>
-    <span class="navbar-subtitle">U.S. Post Offices in the Nineteenth-Century West</span>
-    <button type="button" id="durationView" class="btn btn-info" onclick="showSnapshot()">Duration View</button>
-    <button type="button" id="statusView" class="btn btn-info" onclick="showRegular()">Status View</button>
-        <div id="about">
-            <ul>
-                <li>Cameron Blevins</li>
-                <li>Jason Heppler</li>
-                <li><span class="sc">Stanford University</span></li>
-            </ul>
-        </div>
+      <span class="navbar-title">Geography of the Post</span>
+      <span class="navbar-subtitle">U.S. Post Offices in the Nineteenth-Century West</span>
+      <button type="button" id="durationView" class="btn btn-info" onclick="showSnapshot()">Duration View</button>
+      <button type="button" id="statusView" class="btn btn-info" onclick="showRegular()">Status View</button>
     </div>
+    <span id="about">
+          <ul>
+              <li>Cameron Blevins</li>
+              <li>Jason Heppler</li>
+              <li><span class="sc">Stanford University</span></li>
+          </ul>
+      </span>
   </div><!-- /.container-fluid -->
 </nav>
 
@@ -44,14 +44,12 @@
   <form display: "inline">
     <input type="radio"
             id="snapshot"
-            class="datamode"
             name="data"
             value="snapshot"
             onclick="showSnapshot()"
             checked="checked"/>Duration View
     <input type="radio"
             id="regular"
-            class="datamode"
             name="data"
             value="regular"
             onclick="showRegular()"/>Status View

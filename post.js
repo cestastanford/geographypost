@@ -768,6 +768,7 @@ function showAll() {
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
             if (d["Latitude"] === 0 || d["Latitude"] === "") {         // THIS LINE OF CODE ISN'T RIGHT
+              // d["Latitude"] === 0 || d["Latitude"] === "" || d["Latitude"] === null
                 num_unmapped++;
                 return "none";
             } else {
