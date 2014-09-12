@@ -767,7 +767,7 @@ function showAll() {
         if (startAlive && endAlive) {
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
-            if (d["Latitude"] == "") {         // THIS LINE OF CODE ISN'T RIGHT
+            if (d["Latitude"] == "" || d["Longitude"] == "") {         // THIS LINE OF CODE ISN'T RIGHT
               // d["Latitude"] === 0 || d["Latitude"] === "" || d["Latitude"] === null
                 num_unmapped++;
                 return "none";
