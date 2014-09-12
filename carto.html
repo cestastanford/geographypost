@@ -1,0 +1,83 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>d3.carto.map - d3.carto.layer.alias</title>
+  <meta charset="utf-8" />
+    <link type="text/css" rel="stylesheet" href="https://raw.githubusercontent.com/emeeks/d3-carto-map/master/d3map.css" />
+    <link type="text/css" rel="stylesheet" href="https://raw.githubusercontent.com/emeeks/d3-carto-map/master/examples/example.css" />
+</head>
+<style>
+  html,body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+  }
+
+  #map {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+  }
+
+
+
+</style>
+<script>
+    function makeMap() {
+    map = d3.carto.map();
+
+    d3.select("#map").call(map);
+    map.centerOn([-111.88,40.75],"latlong");
+    map.setScale(5);
+
+    tileLayer = d3.carto.layer.tile();
+    tileLayer
+      .tileType("mapbox")
+      .path("examples.map-zgrqqx0w")
+      .label("Base")
+      .visibility(true);
+
+    csvModal = d3.carto.modal();
+    csvModal.formatter(
+      function(d) { return "<h1>" + d.Name + "</h1>" +
+                            "<br> Established: " + d.Est +
+                            "<br> Disestablished: " + d.Dis1 }
+    )
+
+    csvLayer = d3.carto.layer.csv();
+    csvLayer
+      .type("csv")
+      .path("data/post_data.csv")
+      .label("CSV Points")
+      .cssClass("pinkcircle")
+      .renderMode("svg")
+      .markerSize(3)
+      .x("Longitude")
+      .y("Latitude")
+      .modal(csvModal)
+      .clickableFeatures(true);
+
+    map.addCartoLayer(tileLayer);
+    map.addCartoLayer(csvLayer);
+
+  }
+
+</script>
+<body onload="makeMap()">
+<div id="map"></div>
+<footer>
+<script src="lib/d3.v3.min.js" charset="utf-8" type="text/javascript"></script>
+<script src="lib/topojson.v1.min.js" type="text/javascript">
+</script>
+<script src="http://d3js.org/d3.geo.projection.v0.min.js" type="text/javascript">
+</script>
+<script src="http://bl.ocks.org/emeeks/raw/f3105fda25ff785dc5ed/tile.js" type="text/javascript">
+</script>
+<script src="http://bl.ocks.org/emeeks/raw/f3105fda25ff785dc5ed/d3.quadtiles.js" type="text/javascript">
+</script>
+<script src="http://bl.ocks.org/emeeks/raw/f3105fda25ff785dc5ed/d3.geo.raster.js" type="text/javascript">
+</script>
+<script src="lib/d3-carto-map/d3.carto.map.js" type="text/javascript">
+</script>
+</footer>
+</body>
+</html>
