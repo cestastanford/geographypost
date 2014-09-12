@@ -566,6 +566,14 @@ function brushend() {
     // Update start and end years in upper right-hand corner of the map
     d3.select("svg").append("brushYears");
     d3.select("#brushYears").text(brushYearStart == brushYearEnd ? brushYearStart : brushYearStart + " - " + brushYearEnd);
+
+    console.log("============")
+    console.log("Mapped height: ", mappedHeight);
+    console.log("Unmapped height: ", unmappedHeight);
+    console.log("totalShown: ", totalShown);
+    console.log("num_mapped: ", num_mapped);
+    console.log("num_unmapped: ", num_unmapped)
+    console.log("============")
   }
 
 function resetBrush() {
@@ -767,7 +775,7 @@ function showAll() {
         if (startAlive && endAlive) {
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
-            if (d["Latitude"] == "" || d["Longitude"] == "") {         // THIS LINE OF CODE ISN'T RIGHT
+            if (d["GeocodeStatus"] === "Unmatched") {
               // d["Latitude"] === 0 || d["Latitude"] === "" || d["Latitude"] === null
                 num_unmapped++;
                 return "none";
@@ -798,7 +806,7 @@ function showAll() {
         } else if (isDuring(estArr, brushYearStart, brushYearEnd)) {
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
-            if (d["Latitude"] == "") {                      // THIS LINE OF CODE ISN'T RIGHT
+            if (d["GeocodeStatus"] === "Unmatched") {                      // THIS LINE OF CODE ISN'T RIGHT
                 num_unmapped++;
                 return "none";
             } else {
