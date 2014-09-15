@@ -305,7 +305,7 @@ function ready(error, us, post) {
     // unmapped data points within the given brush
     //********************************
 
-    var mappedChart = legend.append("g");
+    mappedChart = legend.append("g").attr("class", "dataChart");
 
     // Mapped bar
     mappedChart.append("rect")
@@ -702,6 +702,7 @@ function styleOpacity() {
 };
 
 function showEst() {
+    d3.selectAll("g.dataChart").style("display", "none");
     d3.selectAll("g.points-est").transition().duration(500).style("display", function (d) {
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
@@ -717,7 +718,7 @@ function showEst() {
 };
 
 function showDis() {
-
+    d3.selectAll("g.dataChart").style("display", "none");
     d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {//.style("opacity", function (d) {
 
         var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
@@ -732,7 +733,7 @@ function showDis() {
 };
 
 function showEstAndDis() {
-
+    d3.selectAll("g.dataChart").style("display", "block");
     d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {//.style("opacity", function (d) {
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
@@ -750,10 +751,10 @@ function showEstAndDis() {
 };
 
 function showAll() {
+    d3.selectAll("g.dataChart").style("display", "block");
     totalShown = 0;
     num_mapped = 0;
     num_unmapped = 0;
-
 
     var totalPoints = 0;
     var totalUnshown = 0;
@@ -819,9 +820,9 @@ function showAll() {
         return "none";
 
     });
-console.log("Total possible offices: ", totalShown);
-console.log("Mapped offices: ", num_mapped);
-console.log("Not mapped offices: ", num_unmapped);
+// console.log("Total possible offices: ", totalShown);
+// console.log("Mapped offices: ", num_mapped);
+// console.log("Not mapped offices: ", num_unmapped);
 };
 
 // When a filter checkbox is selected or unselected, update the points shown to reflect current filter
@@ -981,7 +982,7 @@ function tooltipText(d) {
             "Established: " + d.Est + "<br>" +
             "Closed: " + d.Dis1 + "<br>";
 }
-
+s
 // Highlight selected view
 $('.navbar-header button').click(function(e) {
     $('.navbar-header button.active').removeClass('active');
