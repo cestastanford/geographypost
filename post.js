@@ -980,11 +980,12 @@ function tooltipText(d) {
             "Closed: " + d.Dis1 + "<br>";
 }
 
-//function toggleSelection() {
-//	var currentColor = "#15b290";
-//
-//	return function() {
-//	  currentColor = currentColor == "#15b290" ? "#15b290" : "#12987B";
-//	  d3.select(this).style("background-color", currentColor);
-//	};
-//}
+// Highlight selected view
+$('.navbar-header button').click(function(e) {
+    $('.navbar-header button.active').removeClass('active');
+    var $this = $(this);
+    if (!$this.hasClass('active')) {
+        $this.addClass('active');
+    }
+    e.preventDefault();
+});
