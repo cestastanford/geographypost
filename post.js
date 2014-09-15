@@ -568,6 +568,8 @@ function brushend() {
     d3.select("#brushYears").text(brushYearStart == brushYearEnd ? brushYearStart : brushYearStart + " - " + brushYearEnd);
 
     console.log("============")
+    console.log("Data check: ")
+    console.log("============")
     console.log("Mapped height: ", mappedHeight);
     console.log("Unmapped height: ", unmappedHeight);
     console.log("totalShown: ", totalShown);
