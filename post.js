@@ -439,9 +439,9 @@ d3.csv("data/years_count2.csv", function (error, post) {
     });
 
     brush = d3.svg.brush()
-        .x(x)
-        .on("brush", brushmove)
-        .on("brushend", brushend);
+      .x(x)
+      .on("brush", brushmove)
+      .on("brushend", brushend);
 
     var freqs = d3.layout.stack()(["established", "discontinued"].map(function (type) {
         return post.map(function (d) {
@@ -982,7 +982,7 @@ function tooltipText(d) {
             "Established: " + d.Est + "<br>" +
             "Closed: " + d.Dis1 + "<br>";
 }
-s
+
 // Highlight selected view
 $('.navbar-header button').click(function(e) {
     $('.navbar-header button.active').removeClass('active');
