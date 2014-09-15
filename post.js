@@ -806,7 +806,7 @@ function showAll() {
         } else if (isDuring(estArr, brushYearStart, brushYearEnd)) {
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
-            if (d["GeocodeStatus"] === "Unmatched") {                      // THIS LINE OF CODE ISN'T RIGHT
+            if (d["GeocodeStatus"] === "Unmatched") {
                 num_unmapped++;
                 return "none";
             } else {
