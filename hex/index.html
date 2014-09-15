@@ -1,0 +1,90 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>d3.carto - Automatic Hexbinning</title>
+  <meta charset="utf-8" />
+    <link type="text/css" rel="stylesheet" href="https://raw.githubusercontent.com/emeeks/d3-carto-map/master/d3map.css" />
+    <link type="text/css" rel="stylesheet" href="https://raw.githubusercontent.com/emeeks/d3-carto-map/master/examples/example.css" />
+</head>
+<style>
+  html,body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+  }
+
+  #map {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+  }
+
+</style>
+<script>
+      function makeSomeMaps() {
+    map = d3.carto.map();
+
+    d3.select("#map").call(map);
+
+    tileLayer = d3.carto.layer();
+    tileLayer
+    .type("tile")
+    .path("elijahmeeks.map-azn21pbi")
+    .label("Base")
+
+    csvLayer = d3.carto.layer.csv();
+    csvLayer
+    .path("post_data.csv")
+    .label("CSV Points")
+    .cssClass("pinkcircle")
+    .renderMode("canvas")
+    .markerColor("black")
+    .markerSize(.5)
+    .x("Longitude")
+    .y("Latitude")
+    .on("load", makeHexbins)
+
+    map.addCartoLayer(tileLayer).addCartoLayer(csvLayer);
+    // map.centerOn([100,30],"latlong").setScale(3);
+    map.centerOn([-111.88,40.75],"latlong").setScale(4);
+
+    function makeHexbins() {
+      var colorScale = d3.scale.linear().domain([1,5,30]).range(["green","yellow","red"])
+      hexbinLayerLarge = map.createHexbinLayer(csvLayer, .50);
+      hexbinLayerSmall = map.createHexbinLayer(csvLayer, .15);
+      hexbinLayerLarge
+      .label(".50 Degree Hexbin")
+      .visibility(false)
+      .on("load", function() {hexbinLayerLarge.g().selectAll("path").style("opacity", .5).style("fill", function(d) {return colorScale(d.properties.node.length)})})
+
+      hexbinLayerSmall
+      .label(".15 Degree Hexbin")
+      .on("load", function() {hexbinLayerSmall.g().selectAll("path").style("opacity", .5).style("fill", function(d) {return colorScale(d.properties.node.length)})})
+
+      map.addCartoLayer(hexbinLayerSmall);
+      map.addCartoLayer(hexbinLayerLarge);
+
+    }
+
+  }
+</script>
+<body onload="makeSomeMaps()">
+<div id="map"></div>
+<footer>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8" type="text/javascript"></script>
+<script src="http://d3js.org/topojson.v1.min.js" type="text/javascript">
+</script>
+<script src="http://d3js.org/d3.geo.projection.v0.min.js" type="text/javascript">
+</script>
+<script src="http://bl.ocks.org/emeeks/raw/f3105fda25ff785dc5ed/tile.js" type="text/javascript">
+</script>
+<script src="http://bl.ocks.org/emeeks/raw/f3105fda25ff785dc5ed/d3.quadtiles.js" type="text/javascript">
+</script>
+<script src="http://bl.ocks.org/emeeks/raw/f3105fda25ff785dc5ed/d3.geo.raster.js" type="text/javascript">
+</script>
+<script src="https://rawgit.com/emeeks/d3-carto-map/master/d3.carto.map.js" type="text/javascript">
+</script>
+<script src="hexbin.js" type="text/javascript">
+</script>
+</footer>
+</body>
+</html>
