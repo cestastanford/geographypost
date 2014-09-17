@@ -5,10 +5,10 @@
     top: 100px;
     right: 50px;
     height: auto;
-    width: 400px;
+    width: 250px;
     padding: 15px;
     background-color: #fff;
-    opacity: .8;
+    opacity: .70;
     -moz-box-shadow: 3px 3px 20px rgba(0,0,0,.2);
     -webkit-box-shadow: 3px 3px 20px rgba(0,0,0,.8);
     box-shadow: 3px 3px 20px rgba(0,0,0,.8);
@@ -18,8 +18,8 @@
 #control #close {
   font-family: sans-serif;
     position: absolute;
-    top: 10px;
-    right: 20px;
+    top: 8px;
+    right: 10px;
     color: #494949;
     text-decoration: none;
     cursor: pointer;
