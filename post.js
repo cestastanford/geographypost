@@ -57,7 +57,7 @@ var shownOpacity = .9;
 var fadeOpacity = 0;
 
 var tooltip = d3.select("body")
-  .append("tooltipView")
+    .append("tooltipView")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
@@ -84,18 +84,11 @@ var svg = d3.select("body").append("svg")
     .attr("height", height)
     .attr("class", "mapviz");
 
-var graticule = d3.geo.graticule()
-    .extent([
-        [-98 - 45, 38 - 45],
-        [-98 + 45, 38 + 45]
-    ])
-    .step([22.5 / 4, 22.5 / 4]);
-
 path = d3.geo.path()
     .projection(projection);
 
-var carto = svg.append("g");
-var postOfficePoints = svg.append("g");
+var carto = svg.append("g").attr("class", "map");
+var postOfficePoints = svg.append("g").attr("class", "points");
 
 // Printing the map
 function ready(error, us, post) {
@@ -132,7 +125,6 @@ function ready(error, us, post) {
     });
 
     carto.append("path")
-        .datum(graticule.outline)
         .attr("class", "background")
         .attr("d", path);
 
@@ -177,6 +169,7 @@ function ready(error, us, post) {
         .attr("class", "points-est")
         .style("fill", autoColor);
 
+    d3.select("#loading").remove();
 
     //********************************
     // Legend
@@ -982,6 +975,9 @@ function tooltipText(d) {
             "Established: " + d.Est + "<br>" +
             "Closed: " + d.Dis1 + "<br>";
 }
+
+// Help text
+d3.select("#info").html("<p>Help text</p>")
 
 // Highlight selected view
 $('.navbar-header button').click(function(e) {

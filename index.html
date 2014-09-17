@@ -17,7 +17,6 @@
 <script src="lib/topojson.v1.min.js" charset="utf-8"></script>
 <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
 
-
 </head>
 
 <body>
@@ -40,6 +39,12 @@
       </span>
   </div><!-- /.container-fluid -->
 </nav>
+
+<div id="loading">
+  <div style="position: fixed; top: 40%; width: 100%;
+      font-size: 600%; text-align: center;">Loading map...
+  </div>
+</div>
 
 <div id="datamode">
   <form display: "inline">
@@ -90,6 +95,16 @@
 <button type="button" id="zoom_in" class="btn btn-info" onclick="manualZoom('in');">Zoom in</button>
 <button type="button" id="zoom_out" class="btn btn-info" onclick="manualZoom('out');">Zoom out</button>
 </div>
+</div>
+
+<div id="control" style="display: block; left: 217px; top: 440px;">
+  <h4>Drawing timelines</h4>
+  <div id="text">
+    <p>When you hover your mouse over the barchart, you'll notice the mouse changes to a crosshair. You can use your mouse to draw spans of time over the barchart and update the map's information. Click "Reset Map" to remove the span of time.</p>
+  </div>
+
+  <div id="control_arrow" style="width: 20px; height: 20px; transform: rotate(45deg); -ms-transform: rotate(45deg); -webkit-transform: rotate(45deg); background: white; border-bottom: solid 1px gray; border-right: 1px solid gray; position: absolute; left: 280px; top: 134px;"></div>
+  <a id="close" title="close" onclick="d3.select('#control').style('display','none')">x</a>
 </div>
 
 <div class="aboutText">
