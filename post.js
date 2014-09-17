@@ -567,15 +567,15 @@ function brushend() {
     d3.select("svg").append("brushYears");
     d3.select("#brushYears").text(brushYearStart == brushYearEnd ? brushYearStart : brushYearStart + " - " + brushYearEnd);
 
-    console.log("============")
-    console.log("Data check: ")
-    console.log("============")
-    console.log("Mapped height: ", mappedHeight);
-    console.log("Unmapped height: ", unmappedHeight);
-    console.log("totalShown: ", totalShown);
-    console.log("num_mapped: ", num_mapped);
-    console.log("num_unmapped: ", num_unmapped)
-    console.log("============")
+    // console.log("============")
+    // console.log("Data check: ")
+    // console.log("============")
+    // console.log("Mapped height: ", mappedHeight);
+    // console.log("Unmapped height: ", unmappedHeight);
+    // console.log("totalShown: ", totalShown);
+    // console.log("num_mapped: ", num_mapped);
+    // console.log("num_unmapped: ", num_unmapped)
+    // console.log("============")
   }
 
 function resetBrush() {
@@ -786,26 +786,26 @@ function showAll() {
                 num_mapped++;
                 return "block";
             }
-        // } else if (startAlive && !endAlive) {
-        //     d3.select(this).transition().duration(500).style("opacity", shownOpacity);
-        //     totalShown++;
-        //     if (d["Latitude"] == 0 || d["Latitude"] == "") {
-        //         num_unmapped++;
-        //         return "none";
-        //     } else {
-        //         num_mapped++;
-        //         return "block";
-        //     }
-        // } else if (!startAlive && endAlive) {
-        //     d3.select(this).transition().duration(500).style("opacity", shownOpacity);
-        //     totalShown++;
-        //     if (d["Latitude"] == 0 || d["Latitude"] == "") {
-        //         num_unmapped++;
-        //         return "none";
-        //     } else {
-        //         num_mapped++;
-        //         return "block";
-        //     }
+        } else if (startAlive && !endAlive) {
+            d3.select(this).transition().duration(500).style("opacity", shownOpacity);
+            totalShown++;
+            if (d["GeocodeStatus"] === "Unmatched") {
+                num_unmapped++;
+                return "none";
+            } else {
+                num_mapped++;
+                return "block";
+            }
+        } else if (!startAlive && endAlive) {
+            d3.select(this).transition().duration(500).style("opacity", shownOpacity);
+            totalShown++;
+            if (d["GeocodeStatus"] === "Unmatched") {
+                num_unmapped++;
+                return "none";
+            } else {
+                num_mapped++;
+                return "block";
+            }
         } else if (isDuring(estArr, brushYearStart, brushYearEnd)) {
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
