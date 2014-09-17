@@ -1,7 +1,7 @@
 /* Control Panel */
 #control {
     display: block;
-    position: fixed;
+    position: absolute;
     top: 100px;
     right: 50px;
     height: auto;
@@ -212,8 +212,8 @@ footer {
 .points-est {
     fill: green;
     fill-opacity: .7;
-    stroke: black;
-    stroke-width: .3px;
+    /*stroke: black;*/
+    /*stroke-width: .2px;*/
     pointer-events: visible;
     z-index: 20;
 }

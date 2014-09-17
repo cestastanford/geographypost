@@ -6,9 +6,9 @@
 
 var width = 1200,
     height = 700,
-    barchart_margin = {top: 20, right: 40, bottom: 30, left: 20},
-    barchart_width = width - barchart_margin.left - barchart_margin.right - 250,
-    barchart_height = 180 - barchart_margin.top - barchart_margin.bottom,
+    margin = {top: 20, right: 40, bottom: 30, left: 20},
+    barchart_width = width - margin.left - margin.right - 250,
+    barchart_height = 180 - margin.top - margin.bottom,
     centered,
     barWidth = 25,
     num_mapped = 50,
@@ -49,9 +49,9 @@ var autoColor = "#15b290";
 var currYearColor = "#CB709D";
 
 // Brush Dates
-var brushYearStart = 1847;
-var brushYearEnd = 1903;
-var defaultDis = 1905;
+var brushYearStart = 1846;
+var brushYearEnd = 1902;
+var defaultDis = 1902;
 var currYear = 0;
 var shownOpacity = .9;
 var fadeOpacity = 0;
@@ -167,6 +167,8 @@ function ready(error, us, post) {
         .append("circle")
         .attr("r", 2.5)
         .attr("class", "points-est")
+        .style("stroke", "black")
+        .style("stroke-width", .2 + "px")
         .style("fill", autoColor);
 
     d3.select("#loading").remove();
@@ -211,23 +213,15 @@ function ready(error, us, post) {
     key.append("text")
         .attr("class", "legendText")
         .attr("id", "keyLabel1")
-        .attr("x", function () {
-            return legend_x + key_x + 10
-        })
-        .attr("y", function () {
-            return legend_y + 10 + key_y
-        })
+        .attr("x", function () { return legend_x + key_x + 10 })
+        .attr("y", function () { return legend_y + 10 + key_y })
         .text("Longer Lifespan");
 
     // Closed during brush
     key.append("circle")
         .attr("id", "keyCircle2")
-        .attr("cx", function () {
-            return legend_x + key_x
-        })
-        .attr("cy", function () {
-            return legend_y + legend_margin + key_y + 5
-        })
+        .attr("cx", function () { return legend_x + key_x })
+        .attr("cy", function () { return legend_y + legend_margin + key_y + 5 })
         .attr("r", 5)
         .style("fill", autoColor)
         .style("opacity", .75);
@@ -391,7 +385,6 @@ function ready(error, us, post) {
     }
 
     function removeLabel(d,i) {
-      // d3.selectAll("text.map-tooltip").remove();
       tooltip.transition().duration(500).style("opacity", 0);
 
       d3.selectAll("rect.bar").transition().duration(600).style("fill", function (d, i) {
@@ -413,16 +406,16 @@ function ready(error, us, post) {
 
 // Prepare the barchart canvas
 var barchart = d3.select("body").append("svg")
-    .attr("class", "barchart")
-    .attr("width", "100%")
-.attr("height", barchart_height + barchart_margin.top + barchart_margin.bottom)
-    .attr("y", height - barchart_height - 100)
-    .attr("x", legend_x + legend_width)
-    .append("g")
-    .attr("transform", "translate(" + (barchart_margin.left + legend_x + legend_width + 10) + "," + barchart_margin.top + ")");
+  .attr("class", "barchart")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", barchart_height + margin.top + margin.bottom)
+.append("g")
+  .attr("y", height - barchart_height - 100)
+  .attr("x", legend_x + legend_width)
+  .attr("transform", "translate(" + (margin.left + legend_x + legend_width + 10) + "," + margin.top + ")");
 
 // Plot the data
-d3.csv("data/years_count2.csv", function (error, post) {
+d3.csv("data/years_count.csv", function (error, post) {
 
     // Coercion since CSV is untyped
     post.forEach(function (d) {
@@ -445,12 +438,8 @@ d3.csv("data/years_count2.csv", function (error, post) {
         });
     }));
 
-    x.domain(freqs[0].map(function (d) {
-        return d.x;
-    }));
-    y.domain([0, d3.max(freqs[freqs.length - 1], function (d) {
-        return d.y0 + d.y;
-    })]);
+    x.domain(freqs[0].map(function (d) { return d.x; }) );
+    y.domain([0, d3.max(freqs[freqs.length - 1], function (d) { return d.y0 + d.y; }) ]);
 
     // Axis variables for the bar chart
     x_axis = d3.svg.axis().scale(x).tickValues([1850, 1855, 1860, 1865, 1870, 1875, 1880, 1885, 1890, 1895, 1900]).orient("bottom");
@@ -466,11 +455,18 @@ d3.csv("data/years_count2.csv", function (error, post) {
     // y axis
     barchart.append("g")
         .attr("class", "y axis")
+        .call(y_axis)
         .style("fill", "#fff")
-        .attr("transform", "translate(" + (barchart_width - 70) + ",0)")
-        .call(y_axis);
+        .attr("transform", "translate(" + (barchart_width - 55) + ",0)")
+      .append("text")
+        .attr("transform", "rotate(90)")
+        .attr("y", 6)
+        .attr("x", 116)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Number of post offices");
 
-    var w = barchart_width - barchart_margin.right - barchart_margin.left;
+    var w = barchart_width - margin.right - margin.left;
 
     // Add a group for each cause.
     var freq = barchart.selectAll("g.freq")
@@ -519,7 +515,7 @@ function brushmove() {
     b = brush.extent();
 
     brushYearStart = (brush.empty()) ? "1847" : Math.ceil(y(b[0]));
-    brushYearEnd = (brush.empty()) ? "1903" : Math.ceil(y(b[1]));
+    brushYearEnd = (brush.empty()) ? "1902" : Math.ceil(y(b[1]));
 
     // Snap to rect edge
     d3.select("g.brush").call((brush.empty()) ? brush.clear() : brush.extent([y.invert(brushYearStart), y.invert(brushYearEnd)]));
@@ -832,42 +828,6 @@ function filterPoints() {
     }
 };
 
-// For use in year-by-year: show only offices that were established or discontinued during that year
-// function showEstDis() {
-
-//     d3.selectAll("g.points-est").style("display", function (d) {
-
-//         var estArr = [d.est, d.re1, d.re2, d.re3];
-//         var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
-
-//         for (var i = 0; i < arrSize; i++) {
-//             if (estArr[i] == currYear) {
-//                 return "block"
-//             } else if ((estArr[i] + lifespanArr[i]) == currYear) {
-//                 return "block";
-//             } else {
-//                 return "none";
-//             }
-//         }
-
-//     });
-
-//     d3.selectAll("circle.points-est").style("fill", function (d) {
-
-//         var estArr = [d.est, d.re1, d.re2, d.re3];
-//         var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
-
-//         for (var i = 0; i < arrSize; i++) {
-//             if (estArr[i] == currYear) {
-//                 d3.select(this).style("opacity", .8);
-//             } else if ((estArr[i] + lifespanArr[i]) == currYear) {
-//                 d3.select(this).style("opacity", .8);
-//             }
-//         }
-
-//     });
-// };
-
 /**
  * View switching functions
  */
@@ -975,9 +935,6 @@ function tooltipText(d) {
             "Established: " + d.Est + "<br>" +
             "Closed: " + d.Dis1 + "<br>";
 }
-
-// Help text
-d3.select("#info").html("<p>Help text</p>")
 
 // Highlight selected view
 $('.navbar-header button').click(function(e) {
