@@ -21,24 +21,6 @@
 
 <body>
 
-<script>
-  $(function() {
-    $('a[href*=#]:not([href=#])').click(function() {
-      if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
-
-        var target = $(this.hash);
-        target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
-        if (target.length) {
-          $('html,body').animate({
-            scrollTop: target.offset().top
-          }, 1000);
-          return false;
-        }
-      }
-    });
-  });
-</script>
-
 <nav class="navbar navbar-inverse" role="navigation">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -128,23 +110,16 @@
 </div>
 
 <div class="aboutText">
-<<<<<<< HEAD
-<h3 id="aboutMap">About the Map</h3>
-<p>The U.S. postal system was the nation's largest communications network in the nineteenth century. This visualization maps the spread of that network in the American West by charting the opening and closing of individual post offices over time. Users can click-and-drag the bar chart to see the extent of the network for any span of years. "Normal View" offers a snapshot of offices that were in existence at any point during a particular period. "Detailed View" gives more information about individual offices - whether they were opened, closed, and whether or not they were in existence for the entirety of the selected period.</p>
-
- <p>Three disclaimers are in order. First, the map is missing a significant amount of data. We attempted to find the locations of post offices by looking them up in the <a href="http://geonames.usgs.gov/">Geographic Names Information System (GNIS)</a>, but we were not successful for many post offices. In order to capture this missing data, the sidebar displays how many post offices are mapped and how many are missing from the map for the selected time period. Second, we have not captured when an office changed names. A name change shows up as if it were a brand-new post office, with the old office "closing" and the new office "opening," even if they were one and the same post office in continuous operation. Finally, the close date of an office represents a final date at which an office ceased to exist. Multiple openings and closings of the same office are not represented.</p>
-=======
 <h3 id="#aboutMap">About the Map</h3>
-<p>The U.S. postal system was the nation's largest communications network in the nineteenth century. By the close of the century the U.S. Post had extended its reach into nearly every city, town, and hamlet in the country. No other public institution was so ubiquitous and so central to everyday life; dropping off a letter or checking for mail at the local post office was a ritual shared by millions of Americans from Connecticut to Colorado. This visualization maps the spread of the postal network on its western periphery by charting the opening and closing of more than <b><font color="#15b290">14,000 post offices</font></b> west of the hundredth meridian. 
->>>>>>> 346acbd7879db135c9d4ee60268c77f52e82c221
+<p>The U.S. postal system was the nation's largest communications network in the nineteenth century. By the close of the century the U.S. Post had extended its reach into nearly every city, town, and hamlet in the country. No other public institution was so ubiquitous and so central to everyday life; dropping off a letter or checking for mail at the local post office was a ritual shared by millions of Americans from Connecticut to Colorado. This visualization maps the spread of the postal network on its western periphery by charting the opening and closing of more than <b><font color="#15b290">14,000 post offices</font></b> west of the hundredth meridian.
 
  <h3>How to Use</h3>
- <p>The stacked bar chart along the bottom is a timeline of post office <span style="background-color: #193441; padding: 2px; border: 1px dashed #fff;">openings (dark blue)</span> and <span style="background-color: #3E606F; padding: 2px; border: 1px dashed #fff;">closings (light blue)</span>, year by year. Users can click-and-drag to select different periods of years to visualize the network's geography at any point in the late nineteenth century. You can clear out your selections by clicking "Reset Map."</p> 
- 
+ <p>The stacked bar chart along the bottom is a timeline of post office <span style="background-color: #193441; padding: 2px; border: 1px dashed #fff;">openings (dark blue)</span> and <span style="background-color: #3E606F; padding: 2px; border: 1px dashed #fff;">closings (light blue)</span>, year by year. Users can click-and-drag to select different periods of years to visualize the network's geography at any point in the late nineteenth century. You can clear out your selections by clicking "Reset Map."</p>
+
  <p>Buttons at the top of the map allow you to toggle between two views. "Duration View" offers a snapshot of post offices colored brighter or darker according to how long they were in operation for a given period of time. "Status View" shows what happened to post offices within the selected timespan - whether they opened, closed, or continuously operated for the entire period. </p>
- 
+
  <p>Hovering over an individual post office will display its name and the years it was in operation.</p>
- 
+
 
  <h3>About the Data</h3>
  <p>The map uses data compiled by postal historian and philatelist Richard Helbock in <i>United States Post Offices, Volumes 1-8</i>. We extend our gratitude to Richard Helbock for his incredible work to compile this data.</p>
