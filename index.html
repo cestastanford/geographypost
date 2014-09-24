@@ -21,6 +21,24 @@
 
 <body>
 
+<script>
+  $(function() {
+    $('a[href*=#]:not([href=#])').click(function() {
+      if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+
+        var target = $(this.hash);
+        target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+        if (target.length) {
+          $('html,body').animate({
+            scrollTop: target.offset().top
+          }, 1000);
+          return false;
+        }
+      }
+    });
+  });
+</script>
+
 <nav class="navbar navbar-inverse" role="navigation">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -111,7 +129,7 @@
 
 <div class="aboutText">
 <h3 id="#aboutMap">About the Map</h3>
-<p>The U.S. postal system was the nation's largest communications network in the nineteenth century. By the close of the century the U.S. Post had extended its reach into nearly every city, town, and hamlet in the country. No other public institution was so ubiquitous and so central to everyday life; dropping off a letter or checking for mail at the local post office was a ritual shared by millions of Americans from Connecticut to Colorado. This visualization maps the spread of the postal network on its western periphery by charting the opening and closing of more than <b><font color="#15b290">14,000 post offices</font></b> west of the hundredth meridian.
+<p>The U.S. postal system was the nation's largest communications network in the nineteenth century. By the close of the century the U.S. Post had extended its reach into nearly every city, town, and hamlet in the country. No other public institution was so ubiquitous and so central to everyday life; dropping off a letter or checking for mail at the local post office was a ritual shared by millions of Americans from Connecticut to Colorado. This visualization maps the spread of the postal network on its western periphery by charting the opening and closing of more than <b><font color="#15b290">14,000 post offices</font></b> west of the hundredth meridian.</p>
 
  <h3>How to Use</h3>
  <p>The stacked bar chart along the bottom is a timeline of post office <span style="background-color: #193441; padding: 2px; border: 1px dashed #fff;">openings (dark blue)</span> and <span style="background-color: #3E606F; padding: 2px; border: 1px dashed #fff;">closings (light blue)</span>, year by year. Users can click-and-drag to select different periods of years to visualize the network's geography at any point in the late nineteenth century. You can clear out your selections by clicking "Reset Map."</p>
