@@ -111,6 +111,17 @@ footer {
   top: 8px;
   pointer-events:all;
 }
+#aboutView {
+  position: absolute;
+  left: 882px;
+  top: 8px;
+  pointer-events:all;
+  color: white;
+  text-decoration: none;
+}
+#aboutView a {
+  color: white;
+}
 
 .aboutText {
   width: 70%;

@@ -21,6 +21,24 @@
 
 <body>
 
+<script>
+  $(function() {
+    $('a[href*=#]:not([href=#])').click(function() {
+      if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+
+        var target = $(this.hash);
+        target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+        if (target.length) {
+          $('html,body').animate({
+            scrollTop: target.offset().top
+          }, 1000);
+          return false;
+        }
+      }
+    });
+  });
+</script>
+
 <nav class="navbar navbar-inverse" role="navigation">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -29,6 +47,7 @@
       <span class="navbar-subtitle">U.S. Post Offices in the Nineteenth-Century West</span>
       <button type="button" id="durationView" class="btn btn-info active" onclick="showSnapshot()">Duration View</button>
       <button type="button" id="statusView" class="btn btn-info" onclick="showRegular()">Status View</button>
+      <a id="aboutView" class="btn btn-info" href="#aboutMap">About</a>
     </div>
     <span id="about">
           <ul>
@@ -109,7 +128,7 @@
 </div>
 
 <div class="aboutText">
-<h3 id="#aboutMap">About the Map</h3>
+<h3 id="aboutMap">About the Map</h3>
 <p>The U.S. postal system was the nation's largest communications network in the nineteenth century. This visualization maps the spread of that network in the American West by charting the opening and closing of individual post offices over time. Users can click-and-drag the bar chart to see the extent of the network for any span of years. "Normal View" offers a snapshot of offices that were in existence at any point during a particular period. "Detailed View" gives more information about individual offices - whether they were opened, closed, and whether or not they were in existence for the entirety of the selected period.</p>
 
  <p>Three disclaimers are in order. First, the map is missing a significant amount of data. We attempted to find the locations of post offices by looking them up in the <a href="http://geonames.usgs.gov/">Geographic Names Information System (GNIS)</a>, but we were not successful for many post offices. In order to capture this missing data, the sidebar displays how many post offices are mapped and how many are missing from the map for the selected time period. Second, we have not captured when an office changed names. A name change shows up as if it were a brand-new post office, with the old office "closing" and the new office "opening," even if they were one and the same post office in continuous operation. Finally, the close date of an office represents a final date at which an office ceased to exist. Multiple openings and closings of the same office are not represented.</p>

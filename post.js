@@ -431,10 +431,7 @@ d3.csv("data/years_count.csv", function (error, post) {
 
     var freqs = d3.layout.stack()(["established", "discontinued"].map(function (type) {
         return post.map(function (d) {
-            return {
-                x: d["year"],
-                y: +d[type]
-            };
+            return { x: d["year"], y: +d[type] };
         });
     }));
 
@@ -466,9 +463,8 @@ d3.csv("data/years_count.csv", function (error, post) {
         .style("text-anchor", "end")
         .text("Number of post offices");
 
-    var w = barchart_width - margin.right - margin.left;
+    //var w = barchart_width - margin.right - margin.left;
 
-    // Add a group for each cause.
     var freq = barchart.selectAll("g.freq")
         .data(freqs)
       .enter().append("g")
@@ -476,7 +472,7 @@ d3.csv("data/years_count.csv", function (error, post) {
         .style("fill", function (d, i) { return z(i); })
         .style("stroke", "#CCE5E5");
 
-    // Add a rect for each date.
+    // Rect for each date
     rect = freq.selectAll("rect")
         .data(Object)
       .enter().append("rect")
@@ -936,6 +932,10 @@ function tooltipText(d) {
             "Closed: " + d.Dis1 + "<br>";
 }
 
+/*
+ * jQuery stuff
+*/
+
 // Highlight selected view
 $('.navbar-header button').click(function(e) {
     $('.navbar-header button.active').removeClass('active');
@@ -944,4 +944,22 @@ $('.navbar-header button').click(function(e) {
         $this.addClass('active');
     }
     e.preventDefault();
+});
+
+// Smooth scroll to About
+
+$(function() {
+  $('a[href*=#]:not([href=#])').click(function() {
+    if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+
+      var target = $(this.hash);
+      target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+      if (target.length) {
+        $('html,body').animate({
+          scrollTop: target.offset().top
+        }, 1000);
+        return false;
+      }
+    }
+  });
 });
