@@ -27,8 +27,11 @@ var zoom = d3.behavior.zoom()
     .on("zoom", zoomed);
 
 // Scales
-var x = d3.scale.ordinal().rangeRoundBands([0, barchart_width - 60], .1);
+var x = d3.scale.ordinal().rangeRoundBands([0, barchart_width - 60], 0, 0);
 var y = d3.scale.linear().range([barchart_height, 0]);
+var brushScaled = d3.scale.ordinal().rangeRoundBands([0, barchart_width - 90], 0, 0);
+
+console.log(x.range());
 
 // Legend variables
 var legend_x = 0,
@@ -425,7 +428,7 @@ d3.csv("data/years_count.csv", function (error, post) {
     });
 
     brush = d3.svg.brush()
-      .x(x)
+      .x(brushScaled)
       .on("brush", brushmove)
       .on("brushend", brushend);
 
