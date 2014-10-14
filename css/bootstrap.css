@@ -2060,6 +2060,68 @@ fieldset[disabled] .btn-default.active {
   color: #fff;
   background-color: #333;
 }
+
+.btn-social-icon {
+  display: inline-block;
+  padding: 6px 6px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 50%;
+}
+.btn-social {
+  color: #333;
+  background-color: #333;
+  border-color: #222;
+}
+.btn-social:hover,
+.btn-social:focus,
+.btn-social:active,
+.btn-social.active,
+.open .dropdown-toggle.btn-social {
+  color: #333;
+  background-color: #222;
+  border-color: #333;
+}
+.btn-social:active,
+.btn-social.active,
+.open .dropdown-toggle.btn-social {
+  background-image: none;
+}
+.btn-social.disabled,
+.btn-social[disabled],
+fieldset[disabled] .btn-social,
+.btn-social.disabled:hover,
+.btn-social[disabled]:hover,
+fieldset[disabled] .btn-social:hover,
+.btn-social.disabled:focus,
+.btn-social[disabled]:focus,
+fieldset[disabled] .btn-social:focus,
+.btn-social.disabled:active,
+.btn-default[disabled]:active,
+fieldset[disabled] .btn-social:active,
+.btn-social.disabled.active,
+.btn-social[disabled].active,
+fieldset[disabled] .btn-social.active {
+  background-color: #fff;
+  border-color: #ccc;
+}
+.btn-social .badge {
+  color: #fff;
+  background-color: #333;
+}
+
 .btn-primary {
   color: #fff;
   background-color: #428bca;

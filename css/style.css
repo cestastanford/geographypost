@@ -113,13 +113,42 @@ footer {
 }
 #aboutView {
   position: absolute;
-  left: 882px;
+  left: 942px;
   top: 8px;
   pointer-events:all;
-  color: white;
+  color: #6E6E6E;
   text-decoration: none;
 }
 #aboutView a {
+  color: #6E6E6E;
+}
+#aboutView:hover {
+  color: white;
+}
+#social_facebook {
+  position: absolute;
+  left: 970px;
+  top: 8px;
+  pointer-events: all;
+  color: #6E6E6E;
+}
+#social_facebook a {
+  color: #6E6E6E;
+}
+#social_facebook:hover {
+  color: white;
+}
+#social_twitter {
+  position: absolute;
+  left: 995px;
+  top: 8px;
+  pointer-events: all;
+  color:#6E6E6E;
+}
+#social_twitter a {
+  color: #6E6E6E;
+}
+#social_twitter:hover {
   color: white;
 }
 
@@ -553,3 +582,20 @@ footer {
     padding: 5px;
     margin: 8px 5px 5px 5px;
   }
+
+.circle {
+  -webkit-border-top-left-radius: 1px;
+  -webkit-border-top-right-radius: 2px;
+  -webkit-border-bottom-right-radius: 3px;
+  -webkit-border-bottom-left-radius: 4px;
+
+  -moz-border-radius-topleft: 1px;
+  -moz-border-radius-topright: 2px;
+  -moz-border-radius-bottomright: 3px;
+  -moz-border-radius-bottomleft: 4px;
+
+  border-top-left-radius: 1px;
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 4px;
+}

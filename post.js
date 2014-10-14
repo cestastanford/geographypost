@@ -1,8 +1,6 @@
-///////////////////////////////////////////////////////////////////////
-//
-// Global Variables
-//
-///////////////////////////////////////////////////////////////////////
+/* *********************************************************************
+ * Global Variables
+ */
 
 var width = 1200,
     height = 700,
@@ -15,10 +13,8 @@ var width = 1200,
     totalShown = 100,
     mappedHeight = 71,
     unmappedHeight = 29,
-    brushYearEnd = 2000;
-
-var z = d3.scale.ordinal().range(["#193441", "#3E606F"]);
-currentZoom = -99;
+    brushYearEnd = 2000,
+    currentZoom = -99;
 
 var zoom = d3.behavior.zoom()
     .translate([0, 0])
@@ -29,9 +25,8 @@ var zoom = d3.behavior.zoom()
 // Scales
 var x = d3.scale.ordinal().rangeRoundBands([0, barchart_width - 60], 0, 0);
 var y = d3.scale.linear().range([barchart_height, 0]);
+var z = d3.scale.ordinal().range(["#193441", "#3E606F"]);
 var brushScaled = d3.scale.ordinal().rangeRoundBands([0, barchart_width - 90], 0, 0);
-
-console.log(x.range());
 
 // Legend variables
 var legend_x = 0,
@@ -70,11 +65,10 @@ queue()
     .defer(d3.csv, "data/post_data.csv")
     .await(ready);
 
-///////////////////////////////////////////////////////////////////////
-//
-// Map
-//
-///////////////////////////////////////////////////////////////////////
+/* **********************************************************
+ * Mapping the Post
+ * This draws the projection, points, and legend
+*/
 
 var projection = d3.geo.azimuthalEqualArea()
     .translate([680, 380])
@@ -290,10 +284,10 @@ function ready(error, us, post) {
         })
         .text("Shorter Lifespan");
 
-    //********************************
-    // Post office toggles - Chart showing the percentage of mapped to
-    // unmapped data points within the given brush
-    //********************************
+    /* *****************************************************************
+     * Post office toggles - Chart showing the percentage of mapped to
+     * unmapped data points within the given brush
+     */
 
     mappedChart = legend.append("g").attr("class", "dataChart");
 
@@ -345,9 +339,9 @@ function ready(error, us, post) {
 
     styleOpacity();
 
-    // *********************************************
+    // ////////////////////////////////////
     // Map Callbacks
-    // *********************************************
+    //
 
     var labelSize = 16;
 
@@ -362,8 +356,6 @@ function ready(error, us, post) {
                 return 2.5 / d3.event.scale + "px"
             });
         }
-        // labelSize = 16 / d3.event.scale;
-        // d3.select(".map-tooltip").style("font-size", 16 / d3.event.scale + "px");
     }
 
     // On hover, show point labels
@@ -401,11 +393,10 @@ function ready(error, us, post) {
 }
 
 
-///////////////////////////////////////////////////////////////////////
-//
-// Bar Chart Timeline
-//
-///////////////////////////////////////////////////////////////////////
+/* **********************************************************
+ * Barchart Timeline
+ * This draws the barchart and handles the brush functions
+*/
 
 // Prepare the barchart canvas
 var barchart = d3.select("body").append("svg")
@@ -554,16 +545,6 @@ function brushend() {
     // Update start and end years in upper right-hand corner of the map
     d3.select("svg").append("brushYears");
     d3.select("#brushYears").text(brushYearStart == brushYearEnd ? brushYearStart : brushYearStart + " - " + brushYearEnd);
-
-    // console.log("============")
-    // console.log("Data check: ")
-    // console.log("============")
-    // console.log("Mapped height: ", mappedHeight);
-    // console.log("Unmapped height: ", unmappedHeight);
-    // console.log("totalShown: ", totalShown);
-    // console.log("num_mapped: ", num_mapped);
-    // console.log("num_unmapped: ", num_unmapped)
-    // console.log("============")
   }
 
 function resetBrush() {
@@ -572,9 +553,13 @@ function resetBrush() {
     .event(d3.select(".brush"));
 }
 
-// ****************************************
-// Post office status functions
-// ****************************************
+/* **********************************************************
+ * Post office status functions:
+ * These functions handle the `status` of post offices during
+ * the draw of a brush. The functions check if the post office
+ * is alive, discontinued, or alive then discontinued during a span
+ * of time.
+*/
 
 var arrSize = 4;
 //Returns whether or not the post office was alive at a given date
@@ -614,8 +599,8 @@ function colorPoints() {
 
         // Arrays of established dates and subsequent life spans of a single post office.
         // Note: assumes there are exactly 4 establish dates in the data
-        var estArr = [d.est, d.re1, d.re2, d.re3];
-        var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+        var estArr = [d.est];
+        var lifespanArr = [d.dis1 - d.est];
 
         // Bools are true if post office was alive at the time of brushMin and brushMax
         var startAlive = false;
@@ -650,8 +635,8 @@ function styleOpacity() {
         if (document.getElementById("regular").checked == true) {
             return shownOpacity;
         } else if (document.getElementById("snapshot").checked == true) {
-            var estArr = [d.est, d.re1, d.re2, d.re3];
-            var lifespanArr = [d.dis1 - d.est, d.dis2 - d.re1, d.dis3 - d.re2, d.dis4 - d.re3];
+            var estArr = [d.est];
+            var lifespanArr = [d.dis1 - d.est];
 
             // Bools are true if post office was alive at the time of brushMin and brushMax
             var startAlive = false;
@@ -693,7 +678,7 @@ function showEst() {
     d3.selectAll("g.dataChart").style("display", "none");
     d3.selectAll("g.points-est").transition().duration(500).style("display", function (d) {
 
-        var estArr = [d.est, d.re1, d.re2, d.re3];
+        var estArr = [d.est];
 
         for (var i = 0; i < arrSize; i++) {
             if (estArr[i] <= brushYearEnd && estArr[i] >= brushYearStart) {
@@ -707,9 +692,9 @@ function showEst() {
 
 function showDis() {
     d3.selectAll("g.dataChart").style("display", "none");
-    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {//.style("opacity", function (d) {
+    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {
 
-        var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
+        var disArr = [d.dis1];
 
         for (var i = 0; i < arrSize; i++) {
             if (disArr[i] <= brushYearEnd && disArr[i] >= brushYearStart) {
@@ -722,7 +707,8 @@ function showDis() {
 
 function showEstAndDis() {
     d3.selectAll("g.dataChart").style("display", "block");
-    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {//.style("opacity", function (d) {
+
+    d3.selectAll("g.points-est").transition().duration(500).style("display", function(d) {
 
         var estArr = [d.est, d.re1, d.re2, d.re3];
         var disArr = [d.dis1, d.dis2, d.dis3, d.dis4];
@@ -740,6 +726,7 @@ function showEstAndDis() {
 
 function showAll() {
     d3.selectAll("g.dataChart").style("display", "block");
+
     totalShown = 0;
     num_mapped = 0;
     num_unmapped = 0;
@@ -762,12 +749,14 @@ function showAll() {
         endAlive = isAliveEnd(estArr, lifespanArr, brushYearEnd);
 
         // Show all offices alive at some point if 'all', only established during that time if
-        // 'established', and only disestablished if 'disestablished' radio button selected
+        // 'established', and only disestablished if 'disestablished' radio button selected.
+        // For those offices that are missing data, we match on the GeocodeStatus of `unmatched`
+        // and hide those. `num_unmapped` and `num_mapped` are used in the dataChart to show
+        // that we have missing data.
         if (startAlive && endAlive) {
             d3.select(this).transition().duration(500).style("opacity", shownOpacity);
             totalShown++;
             if (d["GeocodeStatus"] === "Unmatched") {
-              // d["Latitude"] === 0 || d["Latitude"] === "" || d["Latitude"] === null
                 num_unmapped++;
                 return "none";
             } else {
@@ -808,14 +797,10 @@ function showAll() {
         return "none";
 
     });
-// console.log("Total possible offices: ", totalShown);
-// console.log("Mapped offices: ", num_mapped);
-// console.log("Not mapped offices: ", num_unmapped);
 };
 
 // When a filter checkbox is selected or unselected, update the points shown to reflect current filter
 function filterPoints() {
-
     if (document.getElementById("estab").checked && !document.getElementById("discont").checked) {
         showEst();
     } else if (!document.getElementById("estab").checked && document.getElementById("discont").checked) {
@@ -827,9 +812,10 @@ function filterPoints() {
     }
 };
 
-/**
- * View switching functions
- */
+// /////////////////////////////
+// View switching functions
+//
+
 function showRegular() {
     fadeOpacity = .1;
     document.getElementById("regular").checked = true;
@@ -854,7 +840,6 @@ function showRegular() {
     d3.select("#keyLabel2").style("display", "block");
     d3.select("#keyLabel3").style("display", "block");
     d3.select("#keyLabel4").text("Estab. and Closed");
-
 };
 
 function showSnapshot() {
@@ -885,9 +870,11 @@ function showSnapshot() {
 
 };
 
-/**
- * Zoom functions
- */
+// /////////////////////////////////////////
+// Zoom functions:
+// The mousewheel zooming is disabled, so we create our own way of
+// handling the zooming in and out on the map.
+//
 
 function zoomed() {
     postOfficePoints.attr("transform", "translate(" + zoom.translate()[0]  +"," + zoom.translate()[1] + ")scale(" + zoom.scale() + ")");
@@ -922,9 +909,8 @@ function manualZoom(zoomDirection) {
     // zoomed();
 }
 
-/**
- * Tooltip display
- */
+
+// Tooltips
 function tooltipText(d) {
     var officeName        = isNaN(d.name) ? "n/a" : d.name,
         officeEstablished = isNaN(d.Est) ? "n/a" : d.Est,
@@ -935,11 +921,12 @@ function tooltipText(d) {
             "Closed: " + d.Dis1 + "<br>";
 }
 
-/*
- * jQuery stuff
+/* **********************************************************
+ * jQuery.
+ * Is this where I apologize for using jQuery?
 */
 
-// Highlight selected view
+// Highlight selected view (Status vs. Duration View)
 $('.navbar-header button').click(function(e) {
     $('.navbar-header button.active').removeClass('active');
     var $this = $(this);
@@ -948,7 +935,3 @@ $('.navbar-header button').click(function(e) {
     }
     e.preventDefault();
 });
-
-// Smooth scroll to About
-
-

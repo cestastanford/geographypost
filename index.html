@@ -10,18 +10,33 @@
 
 <link href="css/style.css" rel="stylesheet" type="text/css">
 <link href="css/bootstrap.css" rel="stylesheet" type="text/css">
+<link href="css/social-buttons.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="css/font-awesome-4.2.0/css/font-awesome.min.css">
 <script src="lib/jquery-1.11.1.min.js"></script>
 
 <script src="lib/d3.v3.min.js" charset="utf-8"></script>
 <script src="lib/queue.v1.min.js" charset="utf-8"></script>
 <script src="lib/topojson.v1.min.js" charset="utf-8"></script>
-<script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
+
+<script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-55739042-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</script>
 
 </head>
 
 <body>
 
 <script>
+// Scroll to About section
 $(function() {
   $('a[href*=#]:not([href=#])').click(function() {
     if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
@@ -47,7 +62,10 @@ $(function() {
       <span class="navbar-subtitle">U.S. Post Offices in the Nineteenth-Century West</span>
       <button type="button" id="durationView" class="btn btn-info active" onclick="showSnapshot()">Duration View</button>
       <button type="button" id="statusView" class="btn btn-info" onclick="showRegular()">Status View</button>
-      <a id="aboutView" class="btn btn-info" href="#aboutMap">About</a>
+      <a id="aboutView" class="btn-social-icon btn-social" href="#aboutMap"><i class="fa fa-question"></i></a>
+      <a id="social_facebook" class="btn-social-icon btn-social" href="http://facebook.com/"><i class="fa fa-facebook"></i></a>
+      <a id="social_twitter" class="btn-social-icon btn-social" href="http://twitter.com/share?text=Mapping the U.S. Postal Network in the Nineteenth-Century West &url=http://digitalhistory.stanford.edu/projects/cblevins" target="_blank"><i class="fa fa-twitter"></i></a>
+
     </div>
     <span id="about">
           <ul>
