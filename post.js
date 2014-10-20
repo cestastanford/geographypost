@@ -824,6 +824,7 @@ function showRegular() {
     // document.getElementById("durationView").style.zIndex = "-4";
     // document.getElementById("durationView").style.background = "#F5F1DE"
     showAll();
+    filterPoints();
     document.getElementById("selections").style.visibility = "visible";
     colorPoints();
     styleOpacity();
@@ -851,6 +852,7 @@ function showSnapshot() {
     // document.getElementById("durationView").style.background = "#f7f7f7"
     showAll();
     colorPoints();
+    filterPoints();
     d3.selectAll("g.key").transition().duration(1000).style("opacity", 0);
     styleOpacity();
     document.getElementById("keyCircle1").style.fill = autoColor;
