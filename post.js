@@ -41,7 +41,7 @@ var legend_x = 0,
 // Colors
 var aliveThroughout = "#009939"; // active throughout
 var diesDuring =  "#ff6600";     // closed
-var bornDuring =  "0089cd";      // established
+var bornDuring =  "#0089cd";      // established
 var aliveDuring = "#C00000";     // est and closed
 var autoColor = "#15b290";
 var currYearColor = "#CB709D";
