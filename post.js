@@ -39,10 +39,10 @@ var legend_x = 0,
     mapped_y = legend_y + legend_height - 90;
 
 // Colors
-var aliveThroughout = "#009939"; // active throughout
-var diesDuring =  "#ff6600";     // closed
-var bornDuring =  "#0089cd";      // established
-var aliveDuring = "#C00000";     // est and closed
+var aliveThroughout = "#6A3D9A";//"#009939"; // active throughout
+var diesDuring =  "#FF7F00";//"#ff6600";     // closed
+var bornDuring =  "#1F78B4";//"#0089cd";      // established
+var aliveDuring = "#E31A1C";//"#C00000";     // est and closed
 var autoColor = "#15b290";
 var currYearColor = "#CB709D";
 
